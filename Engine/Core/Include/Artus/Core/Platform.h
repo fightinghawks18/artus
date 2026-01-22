@@ -2,8 +2,8 @@
 // Created by fightinghawks18 on 1/21/26.
 //
 
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#ifndef ARTUS_PLATFORM_H
+#define ARTUS_PLATFORM_H
 
 #include <memory>
 
@@ -25,5 +25,5 @@ namespace Artus::Core {
     };
 }
 
-#endif // PLATFORM_H
+#endif // ARTUS_PLATFORM_H
 

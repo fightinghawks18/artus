@@ -1,5 +1,8 @@
 ColumnLimit: 150
 
+Language: Cpp
+PointerAlignment: Left
+
 IndentWidth: 4
 UseTab: Never
 NamespaceIndentation: All

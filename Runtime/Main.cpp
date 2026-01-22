@@ -1,10 +1,16 @@
-#include <Core/Platform.h>
+#include <Artus/Core/Platform.h>
+#include <Artus/Graphics/Device.h>
+
+using namespace Artus;
 
 int main() {
-    auto* window = new Artus::Core::Window();
-    
+    const auto* window = new Core::Window();
+    const auto* device = new Graphics::Device();
+
     while (!window->IsClosing()) {
-        Artus::Core::Window::Update();
+        Core::Window::Update();
     }
+
     delete window;
+    delete device;
 }
