@@ -1,0 +1,5 @@
+ColumnLimit: 150
+
+IndentWidth: 4
+UseTab: Never
+NamespaceIndentation: All
