@@ -1,0 +1,12 @@
+# IDEs
+.idea/
+.vs/
+.vscode/
+
+# Clangd
+compile_commands.json
+
+# CMake
+cmake-build-*/
+build-*/
+out-*/
