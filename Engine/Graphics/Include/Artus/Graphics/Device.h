@@ -14,6 +14,12 @@ namespace Artus::Graphics {
         ~Device();
     private:
         vk::UniqueInstance mInstance;
+        vk::PhysicalDevice mPhysicalDevice;
+        vk::UniqueDevice mDevice;
+
+        void MakeInstance();
+        void GetPhysicalDevice();
+        void MakeDevice();
     };
 }
 
