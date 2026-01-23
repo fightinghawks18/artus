@@ -14,8 +14,12 @@ namespace Artus::Graphics {
         ~Device();
     private:
         vk::UniqueInstance mInstance;
-        vk::PhysicalDevice mPhysicalDevice;
+        vk::PhysicalDevice mPhysicalDevice = nullptr;
         vk::UniqueDevice mDevice;
+
+        vk::Queue mGraphicsQueue = nullptr;
+        vk::Queue mComputeQueue = nullptr;
+        vk::Queue mTransferQueue = nullptr;
 
         void MakeInstance();
         void GetPhysicalDevice();

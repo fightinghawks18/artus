@@ -6,6 +6,12 @@
 
 #include <iostream>
 
+struct DeviceQueue {
+    vk::QueueFlags flags;
+    vk::DeviceQueueCreateInfo queueInfo;
+    float queuePriority[1] = {1};
+};
+
 namespace Artus::Graphics {
     Device::Device() {
         MakeInstance();
@@ -24,16 +30,21 @@ namespace Artus::Graphics {
             .setApiVersion(VK_MAKE_API_VERSION(0, 1, 3, 0));
 
         std::vector<const char*> extensions;
+        std::vector<const char*> layers;
         vk::InstanceCreateFlags flags;
 #ifdef __APPLE__
         flags |=  vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
+#ifndef NDEBUG
+        layers.push_back("VK_LAYER_KHRONOS_validation");
+#endif
+
         vk::InstanceCreateInfo instInfo = {};
         instInfo.setFlags(flags)
             .setPEnabledExtensionNames(extensions)
-            .setPEnabledLayerNames(nullptr)
+            .setPEnabledLayerNames(layers)
             .setPApplicationInfo(&appInfo);
 
         mInstance = vk::createInstanceUnique(instInfo);
@@ -83,8 +94,59 @@ namespace Artus::Graphics {
             << "}" << std::endl;
     }
 
+    std::vector<DeviceQueue> FindDeviceQueues(vk::PhysicalDevice physicalDevice) {
+        auto queueFamilies = physicalDevice.getQueueFamilyProperties();
+        std::vector<DeviceQueue> deviceQueues;
+
+        for (uint32_t i = 0; i < queueFamilies.size(); i++) {
+            bool found = false;
+            auto& queueFamily = queueFamilies[i];
+            for (auto& deviceQueue : deviceQueues) {
+                if (i != deviceQueue.queueInfo.queueFamilyIndex)
+                    continue;
+                deviceQueue.flags |= queueFamily.queueFlags;
+                deviceQueue.queueInfo.queueCount++;
+                found = true;
+                break;
+            }
+
+            if (found)
+                continue;
+            vk::DeviceQueueCreateInfo queueInfo = {};
+            queueInfo.setQueueCount(1)
+                .setQueueFamilyIndex(i);
+            deviceQueues.push_back({queueFamily.queueFlags, queueInfo});
+        }
+
+        return deviceQueues;
+    }
+
     void Device::MakeDevice() {
-        vk::DeviceCreateInfo deviceInfo = {}; // TODO: Add queues and extensions
+        const float priority = 1;
+        auto deviceQueues  = FindDeviceQueues(mPhysicalDevice);
+        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+        for (auto& deviceQueue : deviceQueues) {
+            deviceQueue.queueInfo.pQueuePriorities = &priority;
+            queueCreateInfos.push_back(deviceQueue.queueInfo);
+        }
+
+        std::vector<const char*> deviceExtensions;
+#ifdef __APPLE__
+        deviceExtensions.push_back("VK_KHR_portability_subset");
+#endif
+
+        vk::DeviceCreateInfo deviceInfo = {};
+        deviceInfo.setQueueCreateInfos(queueCreateInfos)
+            .setPEnabledExtensionNames(deviceExtensions);
         mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
+
+        for (auto& deviceQueue : deviceQueues) {
+            if (deviceQueue.flags & vk::QueueFlagBits::eGraphics && !mGraphicsQueue)
+                mGraphicsQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
+            if (deviceQueue.flags & vk::QueueFlagBits::eCompute && !mComputeQueue)
+                mComputeQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
+            if (deviceQueue.flags & vk::QueueFlagBits::eTransfer && !mTransferQueue)
+                mTransferQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
+        }
     }
 } // namespace Artus::Graphics
