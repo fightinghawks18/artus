@@ -8,6 +8,12 @@
 #include <memory>
 
 namespace Artus::Core {
+    struct WindowHandle { void* handle; };
+    struct WindowSize {
+        int32_t width;
+        int32_t height;
+    };
+
     class Window {
     public:
         static void Update();
@@ -17,7 +23,10 @@ namespace Artus::Core {
         
         void SetClosing(const bool closing) { mClosing = closing; }
         
+        [[nodiscard]] WindowSize GetWindowSize();
+        [[nodiscard]] WindowSize GetWindowContentSize();
         [[nodiscard]] bool IsClosing() const { return mClosing; }
+        [[nodiscard]] WindowHandle GetHandle();
     private:
         struct Impl;
         std::unique_ptr<Impl> mImpl;

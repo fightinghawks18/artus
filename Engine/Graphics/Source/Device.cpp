@@ -29,12 +29,16 @@ namespace Artus::Graphics {
             .setEngineVersion(VK_MAKE_API_VERSION(0, 0, 0, 1))
             .setApiVersion(VK_MAKE_API_VERSION(0, 1, 3, 0));
 
-        std::vector<const char*> extensions;
+        std::vector extensions = {
+            "VK_KHR_surface"
+        };
         std::vector<const char*> layers;
         vk::InstanceCreateFlags flags;
+
 #ifdef __APPLE__
         flags |=  vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        extensions.push_back("VK_EXT_metal_surface");
 #endif
 
 #ifndef NDEBUG
@@ -133,20 +137,33 @@ namespace Artus::Graphics {
         std::vector<const char*> deviceExtensions;
 #ifdef __APPLE__
         deviceExtensions.push_back("VK_KHR_portability_subset");
+        deviceExtensions.push_back("VK_KHR_swapchain");
 #endif
 
+        vk::PhysicalDeviceVulkan13Features v13Feats = {};
+        v13Feats.setDynamicRendering(true);
+
         vk::DeviceCreateInfo deviceInfo = {};
-        deviceInfo.setQueueCreateInfos(queueCreateInfos)
+        deviceInfo.setPNext(v13Feats)
+            .setQueueCreateInfos(queueCreateInfos)
             .setPEnabledExtensionNames(deviceExtensions);
         mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
 
         for (auto& deviceQueue : deviceQueues) {
-            if (deviceQueue.flags & vk::QueueFlagBits::eGraphics && !mGraphicsQueue)
+            if (deviceQueue.flags & vk::QueueFlagBits::eGraphics && !mGraphicsQueue) {
                 mGraphicsQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
-            if (deviceQueue.flags & vk::QueueFlagBits::eCompute && !mComputeQueue)
+                mGraphicsFamily = deviceQueue.queueInfo.queueFamilyIndex;
+            }
+
+            if (deviceQueue.flags & vk::QueueFlagBits::eCompute && !mComputeQueue) {
                 mComputeQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
-            if (deviceQueue.flags & vk::QueueFlagBits::eTransfer && !mTransferQueue)
+                mComputeFamily = deviceQueue.queueInfo.queueFamilyIndex;
+            }
+
+            if (deviceQueue.flags & vk::QueueFlagBits::eTransfer && !mTransferQueue) {
                 mTransferQueue = mDevice->getQueue(deviceQueue.queueInfo.queueFamilyIndex, 0);
+                mTransferFamily = deviceQueue.queueInfo.queueFamilyIndex;
+            }
         }
     }
 } // namespace Artus::Graphics

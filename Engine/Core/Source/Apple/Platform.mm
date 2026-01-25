@@ -1,3 +1,7 @@
+//
+// Created by fightinghawks18 on 1/21/26.
+//
+
 #include "Artus/Core/Platform.h"
 
 #import <AppKit/AppKit.h>
@@ -56,4 +60,17 @@ namespace Artus::Core {
         [mImpl->win release];
         mImpl->win = nil;
     }
+
+    WindowSize Window::GetWindowSize() {
+        NSRect rect = [[mImpl->win contentView] frame];
+        return {static_cast<int32_t>(rect.size.width), static_cast<int32_t>(rect.size.height)};
+    }
+
+    WindowSize Window::GetWindowContentSize() {
+        NSView* view = [mImpl->win contentView];
+        NSRect rect = [view convertRectToBacking:[view bounds]];
+        return {static_cast<int32_t>(rect.size.width), static_cast<int32_t>(rect.size.height)};
+    }
+
+    WindowHandle Window::GetHandle() { return {(__bridge void*)mImpl->win}; }
 }
