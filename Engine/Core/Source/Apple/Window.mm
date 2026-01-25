@@ -40,7 +40,7 @@ namespace Artus::Core {
         
         NSWindow* win = [NSWindow alloc];
         [win initWithContentRect:NSMakeRect(0, 0, 800, 600)
-                       styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
+                       styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable
                          backing:NSBackingStoreBuffered
                            defer:NO];
         [win makeKeyAndOrderFront:nil];
@@ -61,12 +61,12 @@ namespace Artus::Core {
         mImpl->win = nil;
     }
 
-    WindowSize Window::GetWindowSize() {
+    WindowSize Window::GetSize() {
         NSRect rect = [[mImpl->win contentView] frame];
         return {static_cast<int32_t>(rect.size.width), static_cast<int32_t>(rect.size.height)};
     }
 
-    WindowSize Window::GetWindowContentSize() {
+    WindowSize Window::GetPhysicalSize() {
         NSView* view = [mImpl->win contentView];
         NSRect rect = [view convertRectToBacking:[view bounds]];
         return {static_cast<int32_t>(rect.size.width), static_cast<int32_t>(rect.size.height)};
