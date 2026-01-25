@@ -194,6 +194,7 @@ namespace Artus::Graphics {
     }
 
     void Surface::CreateImageViews() {
+        mImages.clear();
         for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
             auto img = std::make_unique<Image>(mDevice, image);
 
@@ -233,6 +234,8 @@ namespace Artus::Graphics {
     void Surface::DestroySurface() { mSurface.reset(); }
 
     void Surface::Rebuild() {
+        mDevice.GetVulkanDevice().waitIdle();
+
         DestroyImageViews();
         DestroySemaphores();
         DestroyFences();
