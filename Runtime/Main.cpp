@@ -1,6 +1,6 @@
 #include "Artus/Graphics/Surface.h"
 
-#include <Artus/Core/Platform.h>
+#include <Artus/Core/Window.h>
 #include <Artus/Graphics/Device.h>
 
 using namespace Artus;
@@ -12,24 +12,25 @@ int main() {
 
     vk::CommandPoolCreateInfo cmdPoolInfo = {};
     cmdPoolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
-        .setQueueFamilyIndex(device->GetVkGraphicsFamily());
+        .setQueueFamilyIndex(device->GetVulkanGraphicsFamily());
 
-    vk::UniqueCommandPool cmdPool = device->GetVkDevice().createCommandPoolUnique(cmdPoolInfo);
+    vk::UniqueCommandPool cmdPool = device->GetVulkanDevice().createCommandPoolUnique(cmdPoolInfo);
 
     vk::CommandBufferAllocateInfo cmdBufferInfo = {};
     cmdBufferInfo.setCommandBufferCount(2)
         .setCommandPool(cmdPool.get());
 
-    std::vector<vk::UniqueCommandBuffer> cmdBuffers = device->GetVkDevice().allocateCommandBuffersUnique(cmdBufferInfo);
+    std::vector<vk::UniqueCommandBuffer> cmdBuffers = device->GetVulkanDevice().allocateCommandBuffersUnique(cmdBufferInfo);
 
     while (!window->IsClosing()) {
         Core::Window::Update();
 
         vk::Semaphore waitSemaphore;
         auto imageIndex = surface->AcquireNextImage(&waitSemaphore);
+        auto image = surface->GetVulkanImage(imageIndex);
 
         vk::Rect2D rect = {};
-        rect.setExtent(surface->GetVkExtent())
+        rect.setExtent(surface->GetVulkanExtent())
             .setOffset({0, 0});
 
         vk::ClearColorValue clearColor = {};
@@ -38,7 +39,7 @@ int main() {
         vk::RenderingAttachmentInfo colorAttachment = {};
         colorAttachment.setClearValue(clearColor)
             .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-            .setImageView(surface->GetVkImageView(imageIndex))
+            .setImageView(surface->GetVulkanImageView(imageIndex))
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eStore);
 
@@ -52,14 +53,23 @@ int main() {
 
         const auto frameIndex = surface->GetFrameIndex();
 
-        cmdBuffers[frameIndex]->reset();
-        cmdBuffers[frameIndex]->begin(beginInfo);
-        cmdBuffers[frameIndex]->beginRendering(renderingInfo);
-        cmdBuffers[frameIndex]->endRendering();
-        cmdBuffers[frameIndex]->end();
+        auto cmd = cmdBuffers[frameIndex].get();
+        cmd.reset();
+        cmd.begin(beginInfo);
 
-        surface->PresentDrawn(imageIndex, cmdBuffers[frameIndex].get(), waitSemaphore);
+        image->MakeRenderable(cmd);
+
+        cmd.beginRendering(renderingInfo);
+        cmd.endRendering();
+
+        image->MakePresentable(cmd);
+
+        cmd.end();
+
+        surface->PresentDrawn(imageIndex, cmd, waitSemaphore);
     }
+
+    device->GetVulkanDevice().waitIdle();
 
     cmdBuffers.clear();
     cmdPool.reset();

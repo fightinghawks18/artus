@@ -9,6 +9,8 @@
 
 #include "Artus/Graphics/Surface.h"
 
+#include "Artus/Core/Logger.h"
+
 #include <iostream>
 
 namespace Artus::Graphics {
@@ -21,6 +23,8 @@ namespace Artus::Graphics {
     }
 
     Surface::~Surface() {
+        mDevice.GetVulkanDevice().waitIdle();
+
         DestroyImageViews();
         DestroyFences();
         DestroySemaphores();
@@ -29,28 +33,28 @@ namespace Artus::Graphics {
     }
 
     uint32_t Surface::AcquireNextImage(vk::Semaphore* outSemaphore) {
-        auto waitResult = mDevice.GetVkDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
+        auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to wait for fences before acquiring new image! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
-        auto resetResult = mDevice.GetVkDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
+        auto resetResult = mDevice.GetVulkanDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
         if (resetResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to reset fence before acquiring new image! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to reset fence before acquiring new image! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
         uint32_t imageIndex = UINT32_MAX;
-        vk::Result getImageResult = mDevice.GetVkDevice().acquireNextImageKHR(mSwapchain.get(), UINT64_MAX, mImageAvailableSems[mFrameIdx].get(), nullptr, &imageIndex);
+        vk::Result getImageResult = mDevice.GetVulkanDevice().acquireNextImageKHR(mSwapchain.get(), UINT64_MAX, mImageAvailableSems[mFrameIdx].get(), nullptr, &imageIndex);
         if (getImageResult == vk::Result::eErrorOutOfDateKHR || getImageResult == vk::Result::eSuboptimalKHR) {
-            std::cout << "Swapchain is out of date or is suboptimal, resizing. (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_LOG("Swapchain is out of date or is suboptimal, resizing. (Occurred on frame {})", mFrameIdx);
             Rebuild();
             return AcquireNextImage(outSemaphore);
         }
 
         if (getImageResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to acquire new image from swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to acquire new image from swapchain! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
@@ -69,9 +73,9 @@ namespace Artus::Graphics {
             .setWaitSemaphores(waitSemaphore)
             .setSignalSemaphores(mRenderFinishedSems[mFrameIdx].get());
 
-        auto submitResult = mDevice.GetVkGraphicsQueue().submit(1, &submitInfo, mInFlightFens[mFrameIdx].get());
+        auto submitResult = mDevice.GetVulkanGraphicsQueue().submit(1, &submitInfo, mInFlightFens[mFrameIdx].get());
         if (submitResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to submit graphics to swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to submit graphics to swapchain! (Occurred on frame {})", mFrameIdx);
             return false;
         }
 
@@ -80,9 +84,9 @@ namespace Artus::Graphics {
             .setSwapchains(mSwapchain.get())
             .setWaitSemaphores(mRenderFinishedSems[mFrameIdx].get());
 
-        auto presentResult = mDevice.GetVkGraphicsQueue().presentKHR(&presentInfo);
+        auto presentResult = mDevice.GetVulkanGraphicsQueue().presentKHR(&presentInfo);
         if (presentResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to present graphics to swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to present graphics to swapchain! (Occurred on frame {})", mFrameIdx);
             return false;
         }
 
@@ -94,14 +98,14 @@ namespace Artus::Graphics {
 #ifdef __APPLE__
         vk::MetalSurfaceCreateInfoEXT surfaceInfo = {};
         surfaceInfo.setPLayer(Metal::CreateMetalLayer(window));
-        mSurface = mDevice.GetVkInstance().createMetalSurfaceEXTUnique(surfaceInfo);
+        mSurface = mDevice.GetVulkanInstance().createMetalSurfaceEXTUnique(surfaceInfo);
 #endif
     }
 
     void Surface::CreateSwapchain(Core::Window* window) {
         // Get present mode
         auto presentMode = vk::PresentModeKHR::eImmediate; // No "None" enum available
-        for (const auto& mode : mDevice.GetVkPhysicalDevice().getSurfacePresentModesKHR(mSurface.get())) {
+        for (const auto& mode : mDevice.GetVulkanPhysicalDevice().getSurfacePresentModesKHR(mSurface.get())) {
             if (mode == vk::PresentModeKHR::eMailbox) {
                 presentMode = mode; // Mailbox is most recommended due to it having the least latency
                 break;
@@ -114,7 +118,7 @@ namespace Artus::Graphics {
         // Get Surface Format
         vk::SurfaceFormatKHR surfaceFormat = {};
         surfaceFormat.format = vk::Format::eUndefined;
-        auto surfaceFormats = mDevice.GetVkPhysicalDevice().getSurfaceFormatsKHR(mSurface.get());
+        auto surfaceFormats = mDevice.GetVulkanPhysicalDevice().getSurfaceFormatsKHR(mSurface.get());
         for (const auto& format : surfaceFormats) {
             if (format.format == vk::Format::eB8G8R8A8Srgb
                 && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
@@ -127,10 +131,10 @@ namespace Artus::Graphics {
             surfaceFormat = surfaceFormats[0];
 
         // Get Surface Extent
-        const auto surfaceCapabilities = mDevice.GetVkPhysicalDevice().getSurfaceCapabilitiesKHR(mSurface.get());
+        const auto surfaceCapabilities = mDevice.GetVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(mSurface.get());
         auto surfaceExtent = surfaceCapabilities.currentExtent;
 
-        const auto windowSize = window->GetWindowSize();
+        const auto windowSize = window->GetSize();
 
         // Window systems may allow the app to define the surface extent,
         // and is within the min/max bounds.
@@ -163,7 +167,7 @@ namespace Artus::Graphics {
         if (mSwapchain)
             swapchainInfo.setOldSwapchain(mSwapchain.get());
 
-        auto swapchain = mDevice.GetVkDevice().createSwapchainKHRUnique(swapchainInfo);
+        auto swapchain = mDevice.GetVulkanDevice().createSwapchainKHRUnique(swapchainInfo);
         if (mSwapchain)
             DestroySwapchain();
         mSwapchain = std::move(swapchain);
@@ -175,8 +179,8 @@ namespace Artus::Graphics {
     void Surface::CreateSemaphores() {
         constexpr vk::SemaphoreCreateInfo semaphoreInfo = {};
         for (uint32_t i = 0; i < 2; i++) {
-            mImageAvailableSems.push_back(mDevice.GetVkDevice().createSemaphoreUnique(semaphoreInfo));
-            mRenderFinishedSems.push_back(mDevice.GetVkDevice().createSemaphoreUnique(semaphoreInfo));
+            mImageAvailableSems.push_back(mDevice.GetVulkanDevice().createSemaphoreUnique(semaphoreInfo));
+            mRenderFinishedSems.push_back(mDevice.GetVulkanDevice().createSemaphoreUnique(semaphoreInfo));
         }
     }
 
@@ -185,14 +189,15 @@ namespace Artus::Graphics {
         fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
 
         for (uint32_t i = 0; i < 2; i++) {
-            mInFlightFens.push_back(mDevice.GetVkDevice().createFenceUnique(fenceInfo));
+            mInFlightFens.push_back(mDevice.GetVulkanDevice().createFenceUnique(fenceInfo));
         }
     }
 
     void Surface::CreateImageViews() {
-        mImages = mDevice.GetVkDevice().getSwapchainImagesKHR(mSwapchain.get());
+        mImages.clear();
+        for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
+            auto img = std::make_unique<Image>(mDevice, image);
 
-        for (const auto& image : mImages) {
             vk::ImageSubresourceRange subresourceRange = {};
             subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
                 .setBaseArrayLayer(0)
@@ -213,7 +218,8 @@ namespace Artus::Graphics {
                 .setSubresourceRange(subresourceRange)
                 .setComponents(componentMapping);
 
-            mImageViews.push_back(mDevice.GetVkDevice().createImageViewUnique(imageViewInfo));
+            mImageViews.push_back(mDevice.GetVulkanDevice().createImageViewUnique(imageViewInfo));
+            mImages.push_back(std::move(img));
         }
     }
 
@@ -228,6 +234,8 @@ namespace Artus::Graphics {
     void Surface::DestroySurface() { mSurface.reset(); }
 
     void Surface::Rebuild() {
+        mDevice.GetVulkanDevice().waitIdle();
+
         DestroyImageViews();
         DestroySemaphores();
         DestroyFences();

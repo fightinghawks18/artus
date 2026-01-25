@@ -5,6 +5,7 @@ find_package(Vulkan REQUIRED)
 add_library(ArtusGraphics
         Source/Device.cpp
         Source/Surface.cpp
+        Source/Resources/Image.cpp
 )
 
 target_include_directories(ArtusGraphics

@@ -13,16 +13,16 @@ namespace Artus::Graphics {
         explicit Device();
         ~Device();
 
-        [[nodiscard]] vk::Instance GetVkInstance() { return mInstance.get(); }
-        [[nodiscard]] vk::PhysicalDevice GetVkPhysicalDevice() const { return mPhysicalDevice; }
-        [[nodiscard]] vk::Device GetVkDevice() { return mDevice.get(); }
+        [[nodiscard]] vk::Instance GetVulkanInstance() { return mInstance.get(); }
+        [[nodiscard]] vk::PhysicalDevice GetVulkanPhysicalDevice() const { return mPhysicalDevice; }
+        [[nodiscard]] vk::Device GetVulkanDevice() { return mDevice.get(); }
 
-        [[nodiscard]] vk::Queue GetVkGraphicsQueue() const { return mGraphicsQueue; }
-        [[nodiscard]] vk::Queue GetVkComputeQueue() const { return mComputeQueue; }
-        [[nodiscard]] vk::Queue GetVkTransferQueue() const { return mTransferQueue; }
-        [[nodiscard]] uint32_t GetVkGraphicsFamily() const { return mGraphicsFamily; }
-        [[nodiscard]] uint32_t GetVkComputeFamily() const { return mComputeFamily; }
-        [[nodiscard]] uint32_t GetVkTransferFamily() const { return mTransferFamily; }
+        [[nodiscard]] vk::Queue GetVulkanGraphicsQueue() const { return mGraphicsQueue; }
+        [[nodiscard]] vk::Queue GetVulkanComputeQueue() const { return mComputeQueue; }
+        [[nodiscard]] vk::Queue GetVulkanTransferQueue() const { return mTransferQueue; }
+        [[nodiscard]] uint32_t GetVulkanGraphicsFamily() const { return mGraphicsFamily; }
+        [[nodiscard]] uint32_t GetVulkanComputeFamily() const { return mComputeFamily; }
+        [[nodiscard]] uint32_t GetVulkanTransferFamily() const { return mTransferFamily; }
     private:
         vk::UniqueInstance mInstance;
         vk::PhysicalDevice mPhysicalDevice = nullptr;

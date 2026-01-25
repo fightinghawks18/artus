@@ -7,7 +7,9 @@
 
 #include "Device.h"
 
-#include "Artus/Core/Platform.h"
+#include "Artus/Core/Window.h"
+#include "Resources/Image.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
@@ -19,10 +21,10 @@ namespace Artus::Graphics {
         uint32_t AcquireNextImage(vk::Semaphore* outSemaphore);
         bool PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore);
 
-        [[nodiscard]] vk::SurfaceFormatKHR GetVkSurfaceFormat() { return mSurfaceFormat; }
-        [[nodiscard]] vk::Extent2D GetVkExtent() const { return mSurfaceExtent; }
-        [[nodiscard]] vk::Image GetVkImage(const uint32_t index) const { return mImages[index]; }
-        [[nodiscard]] vk::ImageView GetVkImageView(const uint32_t index) { return mImageViews[index].get(); }
+        [[nodiscard]] vk::SurfaceFormatKHR GetVulkanSurfaceFormat() const { return mSurfaceFormat; }
+        [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
+        [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
+        [[nodiscard]] vk::ImageView GetVulkanImageView(const uint32_t index) { return mImageViews[index].get(); }
         [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
     private:
         Device& mDevice;
@@ -37,7 +39,7 @@ namespace Artus::Graphics {
         std::vector<vk::UniqueSemaphore> mRenderFinishedSems;
         std::vector<vk::UniqueFence> mInFlightFens;
 
-        std::vector<vk::Image> mImages;
+        std::vector<std::unique_ptr<Image>> mImages;
         std::vector<vk::UniqueImageView> mImageViews;
 
         uint32_t mFrameIdx = 0;
