@@ -19,7 +19,13 @@ namespace Artus::Graphics {
         MakeDevice();
     }
 
-    Device::~Device() = default;
+    Device::~Device() {
+        mDevice->waitIdle();
+
+        mDevice.reset();
+        mPhysicalDevice = nullptr;
+        mInstance.reset();
+    }
 
     void Device::MakeInstance() {
         vk::ApplicationInfo appInfo = {};
@@ -141,7 +147,8 @@ namespace Artus::Graphics {
 #endif
 
         vk::PhysicalDeviceVulkan13Features v13Feats = {};
-        v13Feats.setDynamicRendering(true);
+        v13Feats.setDynamicRendering(true)
+            .setSynchronization2(true);
 
         vk::DeviceCreateInfo deviceInfo = {};
         deviceInfo.setPNext(v13Feats)
