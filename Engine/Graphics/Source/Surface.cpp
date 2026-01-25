@@ -9,6 +9,8 @@
 
 #include "Artus/Graphics/Surface.h"
 
+#include "Artus/Core/Logger.h"
+
 #include <iostream>
 
 namespace Artus::Graphics {
@@ -33,26 +35,26 @@ namespace Artus::Graphics {
     uint32_t Surface::AcquireNextImage(vk::Semaphore* outSemaphore) {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to wait for fences before acquiring new image! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
         auto resetResult = mDevice.GetVulkanDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
         if (resetResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to reset fence before acquiring new image! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to reset fence before acquiring new image! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
         uint32_t imageIndex = UINT32_MAX;
         vk::Result getImageResult = mDevice.GetVulkanDevice().acquireNextImageKHR(mSwapchain.get(), UINT64_MAX, mImageAvailableSems[mFrameIdx].get(), nullptr, &imageIndex);
         if (getImageResult == vk::Result::eErrorOutOfDateKHR || getImageResult == vk::Result::eSuboptimalKHR) {
-            std::cout << "Swapchain is out of date or is suboptimal, resizing. (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_LOG("Swapchain is out of date or is suboptimal, resizing. (Occurred on frame {})", mFrameIdx);
             Rebuild();
             return AcquireNextImage(outSemaphore);
         }
 
         if (getImageResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to acquire new image from swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to acquire new image from swapchain! (Occurred on frame {})", mFrameIdx);
             return UINT32_MAX;
         }
 
@@ -73,7 +75,7 @@ namespace Artus::Graphics {
 
         auto submitResult = mDevice.GetVulkanGraphicsQueue().submit(1, &submitInfo, mInFlightFens[mFrameIdx].get());
         if (submitResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to submit graphics to swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to submit graphics to swapchain! (Occurred on frame {})", mFrameIdx);
             return false;
         }
 
@@ -84,7 +86,7 @@ namespace Artus::Graphics {
 
         auto presentResult = mDevice.GetVulkanGraphicsQueue().presentKHR(&presentInfo);
         if (presentResult != vk::Result::eSuccess) {
-            std::cerr << "Failed to present graphics to swapchain! (Occurred on frame " << mFrameIdx << ")" << std::endl;
+            AR_ERR("Failed to present graphics to swapchain! (Occurred on frame {})", mFrameIdx);
             return false;
         }
 

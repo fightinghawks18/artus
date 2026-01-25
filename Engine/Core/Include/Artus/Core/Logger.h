@@ -36,8 +36,8 @@ namespace Artus::Core {
         }
 
         template <typename ...Args>
-        void Output(MessageSeverity severity, std::string_view format, Args&&... args) {
-            auto message = std::format(format, std::forward<Args>(args)...);
+        void Output(MessageSeverity severity, std::format_string<Args...> format, Args&&... args) {
+            const auto message = std::format(format, std::forward<Args>(args)...);
             switch (severity) {
             case MessageSeverity::Low:
                 std::cout << message << std::endl;

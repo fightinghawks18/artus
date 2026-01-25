@@ -4,6 +4,8 @@
 
 #include "Artus/Graphics/Device.h"
 
+#include "Artus/Core/Logger.h"
+
 #include <iostream>
 
 struct DeviceQueue {
@@ -90,18 +92,15 @@ namespace Artus::Graphics {
         }
 
         if (bestDevice == nullptr) {
-            std::cerr << "Failed to find a suitable GPU for rendering!" << std::endl;
+            AR_ERR("Failed to find a suitable GPU for rendering");
             return;
         }
 
         mPhysicalDevice = bestDevice;
         const auto properties = mPhysicalDevice.getProperties();
 
-        std::cout << "GPU Found: {\n"
-            << "\tName: " << properties.deviceName << "\n"
-            << "\tType: " << vk::to_string(properties.deviceType) << "\n"
-            << "\tID: " << properties.deviceID << "\n"
-            << "}" << std::endl;
+        AR_LOG("GPU Information:\n\tName: {}\n\tType: {}\n\tID: {}",
+            std::string(properties.deviceName.data()), vk::to_string(properties.deviceType), properties.deviceID);
     }
 
     std::vector<DeviceQueue> FindDeviceQueues(vk::PhysicalDevice physicalDevice) {
