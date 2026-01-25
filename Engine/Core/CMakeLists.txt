@@ -5,7 +5,7 @@ target_include_directories(ArtusCore
 
 if (APPLE)
     target_sources(ArtusCore PRIVATE
-            Source/Apple/Platform.mm
+            Source/Apple/Window.mm
     )
 
     target_link_libraries(ArtusCore

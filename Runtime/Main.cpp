@@ -1,6 +1,6 @@
 #include "Artus/Graphics/Surface.h"
 
-#include <Artus/Core/Platform.h>
+#include <Artus/Core/Window.h>
 #include <Artus/Graphics/Device.h>
 
 using namespace Artus;

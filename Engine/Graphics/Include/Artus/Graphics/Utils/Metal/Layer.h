@@ -7,7 +7,7 @@
 
 #ifdef __APPLE__
 
-#include "Artus/Core/Platform.h"
+#include "Artus/Core/Window.h"
 
 namespace Artus::Graphics::Metal {
     void* CreateMetalLayer(Core::Window* window);

@@ -7,7 +7,7 @@
 
 #include "Device.h"
 
-#include "Artus/Core/Platform.h"
+#include "Artus/Core/Window.h"
 #include "Resources/Image.h"
 
 #include <vulkan/vulkan.hpp>

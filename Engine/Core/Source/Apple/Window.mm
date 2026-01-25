@@ -2,7 +2,7 @@
 // Created by fightinghawks18 on 1/21/26.
 //
 
-#include "Artus/Core/Platform.h"
+#include "Artus/Core/Window.h"
 
 #import <AppKit/AppKit.h>
 #import <CoreFoundation/CoreFoundation.h>
