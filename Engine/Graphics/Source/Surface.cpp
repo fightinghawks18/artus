@@ -132,7 +132,7 @@ namespace Artus::Graphics {
         const auto surfaceCapabilities = mDevice.GetVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(mSurface.get());
         auto surfaceExtent = surfaceCapabilities.currentExtent;
 
-        const auto windowSize = window->GetWindowSize();
+        const auto windowSize = window->GetSize();
 
         // Window systems may allow the app to define the surface extent,
         // and is within the min/max bounds.
