@@ -6,6 +6,7 @@ add_library(ArtusGraphics
         Source/Device.cpp
         Source/Surface.cpp
         Source/Resources/Image.cpp
+        Source/Utils/Vulkan/Allocator.cpp
 )
 
 target_include_directories(ArtusGraphics

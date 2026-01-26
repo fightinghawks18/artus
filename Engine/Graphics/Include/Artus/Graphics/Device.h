@@ -6,6 +6,7 @@
 #define ARTUS_DEVICE_H
 
 #include <vulkan/vulkan.hpp>
+#include "Artus/Graphics/Utils/Vulkan/Allocator.h"
 
 namespace Artus::Graphics {
     class Device {
@@ -16,6 +17,7 @@ namespace Artus::Graphics {
         [[nodiscard]] vk::Instance GetVulkanInstance() { return mInstance.get(); }
         [[nodiscard]] vk::PhysicalDevice GetVulkanPhysicalDevice() const { return mPhysicalDevice; }
         [[nodiscard]] vk::Device GetVulkanDevice() { return mDevice.get(); }
+        [[nodiscard]] VmaAllocator GetVulkanAllocator() { return mAllocator; }
 
         [[nodiscard]] vk::Queue GetVulkanGraphicsQueue() const { return mGraphicsQueue; }
         [[nodiscard]] vk::Queue GetVulkanComputeQueue() const { return mComputeQueue; }
@@ -27,6 +29,7 @@ namespace Artus::Graphics {
         vk::UniqueInstance mInstance;
         vk::PhysicalDevice mPhysicalDevice = nullptr;
         vk::UniqueDevice mDevice;
+        VmaAllocator mAllocator = nullptr;
 
         vk::Queue mGraphicsQueue = nullptr;
         vk::Queue mComputeQueue = nullptr;
@@ -38,6 +41,7 @@ namespace Artus::Graphics {
         void MakeInstance();
         void GetPhysicalDevice();
         void MakeDevice();
+        void MakeAllocator();
     };
 }
 

@@ -24,6 +24,9 @@ namespace Artus::Graphics {
     Device::~Device() {
         mDevice->waitIdle();
 
+        vmaDestroyAllocator(mAllocator);
+        mAllocator = nullptr;
+
         mDevice.reset();
         mPhysicalDevice = nullptr;
         mInstance.reset();
@@ -171,5 +174,12 @@ namespace Artus::Graphics {
                 mTransferFamily = deviceQueue.queueInfo.queueFamilyIndex;
             }
         }
+    }
+
+    void Device::MakeAllocator() {
+        VmaAllocatorCreateInfo allocatorInfo = {0};
+        allocatorInfo.instance = mInstance.get();
+        allocatorInfo.physicalDevice = mPhysicalDevice;
+        allocatorInfo.device = mDevice.get();
     }
 } // namespace Artus::Graphics
