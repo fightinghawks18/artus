@@ -10,17 +10,28 @@
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
+    /// @brief Holds image data used for textures, rendering, or storage
     class Image {
     public:
         explicit Image(Device& device, const vk::ImageCreateInfo& imageInfo);
         explicit Image(Device& device, vk::Image image);
         ~Image();
 
+        /// @brief Modifies this image to be available for use in rendering
+        /// @param cmd The command buffer that modifies this image's state
         void MakeRenderable(vk::CommandBuffer cmd);
+        /// @brief Modifies this image to be available for use in depth stenciling
+        /// @param cmd The command buffer that modifies this image's state
         void MakeDepthStencil(vk::CommandBuffer cmd);
+        /// @brief Modifies this image to be available for use in shaders
+        /// @param cmd The command buffer that modifies this image's state
         void MakeShaderResource(vk::CommandBuffer cmd);
+        /// @brief Modifies this image to be available for presenting to the screen
+        /// @param cmd The command buffer that modifies this image's state
         void MakePresentable(vk::CommandBuffer cmd);
 
+        /// @brief Retrieves the vulkan handle to this image
+        /// @return vk::Image
         [[nodiscard]] vk::Image GetVulkanImage() const { return mImage; }
     private:
         Device& mDevice;

@@ -7,6 +7,10 @@ add_library(ArtusGraphics
         Source/Surface.cpp
         Source/Resources/Image.cpp
         Source/Utils/Vulkan/Allocator.cpp
+        Source/Resources/Buffer.cpp
+        Source/Resources/Shader.cpp
+        Source/Resources/CommandAllocator.cpp
+        Source/Resources/CommandEncoder.cpp
 )
 
 target_include_directories(ArtusGraphics
