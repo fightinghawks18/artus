@@ -6,8 +6,6 @@
 
 #include "Artus/Core/Logger.h"
 
-#include <iostream>
-
 struct DeviceQueue {
     vk::QueueFlags flags;
     vk::DeviceQueueCreateInfo queueInfo;
@@ -40,14 +38,12 @@ namespace Artus::Graphics {
             .setEngineVersion(VK_MAKE_API_VERSION(0, 0, 0, 1))
             .setApiVersion(VK_MAKE_API_VERSION(0, 1, 3, 0));
 
-        std::vector extensions = {
-            "VK_KHR_surface"
-        };
+        std::vector extensions = {"VK_KHR_surface"};
         std::vector<const char*> layers;
         vk::InstanceCreateFlags flags;
 
 #ifdef __APPLE__
-        flags |=  vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+        flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
         extensions.push_back("VK_EXT_metal_surface");
 #endif
@@ -102,8 +98,8 @@ namespace Artus::Graphics {
         mPhysicalDevice = bestDevice;
         const auto properties = mPhysicalDevice.getProperties();
 
-        AR_LOG("GPU Information:\n\tName: {}\n\tType: {}\n\tID: {}",
-            std::string(properties.deviceName.data()), vk::to_string(properties.deviceType), properties.deviceID);
+        AR_LOG("GPU Information:\n\tName: {}\n\tType: {}\n\tID: {}", std::string(properties.deviceName.data()),
+               vk::to_string(properties.deviceType), properties.deviceID);
     }
 
     std::vector<DeviceQueue> FindDeviceQueues(vk::PhysicalDevice physicalDevice) {
@@ -125,8 +121,7 @@ namespace Artus::Graphics {
             if (found)
                 continue;
             vk::DeviceQueueCreateInfo queueInfo = {};
-            queueInfo.setQueueCount(1)
-                .setQueueFamilyIndex(i);
+            queueInfo.setQueueCount(1).setQueueFamilyIndex(i);
             deviceQueues.push_back({queueFamily.queueFlags, queueInfo});
         }
 
@@ -135,7 +130,7 @@ namespace Artus::Graphics {
 
     void Device::MakeDevice() {
         const float priority = 1;
-        auto deviceQueues  = FindDeviceQueues(mPhysicalDevice);
+        auto deviceQueues = FindDeviceQueues(mPhysicalDevice);
         std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
         for (auto& deviceQueue : deviceQueues) {
             deviceQueue.queueInfo.pQueuePriorities = &priority;
@@ -149,13 +144,10 @@ namespace Artus::Graphics {
 #endif
 
         vk::PhysicalDeviceVulkan13Features v13Feats = {};
-        v13Feats.setDynamicRendering(true)
-            .setSynchronization2(true);
+        v13Feats.setDynamicRendering(true).setSynchronization2(true);
 
         vk::DeviceCreateInfo deviceInfo = {};
-        deviceInfo.setPNext(v13Feats)
-            .setQueueCreateInfos(queueCreateInfos)
-            .setPEnabledExtensionNames(deviceExtensions);
+        deviceInfo.setPNext(v13Feats).setQueueCreateInfos(queueCreateInfos).setPEnabledExtensionNames(deviceExtensions);
         mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
 
         for (auto& deviceQueue : deviceQueues) {
