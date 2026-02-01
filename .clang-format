@@ -1,4 +1,4 @@
-ColumnLimit: 150
+ColumnLimit: 120
 
 Language: Cpp
 PointerAlignment: Left
@@ -6,3 +6,8 @@ PointerAlignment: Left
 IndentWidth: 4
 UseTab: Never
 NamespaceIndentation: All
+
+AccessModifierOffset: -4
+IndentAccessModifiers: false
+
+ContinuationIndentWidth: 4

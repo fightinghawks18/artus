@@ -4,6 +4,7 @@
 .vscode/
 
 # Clangd
+.cache/
 compile_commands.json
 
 # CMake
