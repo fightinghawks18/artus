@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/26/26.
+// Created by fightinghawks18 on 1/26/2026.
 //
 
 #include "Artus/Graphics/Resources/Buffer.h"
@@ -23,11 +23,10 @@ namespace Artus::Graphics {
         }
 
         vk::BufferCreateInfo bufferInfo = {};
-        bufferInfo.setSize(size)
-            .setUsage(usageFlags)
-            .setSharingMode(vk::SharingMode::eExclusive);
+        bufferInfo.setSize(size).setUsage(usageFlags).setSharingMode(vk::SharingMode::eExclusive);
 
         VmaAllocationCreateInfo allocInfo = {0};
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
         VkBuffer buffer;

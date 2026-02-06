@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/22/26.
+// Created by fightinghawks18 on 1/22/2026.
 //
 
 #include "Artus/Graphics/Device.h"
@@ -17,6 +17,7 @@ namespace Artus::Graphics {
         MakeInstance();
         GetPhysicalDevice();
         MakeDevice();
+        MakeAllocator();
     }
 
     Device::~Device() {
@@ -137,7 +138,11 @@ namespace Artus::Graphics {
             queueCreateInfos.push_back(deviceQueue.queueInfo);
         }
 
-        std::vector<const char*> deviceExtensions;
+        std::vector<const char*> deviceExtensions = {
+            VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME,
+            VK_EXT_EXTENDED_DYNAMIC_STATE_2_EXTENSION_NAME,
+            VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
+        };
 #ifdef __APPLE__
         deviceExtensions.push_back("VK_KHR_portability_subset");
         deviceExtensions.push_back("VK_KHR_swapchain");
@@ -173,5 +178,7 @@ namespace Artus::Graphics {
         allocatorInfo.instance = mInstance.get();
         allocatorInfo.physicalDevice = mPhysicalDevice;
         allocatorInfo.device = mDevice.get();
+
+        vmaCreateAllocator(&allocatorInfo, &mAllocator);
     }
 } // namespace Artus::Graphics
