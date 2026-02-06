@@ -11,6 +11,8 @@ add_library(ArtusGraphics
         Source/Resources/Shader.cpp
         Source/Resources/CommandAllocator.cpp
         Source/Resources/CommandEncoder.cpp
+        Source/Resources/GraphicsPipeline.cpp
+        Source/Resources/PipelineLayout.cpp
 )
 
 target_include_directories(ArtusGraphics

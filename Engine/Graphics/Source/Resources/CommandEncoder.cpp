@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 2/1/2026
+// Created by fightinghawks18 on 2/1/2026.
 //
 
 #include "Artus/Graphics/Resources/CommandEncoder.h"
@@ -51,5 +51,24 @@ namespace Artus::Graphics {
         mCommandBuffer->beginRendering(renderingInfo);
     }
     void CommandEncoder::EndRendering() { mCommandBuffer->endRendering(); }
+
+    void CommandEncoder::BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline) {
+        auto pipelineHandle = graphicsPipeline->GetVulkanPipeline();
+        mCommandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipelineHandle);
+    }
+
+    void CommandEncoder::BindVertexBuffer(Buffer* vertexBuffer) {
+        auto vertexHandle = vertexBuffer->GetVulkanBuffer();
+        mCommandBuffer->bindVertexBuffers(0, vertexHandle, {0});
+    }
+
+    void CommandEncoder::BindIndexBuffer(Buffer* indexBuffer) {
+        auto indexHandle = indexBuffer->GetVulkanBuffer();
+        mCommandBuffer->bindIndexBuffer(indexHandle, 0, vk::IndexType::eUint32);
+    }
+
+    void CommandEncoder::DrawIndexed(uint32_t indexCount, uint32_t firstIndex) {
+        mCommandBuffer->drawIndexed(indexCount, 0, firstIndex, 0, 0);
+    }
 
 } // namespace Artus::Graphics
