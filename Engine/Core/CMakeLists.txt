@@ -12,4 +12,8 @@ if (APPLE)
             PRIVATE "-framework CoreFoundation"
             PRIVATE "-framework AppKit"
     )
+elseif (WIN32)
+    target_sources(ArtusCore PRIVATE
+            Source/Windows/Window.cpp
+    )
 endif ()
