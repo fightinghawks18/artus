@@ -1,0 +1,44 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "Ninja",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "build/ninja-mc",
+            "installDir": "dist/ninja-mc"
+        },
+
+        {
+            "name": "XCode",
+            "generator": "Xcode",
+            "binaryDir": "build/xcode",
+            "installDir": "dist/xcode"
+        }
+    ],
+
+    "buildPresets": [
+        {
+            "name": "Ninja-Debug",
+            "configurePreset": "Ninja",
+            "configuration": "Debug"
+        },
+
+        {
+            "name": "Ninja-Release",
+            "configurePreset": "Ninja",
+            "configuration": "Release"
+        },
+
+        {
+            "name": "XCode-Debug",
+            "configurePreset": "XCode",
+            "configuration": "Debug"
+        },
+
+        {
+            "name": "XCode-Release",
+            "configurePreset": "XCode",
+            "configuration": "Release"
+        }
+    ]
+}
