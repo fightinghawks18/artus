@@ -11,6 +11,7 @@ target_link_libraries(Artus
         PRIVATE ArtusGraphics
 )
 
-compile_slang_file_to_spirv(Runtime/Resources/Shaders/Default.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Default.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/VS_Default.slang Shaders)
 
 add_subdirectory(engine)
