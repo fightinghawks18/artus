@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/25/26.
+// Created by fightinghawks18 on 1/25/2026.
 //
 
 #ifndef ARTUS_IMAGE_H
@@ -33,6 +33,7 @@ namespace Artus::Graphics {
         /// @brief Retrieves the vulkan handle to this image
         /// @return vk::Image
         [[nodiscard]] vk::Image GetVulkanImage() const { return mImage; }
+
     private:
         Device& mDevice;
 
@@ -42,6 +43,6 @@ namespace Artus::Graphics {
         vk::AccessFlags2 mAccessMasks;
         vk::PipelineStageFlags2 mStageMasks;
     };
-}
+} // namespace Artus::Graphics
 
 #endif // ARTUS_IMAGE_H

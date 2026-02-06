@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/25/26.
+// Created by fightinghawks18 on 1/25/2026.
 //
 
 #include "Artus/Graphics/Resources/Image.h"
@@ -71,8 +71,10 @@ namespace Artus::Graphics {
             .setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
             .setSrcAccessMask(mAccessMasks)
             .setSrcStageMask(mStageMasks)
-            .setDstAccessMask(vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eLateFragmentTests | vk::PipelineStageFlagBits2::eEarlyFragmentTests)
+            .setDstAccessMask(vk::AccessFlagBits2::eDepthStencilAttachmentRead |
+                              vk::AccessFlagBits2::eDepthStencilAttachmentWrite)
+            .setDstStageMask(vk::PipelineStageFlagBits2::eLateFragmentTests |
+                             vk::PipelineStageFlagBits2::eEarlyFragmentTests)
             .setSubresourceRange(subresourceRange);
 
         vk::DependencyInfo dependencyInfo = {};
@@ -81,7 +83,8 @@ namespace Artus::Graphics {
         cmd.pipelineBarrier2(dependencyInfo);
 
         mCurrentState = vk::ImageLayout::eDepthStencilAttachmentOptimal;
-        mAccessMasks = vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite;
+        mAccessMasks =
+            vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite;
         mStageMasks = vk::PipelineStageFlagBits2::eLateFragmentTests | vk::PipelineStageFlagBits2::eEarlyFragmentTests;
     }
 

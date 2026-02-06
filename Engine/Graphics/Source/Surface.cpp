@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/24/26.
+// Created by fightinghawks18 on 1/24/2026.
 //
 
 #ifdef __APPLE__
@@ -46,7 +46,8 @@ namespace Artus::Graphics {
         }
 
         uint32_t imageIndex = UINT32_MAX;
-        vk::Result getImageResult = mDevice.GetVulkanDevice().acquireNextImageKHR(mSwapchain.get(), UINT64_MAX, mImageAvailableSems[mFrameIdx].get(), nullptr, &imageIndex);
+        vk::Result getImageResult = mDevice.GetVulkanDevice().acquireNextImageKHR(
+            mSwapchain.get(), UINT64_MAX, mImageAvailableSems[mFrameIdx].get(), nullptr, &imageIndex);
         if (getImageResult == vk::Result::eErrorOutOfDateKHR || getImageResult == vk::Result::eSuboptimalKHR) {
             AR_LOG("Swapchain is out of date or is suboptimal, resizing. (Occurred on frame {})", mFrameIdx);
             Rebuild();
@@ -63,9 +64,16 @@ namespace Artus::Graphics {
     }
 
     bool Surface::PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore) {
-        std::vector<vk::PipelineStageFlags> waitDstStageMask = {
-            vk::PipelineStageFlagBits::eAllCommands
-        };
+        auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
+
+        if (waitResult != vk::Result::eSuccess) {
+            AR_ERR("Failed to wait for fence! (Occurred on frame {})", mFrameIdx);
+            return false;
+        }
+
+        mDevice.GetVulkanDevice().resetFences(mInFlightFens[mFrameIdx].get());
+
+        std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eAllCommands};
 
         vk::SubmitInfo submitInfo = {};
         submitInfo.setCommandBuffers(commandBuffer)
@@ -120,9 +128,9 @@ namespace Artus::Graphics {
         surfaceFormat.format = vk::Format::eUndefined;
         auto surfaceFormats = mDevice.GetVulkanPhysicalDevice().getSurfaceFormatsKHR(mSurface.get());
         for (const auto& format : surfaceFormats) {
-            if (format.format == vk::Format::eB8G8R8A8Srgb
-                && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-                surfaceFormat = format; // BGRA8_SRGB is common, so we use SRGB_nonlinear so that we don't reconvert SRGB swapchain data
+            if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+                surfaceFormat = format; // BGRA8_SRGB is common, so we use SRGB_nonlinear so that we don't reconvert
+                                        // SRGB swapchain data
                 break;
             }
         }
@@ -140,14 +148,12 @@ namespace Artus::Graphics {
         // and is within the min/max bounds.
         // Otherwise, it is controlled by the window's size
         if (surfaceExtent.width == 0xFFFFFFFF || surfaceExtent.height == 0xFFFFFFFF) {
-            surfaceExtent.setWidth(std::clamp(
-                    static_cast<uint32_t>(windowSize.width),
-                    surfaceCapabilities.minImageExtent.width,
-                    surfaceCapabilities.maxImageExtent.width));
-            surfaceExtent.setHeight(std::clamp(
-                    static_cast<uint32_t>(windowSize.height),
-                    surfaceCapabilities.minImageExtent.height,
-                    surfaceCapabilities.maxImageExtent.height));
+            surfaceExtent.setWidth(std::clamp(static_cast<uint32_t>(windowSize.width),
+                                              surfaceCapabilities.minImageExtent.width,
+                                              surfaceCapabilities.maxImageExtent.width));
+            surfaceExtent.setHeight(std::clamp(static_cast<uint32_t>(windowSize.height),
+                                               surfaceCapabilities.minImageExtent.height,
+                                               surfaceCapabilities.maxImageExtent.height));
         }
 
         vk::SwapchainCreateInfoKHR swapchainInfo = {};

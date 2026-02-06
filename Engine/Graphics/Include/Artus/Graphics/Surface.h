@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/24/26.
+// Created by fightinghawks18 on 1/24/2026.
 //
 
 #ifndef ARTUS_SURFACE_H
@@ -26,6 +26,7 @@ namespace Artus::Graphics {
         [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
         [[nodiscard]] vk::ImageView GetVulkanImageView(const uint32_t index) { return mImageViews[index].get(); }
         [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
+
     private:
         Device& mDevice;
         Core::Window* mWindow;
@@ -58,6 +59,6 @@ namespace Artus::Graphics {
 
         void Rebuild();
     };
-}
+} // namespace Artus::Graphics
 
 #endif // ARTUS_SURFACE_H

@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/21/26.
+// Created by fightinghawks18 on 1/21/2026.
 //
 
 #include "Artus/Core/Window.h"

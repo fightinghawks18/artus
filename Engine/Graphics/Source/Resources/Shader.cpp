@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/28/2026
+// Created by fightinghawks18 on 1/28/2026.
 //
 
 #include "Artus/Graphics/Resources/Shader.h"

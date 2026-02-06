@@ -1,13 +1,20 @@
+# Common
 ColumnLimit: 120
 
+# Language
 Language: Cpp
 PointerAlignment: Left
 
+# Indentation
 IndentWidth: 4
 UseTab: Never
 NamespaceIndentation: All
-
 AccessModifierOffset: -4
 IndentAccessModifiers: false
-
 ContinuationIndentWidth: 4
+
+# Aligning
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+AlignAfterOpenBracket: Align

@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/27/2026
+// Created by fightinghawks18 on 1/27/2026.
 //
 
 #ifndef ARTUS_SHADER_H
@@ -10,12 +10,13 @@
 
 namespace Artus::Graphics {
     class Shader {
-      public:
+    public:
         explicit Shader(Device& device, const std::string& shaderPath);
         ~Shader();
 
         [[nodiscard]] vk::ShaderModule GetVulkanShaderModule() const { return mShaderModule.get(); }
-      private:
+
+    private:
         Device& mDevice;
 
         vk::UniqueShaderModule mShaderModule;

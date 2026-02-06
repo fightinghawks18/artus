@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/21/26.
+// Created by fightinghawks18 on 1/21/2026.
 //
 
 #ifndef ARTUS_PLATFORM_H
@@ -9,7 +9,9 @@
 
 namespace Artus::Core {
     /// @brief A pointer to the window's underlying platform handle
-    struct WindowHandle { void* handle; };
+    struct WindowHandle {
+        void* handle;
+    };
 
     /// @brief The size of a window
     /// @note Size can be logical which is defined by the system, or physical which
@@ -26,7 +28,7 @@ namespace Artus::Core {
         /// @brief Polls the platform's windowing system to update all available windows
         /// used by this application
         static void Update();
-        
+
         explicit Window();
         ~Window();
 
@@ -53,12 +55,12 @@ namespace Artus::Core {
         /// @brief Gets the window's underlying platform handle
         /// @return Window handle
         [[nodiscard]] WindowHandle GetHandle();
+
     private:
         struct Impl;
         std::unique_ptr<Impl> mImpl;
         bool mClosing;
     };
-}
+} // namespace Artus::Core
 
 #endif // ARTUS_PLATFORM_H
-

@@ -1,12 +1,12 @@
 //
-// Created by fightinghawks18 on 1/22/26.
+// Created by fightinghawks18 on 1/22/2026.
 //
 
 #ifndef ARTUS_DEVICE_H
 #define ARTUS_DEVICE_H
 
-#include <vulkan/vulkan.hpp>
 #include "Artus/Graphics/Utils/Vulkan/Allocator.h"
+#include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
     class Device {
@@ -25,6 +25,7 @@ namespace Artus::Graphics {
         [[nodiscard]] uint32_t GetVulkanGraphicsFamily() const { return mGraphicsFamily; }
         [[nodiscard]] uint32_t GetVulkanComputeFamily() const { return mComputeFamily; }
         [[nodiscard]] uint32_t GetVulkanTransferFamily() const { return mTransferFamily; }
+
     private:
         vk::UniqueInstance mInstance;
         vk::PhysicalDevice mPhysicalDevice = nullptr;
@@ -43,6 +44,6 @@ namespace Artus::Graphics {
         void MakeDevice();
         void MakeAllocator();
     };
-}
+} // namespace Artus::Graphics
 
 #endif // ARTUS_DEVICE_H

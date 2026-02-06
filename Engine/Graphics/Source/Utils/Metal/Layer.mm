@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/24/26.
+// Created by fightinghawks18 on 1/24/2026.
 //
 
 #include "Artus/Graphics/Utils/Metal/Layer.h"

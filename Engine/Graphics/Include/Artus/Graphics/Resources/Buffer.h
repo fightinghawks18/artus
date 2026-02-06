@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/26/26.
+// Created by fightinghawks18 on 1/26/2026.
 //
 
 #ifndef ARTUS_BUFFER_H
@@ -13,9 +13,9 @@
 namespace Artus::Graphics {
     /// @brief Describes how a buffer is used
     enum class BufferUsage {
-        Vertex, ///< Buffer is used to store vertices for an object
-        Index, ///< Buffer is used to store indices for an object
-        Shader, ///< Buffer is read-only in shaders and stores small amounts of data
+        Vertex,        ///< Buffer is used to store vertices for an object
+        Index,         ///< Buffer is used to store indices for an object
+        Shader,        ///< Buffer is read-only in shaders and stores small amounts of data
         ShaderStorage, ///< Buffer is read/write in shaders and stores large amounts of data
     };
 
@@ -39,12 +39,13 @@ namespace Artus::Graphics {
         /// @brief Retrieves the underlying vulkan allocation to this buffer
         /// @return VmaAllocation
         [[nodiscard]] VmaAllocation GetVulkanAllocation() const { return mAllocation; }
+
     private:
         Device& mDevice;
 
         vk::Buffer mBuffer;
         VmaAllocation mAllocation;
     };
-}
+} // namespace Artus::Graphics
 
 #endif // ARTUS_BUFFER_H

@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 2/1/2026
+// Created by fightinghawks18 on 2/1/2026.
 //
 
 #include "Artus/Graphics/Resources/CommandAllocator.h"

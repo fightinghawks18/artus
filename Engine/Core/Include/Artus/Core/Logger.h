@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 1/25/26.
+// Created by fightinghawks18 on 1/25/2026.
 //
 
 #ifndef ARTUS_MESSENGER_H
@@ -13,9 +13,9 @@
 namespace Artus::Core {
     /// @brief Differentiates the importance of a message
     enum class MessageSeverity {
-        Low, ///< Message isn't important, probably to inform
-        Medium, ///< Message is semi-important, probably to warn
-        High, ///< Message is important, probably an error
+        Low,      ///< Message isn't important, probably to inform
+        Medium,   ///< Message is semi-important, probably to warn
+        High,     ///< Message is important, probably an error
         Critical, ///< Message is very important, probably a fatal error
     };
 
@@ -35,7 +35,7 @@ namespace Artus::Core {
             return logger;
         }
 
-        template <typename ...Args>
+        template <typename... Args>
         void Output(MessageSeverity severity, std::format_string<Args...> format, Args&&... args) {
             const auto message = std::format(format, std::forward<Args>(args)...);
             switch (severity) {
@@ -53,14 +53,19 @@ namespace Artus::Core {
         }
 
         [[nodiscard]] const std::vector<Message>& GetLogs() { return mMessages; }
+
     private:
         std::vector<Message> mMessages;
     };
-}
+} // namespace Artus::Core
 
-#define AR_LOG(fmt, ...) Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Low, fmt, ##__VA_ARGS__)
-#define AR_WARN(fmt, ...) Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Medium, fmt, ##__VA_ARGS__)
-#define AR_ERR(fmt, ...) Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::High, fmt, ##__VA_ARGS__)
-#define AR_PANIC(fmt, ...) Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Critical, fmt, ##__VA_ARGS__)
+#define AR_LOG(fmt, ...)                                                                                               \
+    Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Low, fmt, ##__VA_ARGS__)
+#define AR_WARN(fmt, ...)                                                                                              \
+    Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Medium, fmt, ##__VA_ARGS__)
+#define AR_ERR(fmt, ...)                                                                                               \
+    Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::High, fmt, ##__VA_ARGS__)
+#define AR_PANIC(fmt, ...)                                                                                             \
+    Artus::Core::Logger::GetSingletonInstance().Output(Artus::Core::MessageSeverity::Critical, fmt, ##__VA_ARGS__)
 
 #endif // ARTUS_MESSENGER_H

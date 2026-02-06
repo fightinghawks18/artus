@@ -1,5 +1,5 @@
 //
-// Created by fightinghawks18 on 2/1/2026
+// Created by fightinghawks18 on 2/1/2026.
 //
 
 #ifndef ARTUS_COMMAND_ALLOCATOR_H
