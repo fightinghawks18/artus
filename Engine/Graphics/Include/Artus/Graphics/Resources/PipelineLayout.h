@@ -10,9 +10,20 @@
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
+    struct PipelinePushConstant {
+        uint32_t size;
+        uint32_t offset;
+        vk::ShaderStageFlags stageFlags;
+    };
+
+    struct PipelineLayoutDesc {
+        std::vector<DescriptorSetLayout*> layouts;
+        std::vector<PipelinePushConstant> pushConstants;
+    };
+
     class PipelineLayout {
     public:
-        explicit PipelineLayout(Device& device, DescriptorSetLayout* setLayout);
+        explicit PipelineLayout(Device& device, const PipelineLayoutDesc& desc);
         ~PipelineLayout();
 
         [[nodiscard]] vk::PipelineLayout GetVulkanPipelineLayout() { return mPipelineLayout.get(); }
