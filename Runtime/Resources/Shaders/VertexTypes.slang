@@ -1,7 +1,7 @@
 module VertexTypes;
 
 public struct Vertex {
-    [[vk::location(0)]] public float3 position;
+    [[vk::location(0)]] public float2 position;
     [[vk::location(1)]] public float2 uv;
     [[vk::location(2)]] public float4 color;
 }

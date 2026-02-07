@@ -78,7 +78,7 @@ int main() {
 
     Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Vertex)};
     vertexBinding.attributes.push_back(
-        {.location = 0, .format = vk::Format::eR32G32B32Sfloat, .offset = offsetof(Vertex, position)});
+        {.location = 0, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, position)});
     vertexBinding.attributes.push_back(
         {.location = 1, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, uvCoords)});
     vertexBinding.attributes.push_back(
