@@ -19,7 +19,7 @@ struct TestModelData {
 };
 
 static TestModelData testModelData = {
-    {1.0f, 0.5f, 0.2f, 1.0f}
+    {1.0f, 1.0f, 0.0f, 1.0f}
 };
 
 static std::vector<Vertex> vertices = {
@@ -65,7 +65,16 @@ int main() {
     auto* descriptorSet = descriptorAllocator->CreateDescriptorSet(descriptorLayout);
     descriptorSet->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, modelBuffer);
 
-    auto* pipelineLayout = new Graphics::PipelineLayout(*device, descriptorLayout);
+    std::vector<Graphics::PipelinePushConstant> pushConstants;
+    pushConstants.push_back({.size = sizeof(TestModelData), .offset = 0, .stageFlags = vk::ShaderStageFlagBits::eFragment});
+
+    std::vector descriptorLayouts = {descriptorLayout};
+
+    Graphics::PipelineLayoutDesc pipelineLayoutDesc;
+    pipelineLayoutDesc.layouts = descriptorLayouts;
+    pipelineLayoutDesc.pushConstants = pushConstants;
+
+    auto* pipelineLayout = new Graphics::PipelineLayout(*device, pipelineLayoutDesc);
 
     Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Vertex)};
     vertexBinding.attributes.push_back(
@@ -98,7 +107,7 @@ int main() {
         rect.setExtent(surface->GetVulkanExtent()).setOffset({0, 0});
 
         vk::ClearColorValue clearColor = {};
-        clearColor.setFloat32({0.2f, 0.6f, 0.3f, 1.0f});
+        clearColor.setFloat32({1.0f, 0.2f, 0.3f, 1.0f});
 
         vk::RenderingAttachmentInfo colorAttachment = {};
         colorAttachment.setClearValue(clearColor)
@@ -131,6 +140,11 @@ int main() {
 
         cmd->StartRendering(renderingInfo);
 
+        TestModelData modelColor = {
+            {1.0f, 0.0f, 0.0f, 0.0f}
+        };
+
+        cmd->GetVulkanCommandBuffer().pushConstants(pipelineLayout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(TestModelData), &modelColor);
         cmd->GetVulkanCommandBuffer().setCullMode(vk::CullModeFlagBits::eNone);
         cmd->GetVulkanCommandBuffer().setDepthWriteEnable(false);
         cmd->GetVulkanCommandBuffer().setDepthTestEnable(false);
