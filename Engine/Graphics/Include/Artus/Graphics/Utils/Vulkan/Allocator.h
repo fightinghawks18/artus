@@ -5,10 +5,6 @@
 #ifndef ARTUS_ALLOCATOR_H
 #define ARTUS_ALLOCATOR_H
 
-#ifdef _WIN32
-#include <vk_mem_alloc.h>
-#else
 #include <vma/vk_mem_alloc.h>
-#endif
 
 #endif // ARTUS_ALLOCATOR_H
