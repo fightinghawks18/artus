@@ -67,7 +67,7 @@ namespace Artus::Graphics {
     }
 
     bool Surface::PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore) {
-        std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eAllCommands};
+        std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
         vk::SubmitInfo submitInfo = {};
         submitInfo.setCommandBuffers(commandBuffer)

@@ -68,7 +68,7 @@ namespace Artus::Graphics {
     }
 
     void CommandEncoder::DrawIndexed(uint32_t indexCount, uint32_t firstIndex) {
-        mCommandBuffer->drawIndexed(indexCount, 0, firstIndex, 0, 0);
+        mCommandBuffer->drawIndexed(indexCount, 1, firstIndex, 0, 0);
     }
 
 } // namespace Artus::Graphics

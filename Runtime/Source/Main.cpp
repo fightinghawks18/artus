@@ -31,8 +31,8 @@ int main() {
     auto* vertexBuffer = new Graphics::Buffer(*device, sizeof(Vertex) * vertices.size(), Graphics::BufferUsage::Vertex);
     auto* indexBuffer = new Graphics::Buffer(*device, sizeof(uint32_t) * indices.size(), Graphics::BufferUsage::Index);
 
-    vertexBuffer->Map(vertices.size() & sizeof(Vertex), 0, 0, vertices.data());
-    indexBuffer->Map(indices.size() * sizeof(uint32_t), 0, 0, indices.data());
+    vertexBuffer->Map(vertices.size() * sizeof(Vertex), 0, vertices.data());
+    indexBuffer->Map(indices.size() * sizeof(uint32_t), 0, indices.data());
 
     auto* vertexShader = new Graphics::Shader(*device, "Shaders/VS_Default.spv");
     auto* pixelShader = new Graphics::Shader(*device, "Shaders/PS_Default.spv");
@@ -41,7 +41,7 @@ int main() {
 
     Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Vertex)};
     vertexBinding.attributes.push_back(
-        {.location = 0, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, position)});
+        {.location = 0, .format = vk::Format::eR32G32B32Sfloat, .offset = offsetof(Vertex, position)});
     vertexBinding.attributes.push_back(
         {.location = 1, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, uvCoords)});
     vertexBinding.attributes.push_back(
