@@ -4,6 +4,7 @@
 #include <Artus/Graphics/Device.h>
 #include <Artus/Graphics/Resources/CommandAllocator.h>
 #include <Artus/Graphics/Resources/GraphicsPipeline.h>
+#include <Artus/Graphics/Resources/DescriptorAllocator.h>
 
 using namespace Artus;
 
@@ -11,6 +12,14 @@ struct Vertex {
     std::array<float, 2> position;
     std::array<float, 2> uvCoords;
     std::array<float, 4> color;
+};
+
+struct TestModelData {
+    std::array<float, 4> color;
+};
+
+static TestModelData testModelData = {
+    {1.0f, 0.5f, 0.2f, 1.0f}
 };
 
 static std::vector<Vertex> vertices = {
@@ -34,10 +43,29 @@ int main() {
     vertexBuffer->Map(vertices.size() * sizeof(Vertex), 0, vertices.data());
     indexBuffer->Map(indices.size() * sizeof(uint32_t), 0, indices.data());
 
+    auto* modelBuffer = new Graphics::Buffer(*device, sizeof(TestModelData), Graphics::BufferUsage::Shader);
+    modelBuffer->Map(sizeof(TestModelData), 0, &testModelData);
+
     auto* vertexShader = new Graphics::Shader(*device, "Shaders/VS_Default.spv");
     auto* pixelShader = new Graphics::Shader(*device, "Shaders/PS_Default.spv");
 
-    auto* pipelineLayout = new Graphics::PipelineLayout(*device);
+    std::vector<Graphics::DescriptorSetLayoutBinding> bindings;
+    bindings.push_back({.binding = 0, .type = vk::DescriptorType::eUniformBuffer,
+                        .stageFlags = vk::ShaderStageFlagBits::eFragment, .count = 1});
+
+    std::vector<Graphics::DescriptorAllocatorPoolDesc> pools;
+    pools.push_back({.type = vk::DescriptorType::eUniformBuffer, .descriptorCount = 2});
+
+    auto* descriptorAllocator = new Graphics::DescriptorAllocator(*device, {
+        .maxDescriptorSets = 2,
+        .pools = pools
+    });
+
+    auto* descriptorLayout = descriptorAllocator->CreateDescriptorSetLayout(bindings);
+    auto* descriptorSet = descriptorAllocator->CreateDescriptorSet(descriptorLayout);
+    descriptorSet->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, modelBuffer);
+
+    auto* pipelineLayout = new Graphics::PipelineLayout(*device, descriptorLayout);
 
     Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Vertex)};
     vertexBinding.attributes.push_back(
@@ -83,6 +111,7 @@ int main() {
         renderingInfo.setColorAttachments(colorAttachment).setLayerCount(1).setRenderArea(rect);
 
         const auto frameIndex = surface->GetFrameIndex();
+        auto set = descriptorSet->GetVulkanDescriptorSet();
 
         vk::Viewport viewport = {};
         viewport.setX(0)
@@ -109,6 +138,7 @@ int main() {
         cmd->GetVulkanCommandBuffer().setViewportWithCount(viewports.size(), viewports.data());
         cmd->GetVulkanCommandBuffer().setScissorWithCount(rects.size(), rects.data());
 
+        cmd->GetVulkanCommandBuffer().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout->GetVulkanPipelineLayout(), 0, 1, &set, 0, nullptr);
         cmd->BindVertexBuffer(vertexBuffer);
         cmd->BindIndexBuffer(indexBuffer);
         cmd->BindGraphicsPipeline(graphicsPipeline);
@@ -130,6 +160,8 @@ int main() {
 
     delete pipelineLayout;
     delete graphicsPipeline;
+    delete modelBuffer;
+    delete descriptorAllocator;
     delete vertexBuffer;
     delete indexBuffer;
 

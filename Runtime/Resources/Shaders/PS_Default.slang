@@ -1,6 +1,10 @@
 import VertexTypes;
+import ShaderTypes;
+
+[[vk::binding(0, 0)]]
+ConstantBuffer<TestModelData> testModelData;
 
 [shader("fragment")]
 float4 PSMain(VSOut input) {
-    return float4(0, 0, 0, 1);
+    return testModelData.color;
 }
