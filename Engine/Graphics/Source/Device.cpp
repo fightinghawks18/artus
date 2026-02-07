@@ -2,6 +2,10 @@
 // Created by fightinghawks18 on 1/22/2026.
 //
 
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
+
 #include "Artus/Graphics/Device.h"
 
 #include "Artus/Core/Logger.h"
@@ -47,6 +51,9 @@ namespace Artus::Graphics {
         flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
         extensions.push_back("VK_EXT_metal_surface");
+#endif
+#ifdef _WIN32
+        extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
 
 #ifndef NDEBUG
@@ -138,14 +145,14 @@ namespace Artus::Graphics {
             queueCreateInfos.push_back(deviceQueue.queueInfo);
         }
 
-        std::vector<const char*> deviceExtensions = {
+        std::vector deviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME,
             VK_EXT_EXTENDED_DYNAMIC_STATE_2_EXTENSION_NAME,
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
         };
 #ifdef __APPLE__
         deviceExtensions.push_back("VK_KHR_portability_subset");
-        deviceExtensions.push_back("VK_KHR_swapchain");
 #endif
 
         vk::PhysicalDeviceVulkan13Features v13Feats = {};

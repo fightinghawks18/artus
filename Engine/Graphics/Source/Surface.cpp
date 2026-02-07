@@ -6,6 +6,9 @@
 #define VK_USE_PLATFORM_METAL_EXT
 #include "Artus/Graphics/Utils/Metal/Layer.h"
 #endif
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 
 #include "Artus/Graphics/Surface.h"
 
@@ -36,13 +39,13 @@ namespace Artus::Graphics {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
             AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return UINT32_MAX;
+            return 0;
         }
 
         auto resetResult = mDevice.GetVulkanDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
         if (resetResult != vk::Result::eSuccess) {
             AR_ERR("Failed to reset fence before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return UINT32_MAX;
+            return 0;
         }
 
         uint32_t imageIndex = UINT32_MAX;
@@ -56,7 +59,7 @@ namespace Artus::Graphics {
 
         if (getImageResult != vk::Result::eSuccess) {
             AR_ERR("Failed to acquire new image from swapchain! (Occurred on frame {})", mFrameIdx);
-            return UINT32_MAX;
+            return 0;
         }
 
         *outSemaphore = mImageAvailableSems[mFrameIdx].get();
@@ -64,15 +67,6 @@ namespace Artus::Graphics {
     }
 
     bool Surface::PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore) {
-        auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
-
-        if (waitResult != vk::Result::eSuccess) {
-            AR_ERR("Failed to wait for fence! (Occurred on frame {})", mFrameIdx);
-            return false;
-        }
-
-        mDevice.GetVulkanDevice().resetFences(mInFlightFens[mFrameIdx].get());
-
         std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eAllCommands};
 
         vk::SubmitInfo submitInfo = {};
@@ -107,6 +101,11 @@ namespace Artus::Graphics {
         vk::MetalSurfaceCreateInfoEXT surfaceInfo = {};
         surfaceInfo.setPLayer(Metal::CreateMetalLayer(window));
         mSurface = mDevice.GetVulkanInstance().createMetalSurfaceEXTUnique(surfaceInfo);
+#endif
+#ifdef _WIN32
+        vk::Win32SurfaceCreateInfoKHR surfaceInfo = {};
+        surfaceInfo.setHwnd(static_cast<HWND>(window->GetHandle().handle)).setHinstance(GetModuleHandle(nullptr));
+        mSurface = mDevice.GetVulkanInstance().createWin32SurfaceKHRUnique(surfaceInfo);
 #endif
     }
 
