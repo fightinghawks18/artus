@@ -13,6 +13,10 @@ add_library(ArtusGraphics
         Source/Resources/CommandEncoder.cpp
         Source/Resources/GraphicsPipeline.cpp
         Source/Resources/PipelineLayout.cpp
+        Source/Resources/DescriptorAllocator.cpp
+        Source/Resources/ImageView.cpp
+        Source/Resources/DescriptorSetLayout.cpp
+        Source/Resources/DescriptorSet.cpp
 )
 
 target_include_directories(ArtusGraphics
