@@ -5,9 +5,11 @@
 #include "Artus/Graphics/Resources/PipelineLayout.h"
 
 namespace Artus::Graphics {
-    PipelineLayout::PipelineLayout(Device& device) : mDevice(device) {
+    PipelineLayout::PipelineLayout(Device& device, DescriptorSetLayout* setLayout) : mDevice(device) {
+        auto layout = setLayout->GetVulkanDescriptorSetLayout();
+
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo = {};
-        pipelineLayoutInfo.setSetLayouts(nullptr).setPushConstantRanges(nullptr);
+        pipelineLayoutInfo.setSetLayouts(layout).setPushConstantRanges(nullptr);
         mPipelineLayout = device.GetVulkanDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
     }
 

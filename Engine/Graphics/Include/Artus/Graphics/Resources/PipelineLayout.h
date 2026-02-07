@@ -5,13 +5,14 @@
 #ifndef ARTUS_PIPELINE_LAYOUT_H
 #define ARTUS_PIPELINE_LAYOUT_H
 
+#include "DescriptorSetLayout.h"
 #include "../Device.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
     class PipelineLayout {
     public:
-        explicit PipelineLayout(Device& device);
+        explicit PipelineLayout(Device& device, DescriptorSetLayout* setLayout);
         ~PipelineLayout();
 
         [[nodiscard]] vk::PipelineLayout GetVulkanPipelineLayout() { return mPipelineLayout.get(); }
