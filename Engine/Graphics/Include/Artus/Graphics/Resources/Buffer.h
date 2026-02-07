@@ -28,10 +28,9 @@ namespace Artus::Graphics {
         /// @brief Maps data provided to the buffer's data
         /// @warning If you try to provide data that can't fully fit into the buffer it'll cause buffer overflow
         /// @param dataSize The size of the data being mapped
-        /// @param dataOffset The offset of the data to map
         /// @param bufferOffset The offset in the buffer's data to map the data provided to
         /// @param data The data to map
-        void Map(size_t dataSize, size_t dataOffset, size_t bufferOffset, void* data) const;
+        void Map(size_t dataSize, size_t bufferOffset, void* data) const;
 
         /// @brief Retrieves the underlying vulkan handle to this buffer
         /// @return vk::Buffer
@@ -45,6 +44,7 @@ namespace Artus::Graphics {
 
         vk::Buffer mBuffer;
         VmaAllocation mAllocation;
+        void* mMappedData = nullptr;
     };
 } // namespace Artus::Graphics
 

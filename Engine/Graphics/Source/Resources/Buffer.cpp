@@ -26,12 +26,14 @@ namespace Artus::Graphics {
         bufferInfo.setSize(size).setUsage(usageFlags).setSharingMode(vk::SharingMode::eExclusive);
 
         VmaAllocationCreateInfo allocInfo = {0};
-        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT ;
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
         VkBuffer buffer;
-        vmaCreateBuffer(device.GetVulkanAllocator(), bufferInfo, &allocInfo, &buffer, &mAllocation, nullptr);
+        VmaAllocationInfo allocInfoOut;
+        vmaCreateBuffer(device.GetVulkanAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo), &allocInfo, &buffer, &mAllocation, &allocInfoOut);
         mBuffer = buffer;
+        mMappedData = allocInfoOut.pMappedData;
     }
 
     Buffer::~Buffer() {
@@ -42,10 +44,7 @@ namespace Artus::Graphics {
         mAllocation = nullptr;
     }
 
-    void Buffer::Map(size_t dataSize, size_t dataOffset, size_t bufferOffset, void* data) const {
-        void* bufferData;
-        vmaMapMemory(mDevice.GetVulkanAllocator(), mAllocation, &bufferData);
-        memcpy(static_cast<char*>(bufferData) + bufferOffset, static_cast<char*>(data) + dataOffset, dataSize);
-        vmaUnmapMemory(mDevice.GetVulkanAllocator(), mAllocation);
+    void Buffer::Map(size_t dataSize, size_t bufferOffset, void* data) const {
+        memcpy(static_cast<char*>(mMappedData) + bufferOffset, data, dataSize);
     }
 } // namespace Artus::Graphics
