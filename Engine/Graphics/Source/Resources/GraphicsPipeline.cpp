@@ -51,7 +51,7 @@ namespace Artus::Graphics {
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
-        inputAssemblyInfo.setTopology(vk::PrimitiveTopology::eTriangleStrip).setPrimitiveRestartEnable(false);
+        inputAssemblyInfo.setTopology(vk::PrimitiveTopology::eTriangleList).setPrimitiveRestartEnable(false);
 
         vk::PipelineTessellationStateCreateInfo tessellationInfo = {};
         tessellationInfo.setPatchControlPoints(4); // Use bilinear for now
