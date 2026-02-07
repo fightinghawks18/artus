@@ -82,17 +82,17 @@ namespace Artus::Core {
         mImpl->hWnd = nullptr;
     }
 
-    WindowSize Window::GetSize() const {
+    WindowSize Window::GetSize() {
         RECT rect;
         GetWindowRect(mImpl->hWnd, &rect);
         return {rect.right-rect.left, rect.bottom-rect.top};
     }
 
-    WindowSize Window::GetPhysicalSize() const {
+    WindowSize Window::GetPhysicalSize() {
         RECT rect;
         GetClientRect(mImpl->hWnd, &rect);
         return {rect.right-rect.left, rect.bottom-rect.top};
     }
 
-    WindowHandle Window::GetHandle() const { return {mImpl->hWnd}; }
+    WindowHandle Window::GetHandle() { return {mImpl->hWnd}; }
 } // namespace Artus::Core
