@@ -1,5 +1,6 @@
 import VertexTypes;
 import ShaderTypes;
+import GeometryUtils;
 
 [[vk::binding(0, 0)]]
 ConstantBuffer<CameraData> cameraData;
@@ -10,12 +11,8 @@ ModelData model;
 [shader("vertex")]
 VSOut VSMain(Vertex input) {
     let vertexPosition = float4(input.position, 1.0);
-    let worldSpace = mul(model.model, vertexPosition);
-    let viewSpace = mul(cameraData.view, worldSpace);
-    let screenPosition = mul(cameraData.projection, viewSpace);
-
     VSOut output;
-    output.position = screenPosition;
+    output.position = VertexToScreenSpace(model.model, cameraData.view, cameraData.projection, vertexPosition);
     output.uv = input.uv;
     output.color = input.color;
     return output;
