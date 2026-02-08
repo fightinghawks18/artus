@@ -17,7 +17,7 @@ namespace Artus::Graphics {
         vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
         descriptorPoolInfo.setMaxSets(desc.maxDescriptorSets)
             .setPoolSizes(poolSizes)
-            .setFlags(vk::DescriptorPoolCreateFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT));
+            .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
         mDescriptorPool = device.GetVulkanDevice().createDescriptorPoolUnique(descriptorPoolInfo);
     }
