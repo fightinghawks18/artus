@@ -1,0 +1,2 @@
+add_library(ArtusMath INTERFACE)
+target_include_directories(ArtusMath INTERFACE Include)

@@ -9,6 +9,7 @@ add_executable(Artus Runtime/Source/Main.cpp)
 target_link_libraries(Artus
         PRIVATE ArtusCore
         PRIVATE ArtusGraphics
+        PRIVATE ArtusMath
 )
 
 compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Default.slang Shaders)
