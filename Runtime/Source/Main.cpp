@@ -124,9 +124,19 @@ int main() {
 
         auto surfaceSize = surface->GetVulkanExtent();
 
+        rotation += Math::Vector3{0.01f, 0.01f, 0.01f};
+
         cameraData = {
             .view = Math::Matrix4::View(Math::Vector3{0, 0, -5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}),
             .projection = Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
+        };
+
+        modelData = {
+            .model = Math::Matrix4::Scale(scale.x, scale.y, scale.z) * (
+                         Math::Matrix4::RotateX(Math::AsRadians(rotation.x)) *
+                         Math::Matrix4::RotateY(Math::AsRadians(rotation.y)) *
+                         Math::Matrix4::RotateZ(Math::AsRadians(rotation.z))) * Math::Matrix4::Translate(
+                         position.x, position.y, position.z)
         };
 
         cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
