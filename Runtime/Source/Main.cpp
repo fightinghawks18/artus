@@ -14,16 +14,35 @@
 using namespace Artus;
 
 static std::vector<Graphics::Vertex3D> vertices = {
-    {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-    {{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-    {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+    {{ 1.0f,  0.0f,  0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    {{ 0.5f,  0.866f,  0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
+    {{-0.5f,  0.866f,  0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
+    {{-1.0f,  0.0f,  0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    {{-0.5f, -0.866f,  0.5f}, {0.5f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f}},
+    {{ 0.5f, -0.866f,  0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+
+    {{ 1.0f,  0.0f, -0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    {{ 0.5f,  0.866f, -0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
+    {{-0.5f,  0.866f, -0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
+    {{-1.0f,  0.0f, -0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    {{-0.5f, -0.866f, -0.5f}, {0.5f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f}},
+    {{ 0.5f, -0.866f, -0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 };
 
-static std::vector<uint32_t> indices = {0, 1, 2};
+static std::vector<uint32_t> indices = {
+    0, 1, 2,  0, 2, 3,  0, 3, 4,  0, 4, 5,
+    6, 8, 7,  6, 9, 8,  6, 10, 9,  6, 11, 10,
+    0, 6, 1,  1, 6, 7,
+    1, 7, 2,  2, 7, 8,
+    2, 8, 3,  3, 8, 9,
+    3, 9, 4,  4, 9, 10,
+    4, 10, 5,  5, 10, 11,
+    5, 11, 0,  0, 11, 6,
+};
 
 int main() {
     Math::Vector3 position{0, 0, 0};
-    Math::Vector3 rotation{0, 0, 0};
+    Math::Quaternion rotation{0, 0, 0};
     Math::Vector3 scale{1, 1, 1};
 
     Graphics::ModelData modelData;
@@ -97,7 +116,6 @@ int main() {
     auto* graphicsPipeline = new Graphics::GraphicsPipeline(*device, graphicsPipelineDescriptor);
 
     while (!window->IsClosing()) {
-
         Core::Window::Update();
 
         vk::Semaphore waitSemaphore;
@@ -124,19 +142,16 @@ int main() {
 
         auto surfaceSize = surface->GetVulkanExtent();
 
-        rotation += Math::Vector3{0.01f, 0.01f, 0.01f};
+        rotation *= Math::Quaternion::FromAxisAngle(Math::Vector3{1.0f, 1.0f, 1.0f}, 0.01f);
+        rotation.Normalize();
 
         cameraData = {
-            .view = Math::Matrix4::View(Math::Vector3{0, 0, -5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}),
-            .projection = Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
+            .view = Math::Matrix4::View(Math::Vector3{0, 0, 5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
+            .projection = Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f).Transpose()
         };
 
         modelData = {
-            .model = Math::Matrix4::Scale(scale.x, scale.y, scale.z) * (
-                         Math::Matrix4::RotateX(Math::AsRadians(rotation.x)) *
-                         Math::Matrix4::RotateY(Math::AsRadians(rotation.y)) *
-                         Math::Matrix4::RotateZ(Math::AsRadians(rotation.z))) * Math::Matrix4::Translate(
-                         position.x, position.y, position.z)
+            .model = (Math::Matrix4::Translate(position.x, position.y, position.z) * Math::Matrix4::QuaternionRotation(rotation) * Math::Matrix4::Scale(scale.x, scale.y, scale.z)).Transpose()
         };
 
         cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
@@ -163,7 +178,7 @@ int main() {
         cmd->StartRendering(renderingInfo);
 
         cmd->GetVulkanCommandBuffer().pushConstants(pipelineLayout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(Graphics::ModelData), &modelData);
-        cmd->GetVulkanCommandBuffer().setCullMode(vk::CullModeFlagBits::eNone);
+        cmd->GetVulkanCommandBuffer().setCullMode(vk::CullModeFlagBits::eFront);
         cmd->GetVulkanCommandBuffer().setDepthWriteEnable(false);
         cmd->GetVulkanCommandBuffer().setDepthTestEnable(false);
         cmd->GetVulkanCommandBuffer().setStencilTestEnable(false);
