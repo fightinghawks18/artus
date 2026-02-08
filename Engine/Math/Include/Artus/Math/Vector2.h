@@ -18,11 +18,11 @@ namespace Artus::Math {
         static Vector2 XUnit() { return Vector2{1, 0}; }
         static Vector2 YUnit() { return Vector2{1, 0}; }
 
-        float Dot(const Vector2& v) const {
+        [[nodiscard]] float Dot(const Vector2& v) const {
             return x * v.x + y * v.y;
         }
 
-        float Magnitude() const {
+        [[nodiscard]] float Length() const {
             return std::sqrtf(x * x + y * y);
         }
 
@@ -33,11 +33,11 @@ namespace Artus::Math {
             return *this;
         }
 
-        Vector2 Normalized() const {
-            auto magnitude = Magnitude();
-            if (magnitude <= 0.01f)
+        [[nodiscard]] Vector2 Normalized() const {
+            auto length = Length();
+            if (length <= 0.0001f)
                 return *this;
-            return Vector2{x / magnitude, y / magnitude};
+            return Vector2{x / length, y / length};
         }
     };
 

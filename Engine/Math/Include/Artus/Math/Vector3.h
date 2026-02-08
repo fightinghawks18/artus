@@ -19,18 +19,18 @@ namespace Artus::Math {
         static Vector3 Right() { return Vector3{1}; }
         static Vector3 Up() { return Vector3{0, 1}; }
 
-        Vector3 Cross(const Vector3& v) const {
+        [[nodiscard]] Vector3 Cross(const Vector3& v) const {
             const float xc = y * v.z - z * v.y;
             const float yc = z * v.x - x * v.z;
             const float zc = x * v.y - y * v.x;
             return Vector3{xc, yc, zc};
         }
 
-        float Dot(const Vector3& v) const {
+        [[nodiscard]] float Dot(const Vector3& v) const {
             return x * v.x + y * v.y + z * v.z;
         }
 
-        float Magnitude() const {
+        [[nodiscard]] float Length() const {
             return std::sqrtf(x * x + y * y + z * z);
         }
 
@@ -42,11 +42,11 @@ namespace Artus::Math {
             return *this;
         }
 
-        Vector3 Normalized() const {
-            auto magnitude = Magnitude();
-            if (magnitude <= 0.01f)
+        [[nodiscard]] Vector3 Normalized() const {
+            auto length = Length();
+            if (length <= 0.0001f)
                 return *this;
-            return Vector3{x / magnitude, y / magnitude, z / magnitude};
+            return Vector3{x / length, y / length, z / length};
         }
     };
 
