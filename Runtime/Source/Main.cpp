@@ -1,4 +1,9 @@
-#include "Artus/Graphics/Surface.h"
+#include "Artus/Graphics/Types/Geometry.h"
+
+#include <Artus/Graphics/Surface.h>
+#include <Artus/Math/Matrix4.h>
+#include <Artus/Math/Vector3.h>
+#include <Artus/Math/Utilities.h>
 
 #include <Artus/Core/Window.h>
 #include <Artus/Graphics/Device.h>
@@ -8,50 +13,42 @@
 
 using namespace Artus;
 
-struct Vertex {
-    std::array<float, 2> position;
-    std::array<float, 2> uvCoords;
-    std::array<float, 4> color;
-};
-
-struct TestModelData {
-    std::array<float, 4> color;
-};
-
-static TestModelData testModelData = {
-    {1.0f, 1.0f, 0.0f, 1.0f}
-};
-
-static std::vector<Vertex> vertices = {
-    {{0.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-    {{1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-    {{-1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+static std::vector<Graphics::Vertex3D> vertices = {
+    {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    {{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 };
 
 static std::vector<uint32_t> indices = {0, 1, 2};
 
 int main() {
+    Math::Vector3 position{0, 0, 0};
+    Math::Vector3 rotation{0, 0, 0};
+    Math::Vector3 scale{1, 1, 1};
+
+    Graphics::ModelData modelData;
+    Graphics::CameraData cameraData;
+
     auto* window = new Core::Window();
     auto* device = new Graphics::Device();
     auto* surface = new Graphics::Surface(*device, window);
     auto* cmdAllocator = new Graphics::CommandAllocator(*device);
     auto cmdEncoders = cmdAllocator->NewEncoders(3);
 
-    auto* vertexBuffer = new Graphics::Buffer(*device, sizeof(Vertex) * vertices.size(), Graphics::BufferUsage::Vertex);
+    auto* vertexBuffer = new Graphics::Buffer(*device, sizeof(Graphics::Vertex3D) * vertices.size(), Graphics::BufferUsage::Vertex);
     auto* indexBuffer = new Graphics::Buffer(*device, sizeof(uint32_t) * indices.size(), Graphics::BufferUsage::Index);
 
-    vertexBuffer->Map(vertices.size() * sizeof(Vertex), 0, vertices.data());
+    vertexBuffer->Map(vertices.size() * sizeof(Graphics::Vertex3D), 0, vertices.data());
     indexBuffer->Map(indices.size() * sizeof(uint32_t), 0, indices.data());
 
-    auto* modelBuffer = new Graphics::Buffer(*device, sizeof(TestModelData), Graphics::BufferUsage::Shader);
-    modelBuffer->Map(sizeof(TestModelData), 0, &testModelData);
+    auto* cameraBuffer = new Graphics::Buffer(*device, sizeof(Graphics::CameraData), Graphics::BufferUsage::Shader);
 
     auto* vertexShader = new Graphics::Shader(*device, "Shaders/VS_Default.spv");
     auto* pixelShader = new Graphics::Shader(*device, "Shaders/PS_Default.spv");
 
     std::vector<Graphics::DescriptorSetLayoutBinding> bindings;
     bindings.push_back({.binding = 0, .type = vk::DescriptorType::eUniformBuffer,
-                        .stageFlags = vk::ShaderStageFlagBits::eFragment, .count = 1});
+                        .stageFlags = vk::ShaderStageFlagBits::eVertex, .count = 1});
 
     std::vector<Graphics::DescriptorAllocatorPoolDesc> pools;
     pools.push_back({.type = vk::DescriptorType::eUniformBuffer, .descriptorCount = 2});
@@ -62,11 +59,14 @@ int main() {
     });
 
     auto* descriptorLayout = descriptorAllocator->CreateDescriptorSetLayout(bindings);
-    auto* descriptorSet = descriptorAllocator->CreateDescriptorSet(descriptorLayout);
-    descriptorSet->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, modelBuffer);
+
+    std::vector<Graphics::DescriptorSet*> descriptorSets = {
+        descriptorAllocator->CreateDescriptorSet(descriptorLayout),
+        descriptorAllocator->CreateDescriptorSet(descriptorLayout)
+    };
 
     std::vector<Graphics::PipelinePushConstant> pushConstants;
-    pushConstants.push_back({.size = sizeof(TestModelData), .offset = 0, .stageFlags = vk::ShaderStageFlagBits::eFragment});
+    pushConstants.push_back({.size = sizeof(Graphics::ModelData), .offset = 0, .stageFlags = vk::ShaderStageFlagBits::eVertex});
 
     std::vector descriptorLayouts = {descriptorLayout};
 
@@ -76,13 +76,13 @@ int main() {
 
     auto* pipelineLayout = new Graphics::PipelineLayout(*device, pipelineLayoutDesc);
 
-    Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Vertex)};
+    Graphics::GraphicsPipelineInputBinding vertexBinding = {.slot = 0, .stride = sizeof(Graphics::Vertex3D)};
     vertexBinding.attributes.push_back(
-        {.location = 0, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, position)});
+        {.location = 0, .format = vk::Format::eR32G32B32Sfloat, .offset = offsetof(Graphics::Vertex3D, position)});
     vertexBinding.attributes.push_back(
-        {.location = 1, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, uvCoords)});
+        {.location = 1, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Graphics::Vertex3D, uvCoords)});
     vertexBinding.attributes.push_back(
-        {.location = 2, .format = vk::Format::eR32G32B32A32Sfloat, .offset = offsetof(Vertex, color)});
+        {.location = 2, .format = vk::Format::eR32G32B32A32Sfloat, .offset = offsetof(Graphics::Vertex3D, color)});
 
     Graphics::GraphicsPipelineDescriptor graphicsPipelineDescriptor = {};
     graphicsPipelineDescriptor.bindings.push_back(vertexBinding);
@@ -97,6 +97,7 @@ int main() {
     auto* graphicsPipeline = new Graphics::GraphicsPipeline(*device, graphicsPipelineDescriptor);
 
     while (!window->IsClosing()) {
+
         Core::Window::Update();
 
         vk::Semaphore waitSemaphore;
@@ -120,7 +121,18 @@ int main() {
         renderingInfo.setColorAttachments(colorAttachment).setLayerCount(1).setRenderArea(rect);
 
         const auto frameIndex = surface->GetFrameIndex();
-        auto set = descriptorSet->GetVulkanDescriptorSet();
+
+        auto surfaceSize = surface->GetVulkanExtent();
+
+        cameraData = {
+            .view = Math::Matrix4::View(Math::Vector3{0, 0, -5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}),
+            .projection = Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
+        };
+
+        cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
+        descriptorSets[frameIndex]->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, cameraBuffer);
+
+        auto set = descriptorSets[frameIndex]->GetVulkanDescriptorSet();
 
         vk::Viewport viewport = {};
         viewport.setX(0)
@@ -140,11 +152,7 @@ int main() {
 
         cmd->StartRendering(renderingInfo);
 
-        TestModelData modelColor = {
-            {1.0f, 0.0f, 0.0f, 0.0f}
-        };
-
-        cmd->GetVulkanCommandBuffer().pushConstants(pipelineLayout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(TestModelData), &modelColor);
+        cmd->GetVulkanCommandBuffer().pushConstants(pipelineLayout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(Graphics::ModelData), &modelData);
         cmd->GetVulkanCommandBuffer().setCullMode(vk::CullModeFlagBits::eNone);
         cmd->GetVulkanCommandBuffer().setDepthWriteEnable(false);
         cmd->GetVulkanCommandBuffer().setDepthTestEnable(false);
@@ -174,7 +182,7 @@ int main() {
 
     delete pipelineLayout;
     delete graphicsPipeline;
-    delete modelBuffer;
+    delete cameraBuffer;
     delete descriptorAllocator;
     delete vertexBuffer;
     delete indexBuffer;
