@@ -158,8 +158,14 @@ namespace Artus::Graphics {
         vk::PhysicalDeviceVulkan13Features v13Feats = {};
         v13Feats.setDynamicRendering(true).setSynchronization2(true);
 
+        vk::PhysicalDeviceVulkan11Features v11Feats = {};
+        v11Feats.setShaderDrawParameters(true).setPNext(v13Feats);
+
+        vk::PhysicalDeviceFeatures2 deviceFeatures = {};
+        deviceFeatures.setPNext(v11Feats);
+
         vk::DeviceCreateInfo deviceInfo = {};
-        deviceInfo.setPNext(v13Feats).setQueueCreateInfos(queueCreateInfos).setPEnabledExtensionNames(deviceExtensions);
+        deviceInfo.setPNext(deviceFeatures).setQueueCreateInfos(queueCreateInfos).setPEnabledExtensionNames(deviceExtensions);
         mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
 
         for (auto& deviceQueue : deviceQueues) {
