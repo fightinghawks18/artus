@@ -5,7 +5,7 @@
 #include "Artus/Graphics/Resources/ImageView.h"
 
 namespace Artus::Graphics {
-    ImageView::ImageView(Device& device, Image* image, const ImageViewDesc& desc) : mDevice(device) {
+    ImageView::ImageView(Device& device, const ImageViewDesc& desc) : mDevice(device) {
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(desc.aspectMask)
             .setBaseArrayLayer(desc.baseLayer)
@@ -20,7 +20,7 @@ namespace Artus::Graphics {
             .setA(desc.alphaComponent);
 
         vk::ImageViewCreateInfo imageViewInfo = {};
-        imageViewInfo.setImage(image->GetVulkanImage())
+        imageViewInfo.setImage(desc.image->GetVulkanImage())
             .setViewType(desc.type)
             .setFormat(desc.format)
             .setSubresourceRange(subresourceRange)

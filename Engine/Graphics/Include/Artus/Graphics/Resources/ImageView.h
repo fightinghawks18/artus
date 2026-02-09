@@ -12,6 +12,7 @@
 
 namespace Artus::Graphics {
     struct ImageViewDesc {
+        Image* image;
         vk::Format format;
         vk::ImageViewType type;
         vk::ImageAspectFlags aspectMask;
@@ -28,7 +29,7 @@ namespace Artus::Graphics {
 
     class ImageView {
     public:
-        explicit ImageView(Device& device, Image* image, const ImageViewDesc& desc);
+        explicit ImageView(Device& device, const ImageViewDesc& desc);
         ~ImageView();
 
         [[nodiscard]] vk::ImageView GetVulkanImageView() const { return mImageView.get(); }

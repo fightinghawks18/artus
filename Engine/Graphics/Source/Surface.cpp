@@ -204,6 +204,7 @@ namespace Artus::Graphics {
             auto img = std::make_unique<Image>(mDevice, image);
 
             ImageViewDesc imageViewDesc = {
+                .image = img.get(),
                 .format = mSurfaceFormat.format,
                 .type = vk::ImageViewType::e2D,
                 .aspectMask = vk::ImageAspectFlagBits::eColor,
@@ -217,7 +218,7 @@ namespace Artus::Graphics {
                 .alphaComponent = vk::ComponentSwizzle::eIdentity
             };
 
-            mImageViews.push_back(std::make_unique<ImageView>(mDevice, img.get(), imageViewDesc));
+            mImageViews.push_back(std::make_unique<ImageView>(mDevice, imageViewDesc));
             mImages.push_back(std::move(img));
         }
     }
