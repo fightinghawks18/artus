@@ -23,7 +23,7 @@ namespace Artus::Graphics {
         std::vector<GraphicsPipelineInputAttribute> attributes;
     };
 
-    struct GraphicsPipelineDescriptor {
+    struct GraphicsPipelineDesc {
         Shader* vertexStage;
         Shader* pixelStage;
 
@@ -32,11 +32,12 @@ namespace Artus::Graphics {
         vk::Format depthFormat;
         vk::Format stencilFormat;
         PipelineLayout* pipelineLayout;
+        vk::CompareOp depthCompare;
     };
 
     class GraphicsPipeline {
     public:
-        explicit GraphicsPipeline(Device& device, const GraphicsPipelineDescriptor& pipelineDescriptor);
+        explicit GraphicsPipeline(Device& device, const GraphicsPipelineDesc& pipelineDescriptor);
         ~GraphicsPipeline();
 
         [[nodiscard]] vk::Pipeline GetVulkanPipeline() { return mPipeline.get(); }

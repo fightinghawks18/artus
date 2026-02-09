@@ -6,7 +6,7 @@
 #include "Artus/Core/Logger.h"
 
 namespace Artus::Graphics {
-    GraphicsPipeline::GraphicsPipeline(Device& device, const GraphicsPipelineDescriptor& pipelineDescriptor)
+    GraphicsPipeline::GraphicsPipeline(Device& device, const GraphicsPipelineDesc& pipelineDescriptor)
         : mDevice(device) {
         vk::PipelineShaderStageCreateInfo vertexStageInfo = {};
         vertexStageInfo.setStage(vk::ShaderStageFlagBits::eVertex)
@@ -100,7 +100,7 @@ namespace Artus::Graphics {
             .setDepthTestEnable(true)                // Ensures farther objects don't render over this primitive
             .setStencilTestEnable(true)              // Ensures that unmarked pixels of this primitive aren't rendered
             .setDepthWriteEnable(true)               // Writes depth values for the depth buffer
-            .setDepthCompareOp(vk::CompareOp::eLess) // Less is common (0.0 is closest, 1.0 is farthest)
+            .setDepthCompareOp(pipelineDescriptor.depthCompare) // Less is common (0.0 is closest, 1.0 is farthest)
             .setBack(backFaceStencilOpStateInfo)
             .setFront(frontFaceStencilOpStateInfo);
 
