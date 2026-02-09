@@ -100,4 +100,8 @@ namespace Artus::Graphics {
         mCommandBuffer->drawIndexed(indexCount, 1, firstIndex, 0, 0);
     }
 
+    void CommandEncoder::Draw(uint32_t vertexCount, uint32_t firstIndex) {
+        mCommandBuffer->draw(vertexCount, 1, firstIndex, 0);
+    }
+
 } // namespace Artus::Graphics
