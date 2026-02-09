@@ -7,6 +7,7 @@
 
 #include "../Device.h"
 #include "Buffer.h"
+#include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 #include <vulkan/vulkan.hpp>
 
@@ -25,6 +26,13 @@ namespace Artus::Graphics {
         void BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline);
         void BindVertexBuffer(Buffer* vertexBuffer);
         void BindIndexBuffer(Buffer* indexBuffer);
+        void SetCullMode(vk::CullModeFlags cullMode);
+        void SetDepthTesting(bool depthTesting);
+        void SetStencilTesting(bool stencilTesting);
+        void SetViewport(vk::Viewport viewport);
+        void SetScissor(vk::Rect2D scissor);
+        void BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout, uint32_t binding);
+        void UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size, uint32_t offset, void* data);
         void DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
 
         [[nodiscard]] vk::CommandBuffer GetVulkanCommandBuffer() { return mCommandBuffer.get(); }

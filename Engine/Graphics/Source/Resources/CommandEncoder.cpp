@@ -67,6 +67,35 @@ namespace Artus::Graphics {
         mCommandBuffer->bindIndexBuffer(indexHandle, 0, vk::IndexType::eUint32);
     }
 
+    void CommandEncoder::SetCullMode(vk::CullModeFlags cullMode) {
+        mCommandBuffer->setCullMode(vk::CullModeFlagBits::eFront);
+    }
+
+    void CommandEncoder::SetDepthTesting(bool depthTesting) {
+        mCommandBuffer->setDepthTestEnable(depthTesting);
+    }
+
+    void CommandEncoder::SetStencilTesting(bool stencilTesting) {
+        mCommandBuffer->setStencilTestEnable(stencilTesting);
+    }
+
+    void CommandEncoder::SetViewport(vk::Viewport viewport) {
+        mCommandBuffer->setViewportWithCount(1, &viewport);
+    }
+
+    void CommandEncoder::SetScissor(vk::Rect2D scissor) {
+        mCommandBuffer->setScissorWithCount(1, &scissor);
+    }
+
+    void CommandEncoder::BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout, uint32_t binding) {
+        auto setHandle = set->GetVulkanDescriptorSet();
+        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout->GetVulkanPipelineLayout(), 0, 1, &setHandle, 0, nullptr);
+    }
+
+    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size, uint32_t offset, void* data) {
+        mCommandBuffer->pushConstants(layout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, size, data);
+    }
+
     void CommandEncoder::DrawIndexed(uint32_t indexCount, uint32_t firstIndex) {
         mCommandBuffer->drawIndexed(indexCount, 1, firstIndex, 0, 0);
     }

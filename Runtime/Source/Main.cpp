@@ -157,8 +157,6 @@ int main() {
         cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
         descriptorSets[frameIndex]->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, cameraBuffer);
 
-        auto set = descriptorSets[frameIndex]->GetVulkanDescriptorSet();
-
         vk::Viewport viewport = {};
         viewport.setX(0)
             .setY(0)
@@ -167,9 +165,6 @@ int main() {
             .setMinDepth(0)
             .setMaxDepth(1.0f);
 
-        std::vector<vk::Rect2D> rects = {rect};
-        std::vector<vk::Viewport> viewports = {viewport};
-
         auto cmd = cmdEncoders[frameIndex];
         cmd->Start();
 
@@ -177,15 +172,13 @@ int main() {
 
         cmd->StartRendering(renderingInfo);
 
-        cmd->GetVulkanCommandBuffer().pushConstants(pipelineLayout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(Graphics::ModelData), &modelData);
-        cmd->GetVulkanCommandBuffer().setCullMode(vk::CullModeFlagBits::eFront);
-        cmd->GetVulkanCommandBuffer().setDepthWriteEnable(false);
-        cmd->GetVulkanCommandBuffer().setDepthTestEnable(false);
-        cmd->GetVulkanCommandBuffer().setStencilTestEnable(false);
-        cmd->GetVulkanCommandBuffer().setViewportWithCount(viewports.size(), viewports.data());
-        cmd->GetVulkanCommandBuffer().setScissorWithCount(rects.size(), rects.data());
-
-        cmd->GetVulkanCommandBuffer().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout->GetVulkanPipelineLayout(), 0, 1, &set, 0, nullptr);
+        cmd->UpdatePushConstant(pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(Graphics::ModelData), 0, &modelData);
+        cmd->SetCullMode(vk::CullModeFlagBits::eFront);
+        cmd->SetDepthTesting(false);
+        cmd->SetStencilTesting(false);
+        cmd->SetViewport(viewport);
+        cmd->SetScissor(rect);
+        cmd->BindDescriptorSet(descriptorSets[frameIndex], pipelineLayout, 0);
         cmd->BindVertexBuffer(vertexBuffer);
         cmd->BindIndexBuffer(indexBuffer);
         cmd->BindGraphicsPipeline(graphicsPipeline);
