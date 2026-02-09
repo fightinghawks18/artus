@@ -14,5 +14,7 @@ target_link_libraries(Artus
 
 compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Default.slang Shaders)
 compile_slang_file_to_spirv(Runtime/Resources/Shaders/VS_Default.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/VS_Fullscreen.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Skybox.slang Shaders)
 
 add_subdirectory(engine)
