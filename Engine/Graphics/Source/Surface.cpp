@@ -203,27 +203,21 @@ namespace Artus::Graphics {
         for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
             auto img = std::make_unique<Image>(mDevice, image);
 
-            vk::ImageSubresourceRange subresourceRange = {};
-            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-                .setBaseArrayLayer(0)
-                .setLayerCount(1)
-                .setBaseMipLevel(0)
-                .setLevelCount(1);
+            ImageViewDesc imageViewDesc = {
+                .format = mSurfaceFormat.format,
+                .type = vk::ImageViewType::e2D,
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .baseLayer = 0,
+                .layerCount = 1,
+                .baseLevel = 0,
+                .levelCount = 1,
+                .redComponent = vk::ComponentSwizzle::eIdentity,
+                .greenComponent = vk::ComponentSwizzle::eIdentity,
+                .blueComponent = vk::ComponentSwizzle::eIdentity,
+                .alphaComponent = vk::ComponentSwizzle::eIdentity
+            };
 
-            vk::ComponentMapping componentMapping = {};
-            componentMapping.setR(vk::ComponentSwizzle::eIdentity)
-                .setG(vk::ComponentSwizzle::eIdentity)
-                .setB(vk::ComponentSwizzle::eIdentity)
-                .setA(vk::ComponentSwizzle::eIdentity);
-
-            vk::ImageViewCreateInfo imageViewInfo = {};
-            imageViewInfo.setImage(image)
-                .setViewType(vk::ImageViewType::e2D)
-                .setFormat(mSurfaceFormat.format)
-                .setSubresourceRange(subresourceRange)
-                .setComponents(componentMapping);
-
-            mImageViews.push_back(mDevice.GetVulkanDevice().createImageViewUnique(imageViewInfo));
+            mImageViews.push_back(std::make_unique<ImageView>(mDevice, img.get(), imageViewDesc));
             mImages.push_back(std::move(img));
         }
     }

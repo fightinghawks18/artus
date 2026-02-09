@@ -79,7 +79,7 @@ int main() {
 
     auto* descriptorLayout = descriptorAllocator->CreateDescriptorSetLayout(bindings);
 
-    std::vector<Graphics::DescriptorSet*> descriptorSets = {
+    std::vector descriptorSets = {
         descriptorAllocator->CreateDescriptorSet(descriptorLayout),
         descriptorAllocator->CreateDescriptorSet(descriptorLayout)
     };
@@ -131,7 +131,7 @@ int main() {
         vk::RenderingAttachmentInfo colorAttachment = {};
         colorAttachment.setClearValue(clearColor)
             .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-            .setImageView(surface->GetVulkanImageView(imageIndex))
+            .setImageView(surface->GetVulkanImageView(imageIndex)->GetVulkanImageView())
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eStore);
 

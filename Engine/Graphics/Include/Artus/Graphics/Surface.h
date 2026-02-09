@@ -9,6 +9,7 @@
 
 #include "Artus/Core/Window.h"
 #include "Resources/Image.h"
+#include "Resources/ImageView.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -24,7 +25,7 @@ namespace Artus::Graphics {
         [[nodiscard]] vk::SurfaceFormatKHR GetVulkanSurfaceFormat() const { return mSurfaceFormat; }
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
         [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
-        [[nodiscard]] vk::ImageView GetVulkanImageView(const uint32_t index) { return mImageViews[index].get(); }
+        [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) { return mImageViews[index].get(); }
         [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
 
     private:
@@ -41,7 +42,7 @@ namespace Artus::Graphics {
         std::vector<vk::UniqueFence> mInFlightFens;
 
         std::vector<std::unique_ptr<Image>> mImages;
-        std::vector<vk::UniqueImageView> mImageViews;
+        std::vector<std::unique_ptr<ImageView>> mImageViews;
 
         uint32_t mFrameIdx = 0;
 
