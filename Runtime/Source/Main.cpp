@@ -65,6 +65,9 @@ int main() {
     auto* vertexShader = new Graphics::Shader(*device, "Shaders/VS_Default.spv");
     auto* pixelShader = new Graphics::Shader(*device, "Shaders/PS_Default.spv");
 
+    auto* fullscreenShader = new Graphics::Shader(*device, "Shaders/VS_Fullscreen.spv");
+    auto* skyboxShader = new Graphics::Shader(*device, "Shaders/PS_Skybox.spv");
+
     std::vector<Graphics::DescriptorSetLayoutBinding> bindings;
     bindings.push_back({.binding = 0, .type = vk::DescriptorType::eUniformBuffer,
                         .stageFlags = vk::ShaderStageFlagBits::eVertex, .count = 1});
@@ -103,7 +106,7 @@ int main() {
     vertexBinding.attributes.push_back(
         {.location = 2, .format = vk::Format::eR32G32B32A32Sfloat, .offset = offsetof(Graphics::Vertex3D, color)});
 
-    Graphics::GraphicsPipelineDescriptor graphicsPipelineDescriptor = {};
+    Graphics::GraphicsPipelineDesc graphicsPipelineDescriptor = {};
     graphicsPipelineDescriptor.bindings.push_back(vertexBinding);
 
     graphicsPipelineDescriptor.vertexStage = vertexShader;
@@ -114,6 +117,20 @@ int main() {
     graphicsPipelineDescriptor.stencilFormat = vk::Format::eD32SfloatS8Uint;
 
     auto* graphicsPipeline = new Graphics::GraphicsPipeline(*device, graphicsPipelineDescriptor);
+
+    Graphics::PipelineLayoutDesc skyboxLayoutDesc;
+    auto* skyboxLayout = new Graphics::PipelineLayout(*device, pipelineLayoutDesc);
+
+    Graphics::GraphicsPipelineDesc fullscreenPipelineDescriptor = {};
+    fullscreenPipelineDescriptor.vertexStage = fullscreenShader;
+    fullscreenPipelineDescriptor.pixelStage = skyboxShader;
+    fullscreenPipelineDescriptor.pipelineLayout = skyboxLayout;
+    fullscreenPipelineDescriptor.colorFormats = {surface->GetVulkanSurfaceFormat().format};
+    fullscreenPipelineDescriptor.depthFormat = vk::Format::eD32SfloatS8Uint;
+    fullscreenPipelineDescriptor.stencilFormat = vk::Format::eD32SfloatS8Uint;
+    fullscreenPipelineDescriptor.depthCompare = vk::CompareOp::eGreater;
+
+    auto* skyboxPipeline = new Graphics::GraphicsPipeline(*device, fullscreenPipelineDescriptor);
 
     while (!window->IsClosing()) {
         Core::Window::Update();
@@ -184,6 +201,9 @@ int main() {
         cmd->BindGraphicsPipeline(graphicsPipeline);
         cmd->DrawIndexed(indices.size(), 0);
 
+        cmd->BindGraphicsPipeline(skyboxPipeline);
+        cmd->Draw(3, 0);
+
         cmd->EndRendering();
 
         image->MakePresentable(cmd->GetVulkanCommandBuffer());
@@ -200,6 +220,10 @@ int main() {
 
     delete pipelineLayout;
     delete graphicsPipeline;
+    delete skyboxPipeline;
+    delete skyboxLayout;
+    delete fullscreenShader;
+    delete skyboxShader;
     delete cameraBuffer;
     delete descriptorAllocator;
     delete vertexBuffer;
