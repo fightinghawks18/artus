@@ -5,9 +5,26 @@
 #include "Artus/Graphics/Resources/Image.h"
 
 namespace Artus::Graphics {
-    Image::Image(Device& device, const vk::ImageCreateInfo& imageInfo) : mDevice(device) {
-        mImage = device.GetVulkanDevice().createImage(imageInfo);
-        mAllocated = true;
+    Image::Image(Device& device, const ImageDesc& desc) : mDevice(device) {
+        vk::ImageCreateInfo imageInfo = {};
+        imageInfo.setFormat(desc.format)
+            .setImageType(desc.type)
+            .setMipLevels(desc.levelCount)
+            .setArrayLayers(desc.layerCount)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setExtent(desc.extent)
+            .setUsage(desc.usage)
+            .setTiling(vk::ImageTiling::eOptimal)
+            .setSharingMode(vk::SharingMode::eExclusive)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setQueueFamilyIndices(nullptr);
+
+        VmaAllocationCreateInfo allocationInfo = {0};
+
+        VkImage image;
+        vmaCreateImage(device.GetVulkanAllocator(), imageInfo, &allocationInfo, &image, &mAllocation, nullptr);
+
+        mImage = image;
         mCurrentState = imageInfo.initialLayout;
         mAccessMasks = vk::AccessFlagBits2::eNone;
         mStageMasks = vk::PipelineStageFlagBits2::eNone;
@@ -15,7 +32,7 @@ namespace Artus::Graphics {
 
     Image::Image(Device& device, const vk::Image image) : mDevice(device) {
         mImage = image;
-        mAllocated = false;
+        mAllocation = nullptr;
         mCurrentState = vk::ImageLayout::eUndefined;
         mAccessMasks = vk::AccessFlagBits2::eNone;
         mStageMasks = vk::PipelineStageFlagBits2::eNone;
@@ -24,9 +41,9 @@ namespace Artus::Graphics {
     Image::~Image() {
         mDevice.GetVulkanDevice().waitIdle();
 
-        if (!mAllocated)
+        if (!mAllocation)
             return;
-        mDevice.GetVulkanDevice().destroyImage(mImage);
+        vmaDestroyImage(mDevice.GetVulkanAllocator(), mImage, mAllocation);
     }
 
     void Image::MakeRenderable(vk::CommandBuffer cmd) {
@@ -59,7 +76,7 @@ namespace Artus::Graphics {
 
     void Image::MakeDepthStencil(vk::CommandBuffer cmd) {
         vk::ImageSubresourceRange subresourceRange = {};
-        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
             .setBaseArrayLayer(0)
             .setLayerCount(1)
             .setBaseMipLevel(0)

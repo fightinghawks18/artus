@@ -2,42 +2,36 @@
 
 #include <Artus/Graphics/Surface.h>
 #include <Artus/Math/Matrix4.h>
-#include <Artus/Math/Vector3.h>
 #include <Artus/Math/Utilities.h>
+#include <Artus/Math/Vector3.h>
 
 #include <Artus/Core/Window.h>
 #include <Artus/Graphics/Device.h>
 #include <Artus/Graphics/Resources/CommandAllocator.h>
-#include <Artus/Graphics/Resources/GraphicsPipeline.h>
 #include <Artus/Graphics/Resources/DescriptorAllocator.h>
+#include <Artus/Graphics/Resources/GraphicsPipeline.h>
 
 using namespace Artus;
 
 static std::vector<Graphics::Vertex3D> vertices = {
-    {{ 1.0f,  0.0f,  0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-    {{ 0.5f,  0.866f,  0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
-    {{-0.5f,  0.866f,  0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
-    {{-1.0f,  0.0f,  0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-    {{-0.5f, -0.866f,  0.5f}, {0.5f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f}},
-    {{ 0.5f, -0.866f,  0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+    {{1.0f, 0.0f, 0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    {{0.5f, 0.866f, 0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
+    {{-0.5f, 0.866f, 0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
+    {{-1.0f, 0.0f, 0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    {{-0.5f, -0.866f, 0.5f}, {0.5f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f}},
+    {{0.5f, -0.866f, 0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 
-    {{ 1.0f,  0.0f, -0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-    {{ 0.5f,  0.866f, -0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
-    {{-0.5f,  0.866f, -0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
-    {{-1.0f,  0.0f, -0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    {{1.0f, 0.0f, -0.5f}, {0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    {{0.5f, 0.866f, -0.5f}, {0.75f, 0.25f}, {1.0f, 0.5f, 0.0f, 1.0f}},
+    {{-0.5f, 0.866f, -0.5f}, {1.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f}},
+    {{-1.0f, 0.0f, -0.5f}, {0.75f, 0.75f}, {0.0f, 1.0f, 0.0f, 1.0f}},
     {{-0.5f, -0.866f, -0.5f}, {0.5f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f}},
-    {{ 0.5f, -0.866f, -0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+    {{0.5f, -0.866f, -0.5f}, {0.25f, 0.75f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 };
 
 static std::vector<uint32_t> indices = {
-    0, 1, 2,  0, 2, 3,  0, 3, 4,  0, 4, 5,
-    6, 8, 7,  6, 9, 8,  6, 10, 9,  6, 11, 10,
-    0, 6, 1,  1, 6, 7,
-    1, 7, 2,  2, 7, 8,
-    2, 8, 3,  3, 8, 9,
-    3, 9, 4,  4, 9, 10,
-    4, 10, 5,  5, 10, 11,
-    5, 11, 0,  0, 11, 6,
+    0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 6, 8, 7, 6, 9, 8,  6, 10, 9, 6, 11, 10, 0, 6,  1, 1, 6,  7,
+    1, 7, 2, 2, 7, 8, 2, 8, 3, 3, 8, 9, 3, 9, 4, 4, 9, 10, 4, 10, 5, 5, 10, 11, 5, 11, 0, 0, 11, 6,
 };
 
 int main() {
@@ -54,7 +48,8 @@ int main() {
     auto* cmdAllocator = new Graphics::CommandAllocator(*device);
     auto cmdEncoders = cmdAllocator->NewEncoders(3);
 
-    auto* vertexBuffer = new Graphics::Buffer(*device, sizeof(Graphics::Vertex3D) * vertices.size(), Graphics::BufferUsage::Vertex);
+    auto* vertexBuffer =
+        new Graphics::Buffer(*device, sizeof(Graphics::Vertex3D) * vertices.size(), Graphics::BufferUsage::Vertex);
     auto* indexBuffer = new Graphics::Buffer(*device, sizeof(uint32_t) * indices.size(), Graphics::BufferUsage::Index);
 
     vertexBuffer->Map(vertices.size() * sizeof(Graphics::Vertex3D), 0, vertices.data());
@@ -62,33 +57,60 @@ int main() {
 
     auto* cameraBuffer = new Graphics::Buffer(*device, sizeof(Graphics::CameraData), Graphics::BufferUsage::Shader);
 
-    auto* vertexShader = new Graphics::Shader(*device, "Shaders/VS_Default.spv");
-    auto* pixelShader = new Graphics::Shader(*device, "Shaders/PS_Default.spv");
+    std::vector<Graphics::Image*> depthImages;
+    std::vector<Graphics::ImageView*> depthImageViews;
+    for (uint32_t i = 0; i < 2; i++) {
+        vk::Extent3D extent(surface->GetVulkanExtent(), 1);
 
-    auto* fullscreenShader = new Graphics::Shader(*device, "Shaders/VS_Fullscreen.spv");
-    auto* skyboxShader = new Graphics::Shader(*device, "Shaders/PS_Skybox.spv");
+        Graphics::ImageDesc depthImageDesc = {.format = vk::Format::eD32SfloatS8Uint,
+                                              .extent = extent,
+                                              .layerCount = 1,
+                                              .levelCount = 1,
+                                              .type = vk::ImageType::e2D,
+                                              .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment};
+
+        auto* depthImage = new Graphics::Image(*device, depthImageDesc);
+        depthImages.push_back(depthImage);
+
+        Graphics::ImageViewDesc depthImageViewDesc = {.image = depthImage,
+                                                      .format = vk::Format::eD32SfloatS8Uint,
+                                                      .type = vk::ImageViewType::e2D,
+                                                      .aspectMask = vk::ImageAspectFlagBits::eDepth |
+                                                                    vk::ImageAspectFlagBits::eStencil,
+                                                      .baseLayer = 0,
+                                                      .layerCount = 1,
+                                                      .baseLevel = 0,
+                                                      .levelCount = 1};
+
+        auto* depthImageView = new Graphics::ImageView(*device, depthImageViewDesc);
+        depthImageViews.push_back(depthImageView);
+    }
+
+    auto* vertexShader = new Graphics::Shader(*device, "Shaders/DefaultMesh_vs.spv");
+    auto* pixelShader = new Graphics::Shader(*device, "Shaders/DefaultMesh_ps.spv");
+
+    auto* fullscreenShader = new Graphics::Shader(*device, "Shaders/FullscreenQuad.spv");
+    auto* skyboxShader = new Graphics::Shader(*device, "Shaders/DefaultSkybox.spv");
 
     std::vector<Graphics::DescriptorSetLayoutBinding> bindings;
-    bindings.push_back({.binding = 0, .type = vk::DescriptorType::eUniformBuffer,
-                        .stageFlags = vk::ShaderStageFlagBits::eVertex, .count = 1});
+    bindings.push_back({.binding = 0,
+                        .type = vk::DescriptorType::eUniformBuffer,
+                        .stageFlags = vk::ShaderStageFlagBits::eVertex,
+                        .count = 1});
 
     std::vector<Graphics::DescriptorAllocatorPoolDesc> pools;
     pools.push_back({.type = vk::DescriptorType::eUniformBuffer, .descriptorCount = 2});
 
-    auto* descriptorAllocator = new Graphics::DescriptorAllocator(*device, {
-        .maxDescriptorSets = 2,
-        .pools = pools
-    });
+    auto* descriptorAllocator = new Graphics::DescriptorAllocator(*device, {.maxDescriptorSets = 2, .pools = pools});
 
     auto* descriptorLayout = descriptorAllocator->CreateDescriptorSetLayout(bindings);
 
-    std::vector descriptorSets = {
-        descriptorAllocator->CreateDescriptorSet(descriptorLayout),
-        descriptorAllocator->CreateDescriptorSet(descriptorLayout)
-    };
+    std::vector descriptorSets = {descriptorAllocator->CreateDescriptorSet(descriptorLayout),
+                                  descriptorAllocator->CreateDescriptorSet(descriptorLayout)};
 
     std::vector<Graphics::PipelinePushConstant> pushConstants;
-    pushConstants.push_back({.size = sizeof(Graphics::ModelData), .offset = 0, .stageFlags = vk::ShaderStageFlagBits::eVertex});
+    pushConstants.push_back(
+        {.size = sizeof(Graphics::ModelData), .offset = 0, .stageFlags = vk::ShaderStageFlagBits::eVertex});
 
     std::vector descriptorLayouts = {descriptorLayout};
 
@@ -128,7 +150,7 @@ int main() {
     fullscreenPipelineDescriptor.colorFormats = {surface->GetVulkanSurfaceFormat().format};
     fullscreenPipelineDescriptor.depthFormat = vk::Format::eD32SfloatS8Uint;
     fullscreenPipelineDescriptor.stencilFormat = vk::Format::eD32SfloatS8Uint;
-    fullscreenPipelineDescriptor.depthCompare = vk::CompareOp::eGreater;
+    fullscreenPipelineDescriptor.depthCompare = vk::CompareOp::eEqual;
 
     auto* skyboxPipeline = new Graphics::GraphicsPipeline(*device, fullscreenPipelineDescriptor);
 
@@ -138,12 +160,13 @@ int main() {
         vk::Semaphore waitSemaphore;
         auto imageIndex = surface->AcquireNextImage(&waitSemaphore);
         auto image = surface->GetVulkanImage(imageIndex);
+        auto depthImage = depthImages[imageIndex];
 
         vk::Rect2D rect = {};
         rect.setExtent(surface->GetVulkanExtent()).setOffset({0, 0});
 
         vk::ClearColorValue clearColor = {};
-        clearColor.setFloat32({1.0f, 0.2f, 0.3f, 1.0f});
+        clearColor.setFloat32({0.0f, 0.0f, 0.0f, 1.0f});
 
         vk::RenderingAttachmentInfo colorAttachment = {};
         colorAttachment.setClearValue(clearColor)
@@ -152,8 +175,22 @@ int main() {
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eStore);
 
+        vk::ClearDepthStencilValue clearDepthStencil = {};
+        clearDepthStencil.setDepth(1.0f).setStencil(0.0f);
+
+        vk::RenderingAttachmentInfo depthStencilAttachment = {};
+        depthStencilAttachment.setClearValue(clearDepthStencil)
+            .setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+            .setImageView(depthImageViews[imageIndex]->GetVulkanImageView())
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eStore);
+
         vk::RenderingInfo renderingInfo = {};
-        renderingInfo.setColorAttachments(colorAttachment).setLayerCount(1).setRenderArea(rect);
+        renderingInfo.setColorAttachments(colorAttachment)
+            .setPDepthAttachment(&depthStencilAttachment)
+            .setPStencilAttachment(&depthStencilAttachment)
+            .setLayerCount(1)
+            .setRenderArea(rect);
 
         const auto frameIndex = surface->GetFrameIndex();
 
@@ -163,13 +200,16 @@ int main() {
         rotation.Normalize();
 
         cameraData = {
-            .view = Math::Matrix4::View(Math::Vector3{0, 0, 5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
-            .projection = Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f).Transpose()
-        };
+            .view =
+                Math::Matrix4::View(Math::Vector3{0, 0, 5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
+            .projection =
+                Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
+                    .Transpose()};
 
-        modelData = {
-            .model = (Math::Matrix4::Translate(position.x, position.y, position.z) * Math::Matrix4::QuaternionRotation(rotation) * Math::Matrix4::Scale(scale.x, scale.y, scale.z)).Transpose()
-        };
+        modelData = {.model =
+                         (Math::Matrix4::Translate(position.x, position.y, position.z) *
+                          Math::Matrix4::QuaternionRotation(rotation) * Math::Matrix4::Scale(scale.x, scale.y, scale.z))
+                             .Transpose()};
 
         cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
         descriptorSets[frameIndex]->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, cameraBuffer);
@@ -186,10 +226,12 @@ int main() {
         cmd->Start();
 
         image->MakeRenderable(cmd->GetVulkanCommandBuffer());
+        depthImage->MakeDepthStencil(cmd->GetVulkanCommandBuffer());
 
         cmd->StartRendering(renderingInfo);
 
-        cmd->UpdatePushConstant(pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(Graphics::ModelData), 0, &modelData);
+        cmd->UpdatePushConstant(pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(Graphics::ModelData), 0,
+                                &modelData);
         cmd->SetCullMode(vk::CullModeFlagBits::eFront);
         cmd->SetDepthTesting(false);
         cmd->SetStencilTesting(false);
@@ -201,6 +243,7 @@ int main() {
         cmd->BindGraphicsPipeline(graphicsPipeline);
         cmd->DrawIndexed(indices.size(), 0);
 
+        cmd->SetCullMode(vk::CullModeFlagBits::eNone);
         cmd->BindGraphicsPipeline(skyboxPipeline);
         cmd->Draw(3, 0);
 
@@ -214,6 +257,14 @@ int main() {
     }
 
     device->GetVulkanDevice().waitIdle();
+
+    for (auto& view : depthImageViews) {
+        delete view;
+    }
+
+    for (auto& image : depthImages) {
+        delete image;
+    }
 
     delete vertexShader;
     delete pixelShader;

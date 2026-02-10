@@ -12,9 +12,10 @@ target_link_libraries(Artus
         PRIVATE ArtusMath
 )
 
-compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Default.slang Shaders)
-compile_slang_file_to_spirv(Runtime/Resources/Shaders/VS_Default.slang Shaders)
-compile_slang_file_to_spirv(Runtime/Resources/Shaders/VS_Fullscreen.slang Shaders)
-compile_slang_file_to_spirv(Runtime/Resources/Shaders/PS_Skybox.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/DefaultMesh_vs.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/DefaultMesh_ps.slang Shaders)
+
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/DefaultSkybox.slang Shaders)
+compile_slang_file_to_spirv(Runtime/Resources/Shaders/FullscreenQuad.slang Shaders)
 
 add_subdirectory(engine)

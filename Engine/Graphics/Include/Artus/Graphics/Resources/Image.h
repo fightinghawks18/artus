@@ -10,10 +10,19 @@
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics {
+    struct ImageDesc {
+        vk::Format format;
+        vk::ImageType type;
+        vk::Extent3D extent;
+        vk::ImageUsageFlags usage;
+        uint32_t layerCount;
+        uint32_t levelCount;
+    };
+
     /// @brief Holds image data used for textures, rendering, or storage
     class Image {
     public:
-        explicit Image(Device& device, const vk::ImageCreateInfo& imageInfo);
+        explicit Image(Device& device, const ImageDesc& desc);
         explicit Image(Device& device, vk::Image image);
         ~Image();
 
@@ -37,7 +46,7 @@ namespace Artus::Graphics {
     private:
         Device& mDevice;
 
-        bool mAllocated;
+        VmaAllocation mAllocation;
         vk::Image mImage;
         vk::ImageLayout mCurrentState;
         vk::AccessFlags2 mAccessMasks;
