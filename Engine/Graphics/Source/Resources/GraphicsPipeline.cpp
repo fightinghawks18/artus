@@ -97,9 +97,9 @@ namespace Artus::Graphics {
 
         vk::PipelineDepthStencilStateCreateInfo depthStencilStateInfo = {};
         depthStencilStateInfo.setDepthBoundsTestEnable(false)
-            .setDepthTestEnable(true)                // Ensures farther objects don't render over this primitive
-            .setStencilTestEnable(true)              // Ensures that unmarked pixels of this primitive aren't rendered
-            .setDepthWriteEnable(true)               // Writes depth values for the depth buffer
+            .setDepthTestEnable(true)   // Ensures farther objects don't render over this primitive
+            .setStencilTestEnable(true) // Ensures that unmarked pixels of this primitive aren't rendered
+            .setDepthWriteEnable(true)  // Writes depth values for the depth buffer
             .setDepthCompareOp(pipelineDescriptor.depthCompare) // Less is common (0.0 is closest, 1.0 is farthest)
             .setBack(backFaceStencilOpStateInfo)
             .setFront(frontFaceStencilOpStateInfo);
@@ -110,7 +110,7 @@ namespace Artus::Graphics {
             .setSrcColorBlendFactor(vk::BlendFactor::eSrcColor)
             .setDstAlphaBlendFactor(vk::BlendFactor::eDstAlpha)
             .setSrcAlphaBlendFactor(vk::BlendFactor::eSrcAlpha)
-            .setBlendEnable(true)
+            .setBlendEnable(false) // Do not blend with the screen contents
             .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
                                vk::ColorComponentFlagBits::eB |
                                vk::ColorComponentFlagBits::eA); // Write to all color channels
