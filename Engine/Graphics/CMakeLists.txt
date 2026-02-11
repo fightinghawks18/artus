@@ -25,6 +25,7 @@ target_include_directories(ArtusGraphics
 
 target_link_libraries(ArtusGraphics
         PUBLIC ArtusCore
+        PUBLIC ArtusMath
         PUBLIC Vulkan::Vulkan
 )
 
