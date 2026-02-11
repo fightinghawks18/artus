@@ -62,12 +62,14 @@ int main() {
     for (uint32_t i = 0; i < 2; i++) {
         vk::Extent3D extent(surface->GetVulkanExtent(), 1);
 
-        Graphics::ImageDesc depthImageDesc = {.format = vk::Format::eD32SfloatS8Uint,
-                                              .extent = extent,
-                                              .layerCount = 1,
-                                              .levelCount = 1,
-                                              .type = vk::ImageType::e2D,
-                                              .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment};
+        Graphics::ImageDesc depthImageDesc = {
+            .format = vk::Format::eD32SfloatS8Uint,
+            .type = vk::ImageType::e2D,
+            .extent = extent,
+            .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+            .layerCount = 1,
+            .levelCount = 1,
+        };
 
         auto* depthImage = new Graphics::Image(*device, depthImageDesc);
         depthImages.push_back(depthImage);
@@ -137,6 +139,7 @@ int main() {
     graphicsPipelineDescriptor.colorFormats = {surface->GetVulkanSurfaceFormat().format};
     graphicsPipelineDescriptor.depthFormat = vk::Format::eD32SfloatS8Uint;
     graphicsPipelineDescriptor.stencilFormat = vk::Format::eD32SfloatS8Uint;
+    graphicsPipelineDescriptor.depthCompare = vk::CompareOp::eGreater;
 
     auto* graphicsPipeline = new Graphics::GraphicsPipeline(*device, graphicsPipelineDescriptor);
 
@@ -150,7 +153,7 @@ int main() {
     fullscreenPipelineDescriptor.colorFormats = {surface->GetVulkanSurfaceFormat().format};
     fullscreenPipelineDescriptor.depthFormat = vk::Format::eD32SfloatS8Uint;
     fullscreenPipelineDescriptor.stencilFormat = vk::Format::eD32SfloatS8Uint;
-    fullscreenPipelineDescriptor.depthCompare = vk::CompareOp::eEqual;
+    fullscreenPipelineDescriptor.depthCompare = vk::CompareOp::eGreater;
 
     auto* skyboxPipeline = new Graphics::GraphicsPipeline(*device, fullscreenPipelineDescriptor);
 
@@ -176,7 +179,7 @@ int main() {
             .setStoreOp(vk::AttachmentStoreOp::eStore);
 
         vk::ClearDepthStencilValue clearDepthStencil = {};
-        clearDepthStencil.setDepth(1.0f).setStencil(0.0f);
+        clearDepthStencil.setDepth(0.0f).setStencil(0.0f);
 
         vk::RenderingAttachmentInfo depthStencilAttachment = {};
         depthStencilAttachment.setClearValue(clearDepthStencil)
@@ -201,7 +204,7 @@ int main() {
 
         cameraData = {
             .view =
-                Math::Matrix4::View(Math::Vector3{0, 0, 5}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
+                Math::Matrix4::View(Math::Vector3{0, 0, 2}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
             .projection =
                 Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
                     .Transpose()};
@@ -230,22 +233,27 @@ int main() {
 
         cmd->StartRendering(renderingInfo);
 
+        cmd->SetViewport(viewport);
+        cmd->SetScissor(rect);
+
+        cmd->SetDepthTesting(false);
+        cmd->SetDepthWriting(false);
+        cmd->SetStencilTesting(false);
+        cmd->BindGraphicsPipeline(skyboxPipeline);
+        cmd->SetCullMode(vk::CullModeFlagBits::eNone);
+        cmd->Draw(3, 0);
+
         cmd->UpdatePushConstant(pipelineLayout, vk::ShaderStageFlagBits::eVertex, sizeof(Graphics::ModelData), 0,
                                 &modelData);
         cmd->SetCullMode(vk::CullModeFlagBits::eFront);
-        cmd->SetDepthTesting(false);
+        cmd->SetDepthTesting(true);
+        cmd->SetDepthWriting(true);
         cmd->SetStencilTesting(false);
-        cmd->SetViewport(viewport);
-        cmd->SetScissor(rect);
         cmd->BindDescriptorSet(descriptorSets[frameIndex], pipelineLayout, 0);
         cmd->BindVertexBuffer(vertexBuffer);
         cmd->BindIndexBuffer(indexBuffer);
         cmd->BindGraphicsPipeline(graphicsPipeline);
         cmd->DrawIndexed(indices.size(), 0);
-
-        cmd->SetCullMode(vk::CullModeFlagBits::eNone);
-        cmd->BindGraphicsPipeline(skyboxPipeline);
-        cmd->Draw(3, 0);
 
         cmd->EndRendering();
 
