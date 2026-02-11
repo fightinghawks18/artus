@@ -64,11 +64,11 @@ namespace Artus::Graphics {
         rasterizationStateInfo.setCullMode(vk::CullModeFlagBits::eBack)
             .setPolygonMode(vk::PolygonMode::eFill)
             .setFrontFace(vk::FrontFace::eCounterClockwise)
-            .setDepthBiasEnable(true)         // Uses offset to avoid z-fighting
+            .setDepthBiasEnable(false)         // Uses offset to avoid z-fighting
             .setDepthClampEnable(false)       // Forces(?) fragments to be within the near/far ranges of the viewport
             .setDepthBiasClamp(0.0)           // Max offset that can be used to avoid z-fighting, 0.0 for no limit
-            .setDepthBiasConstantFactor(1.25) // Constant offset
-            .setDepthBiasSlopeFactor(1.75)    // Offset based on the angle that this primitive is viewed at
+            .setDepthBiasConstantFactor(0.01) // Constant offset
+            .setDepthBiasSlopeFactor(0.02)    // Offset based on the angle that this primitive is viewed at
             .setLineWidth(1.0f);
 
         vk::PipelineMultisampleStateCreateInfo multisampleStateInfo = {};
@@ -96,7 +96,7 @@ namespace Artus::Graphics {
             .setPassOp(vk::StencilOp::eDecrementAndWrap);
 
         vk::PipelineDepthStencilStateCreateInfo depthStencilStateInfo = {};
-        depthStencilStateInfo.setDepthBoundsTestEnable(false)
+        depthStencilStateInfo.setDepthBoundsTestEnable(true)
             .setDepthTestEnable(true)   // Ensures farther objects don't render over this primitive
             .setStencilTestEnable(true) // Ensures that unmarked pixels of this primitive aren't rendered
             .setDepthWriteEnable(true)  // Writes depth values for the depth buffer
