@@ -29,6 +29,7 @@ namespace Artus::Graphics {
         void SetCullMode(vk::CullModeFlags cullMode);
         void SetDepthTesting(bool depthTesting);
         void SetStencilTesting(bool stencilTesting);
+        void SetDepthWriting(bool depthWriting);
         void SetViewport(vk::Viewport viewport);
         void SetScissor(vk::Rect2D scissor);
         void BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout, uint32_t binding);

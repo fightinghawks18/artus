@@ -68,7 +68,7 @@ namespace Artus::Graphics {
     }
 
     void CommandEncoder::SetCullMode(vk::CullModeFlags cullMode) {
-        mCommandBuffer->setCullMode(vk::CullModeFlagBits::eFront);
+        mCommandBuffer->setCullMode(cullMode);
     }
 
     void CommandEncoder::SetDepthTesting(bool depthTesting) {
@@ -77,6 +77,10 @@ namespace Artus::Graphics {
 
     void CommandEncoder::SetStencilTesting(bool stencilTesting) {
         mCommandBuffer->setStencilTestEnable(stencilTesting);
+    }
+
+    void CommandEncoder::SetDepthWriting(bool depthWriting) {
+        mCommandBuffer->setDepthWriteEnable(depthWriting);
     }
 
     void CommandEncoder::SetViewport(vk::Viewport viewport) {
