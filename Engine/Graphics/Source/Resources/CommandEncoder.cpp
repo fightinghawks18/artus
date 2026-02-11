@@ -47,10 +47,71 @@ namespace Artus::Graphics {
     }
 
     void CommandEncoder::Reset() { mCommandBuffer->reset(); }
-    void CommandEncoder::StartRendering(vk::RenderingInfo renderingInfo) {
+    void CommandEncoder::StartRenderingPass(const RenderingPass& renderingPass) {
+        vk::RenderingInfo renderingInfo = {};
+
+        std::vector<vk::RenderingAttachmentInfo> colorAttachments;
+        vk::RenderingAttachmentInfo depthStencilAttachmentInfo = {};
+        for (const auto& attachment : renderingPass.attachments) {
+            vk::RenderingAttachmentInfo attachmentInfo = {};
+            attachmentInfo.setImageView(attachment.view->GetVulkanImageView());
+
+            switch (attachment.type) {
+            case RenderingAttachmentType::Color: {
+                attachmentInfo.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal);
+                break;
+            }
+            case RenderingAttachmentType::DepthStencil: {
+                attachmentInfo.setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+                break;
+            }
+            case RenderingAttachmentType::Shader: {
+                attachmentInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+                break;
+            }
+            }
+
+            switch (attachment.lsOp) {
+            case RenderingAttachmentLoadStoreOp::LoadThenStore: {
+                attachmentInfo.setLoadOp(vk::AttachmentLoadOp::eLoad).setStoreOp(vk::AttachmentStoreOp::eStore);
+                break;
+            }
+            case RenderingAttachmentLoadStoreOp::ClearThenStore: {
+                attachmentInfo.setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+                break;
+            }
+            }
+
+            if (attachment.type == RenderingAttachmentType::DepthStencil) {
+                const auto clearDepthValue = std::get<RenderingDepthStencilClear>(attachment.clear);
+
+                vk::ClearDepthStencilValue depthStencil = {};
+                depthStencil.setDepth(clearDepthValue.depth).setStencil(clearDepthValue.stencil);
+                attachmentInfo.setClearValue(depthStencil);
+                depthStencilAttachmentInfo = attachmentInfo;
+            } else {
+                const auto clearColorValue = std::get<Math::Color>(attachment.clear);
+
+                vk::ClearColorValue clearColor = {};
+                clearColor.setFloat32({clearColorValue.r, clearColorValue.g, clearColorValue.b, clearColorValue.a});
+                attachmentInfo.setClearValue(clearColor);
+                colorAttachments.push_back(attachmentInfo);
+            }
+        }
+
+        vk::Rect2D renderArea = {};
+        renderArea.setOffset({renderingPass.renderArea.x, renderingPass.renderArea.y})
+            .setExtent({renderingPass.renderArea.width, renderingPass.renderArea.height});
+
+        renderingInfo.setColorAttachments(colorAttachments)
+            .setLayerCount(1).setRenderArea(renderArea);
+        if (depthStencilAttachmentInfo.imageView)
+            renderingInfo.setPDepthAttachment(&depthStencilAttachmentInfo).setPStencilAttachment(
+                &depthStencilAttachmentInfo);
+
         mCommandBuffer->beginRendering(renderingInfo);
     }
-    void CommandEncoder::EndRendering() { mCommandBuffer->endRendering(); }
+    void CommandEncoder::EndRenderingPass() { mCommandBuffer->endRendering(); }
 
     void CommandEncoder::MakeImageRenderable(Image* image) {
         auto& accessMasks = image->GetVulkanAccessMasks();
@@ -218,21 +279,25 @@ namespace Artus::Graphics {
         mCommandBuffer->setDepthWriteEnable(depthWriting);
     }
 
-    void CommandEncoder::SetViewport(vk::Viewport viewport) {
-        mCommandBuffer->setViewportWithCount(1, &viewport);
+    void CommandEncoder::SetViewport(const Viewport& viewport) {
+        vk::Viewport vp = {viewport.x, viewport.y, viewport.width, viewport.height, viewport.minDepth, viewport.maxDepth};
+        mCommandBuffer->setViewportWithCount(1, &vp);
     }
 
-    void CommandEncoder::SetScissor(vk::Rect2D scissor) {
-        mCommandBuffer->setScissorWithCount(1, &scissor);
+    void CommandEncoder::SetScissor(const Rectangle& scissor) {
+        vk::Rect2D s = {};
+        s.setOffset({scissor.x, scissor.y})
+            .setExtent({scissor.width, scissor.height});
+        mCommandBuffer->setScissorWithCount(1, &s);
     }
 
-    void CommandEncoder::BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout, uint32_t binding) {
+    void CommandEncoder::BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout) {
         auto setHandle = set->GetVulkanDescriptorSet();
         mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout->GetVulkanPipelineLayout(), 0, 1, &setHandle, 0, nullptr);
     }
 
-    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size, uint32_t offset, void* data) {
-        mCommandBuffer->pushConstants(layout->GetVulkanPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, size, data);
+    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, const vk::ShaderStageFlagBits stageFlags, const uint32_t size, const uint32_t offset, void* data) {
+        mCommandBuffer->pushConstants(layout->GetVulkanPipelineLayout(), stageFlags, offset, size, data);
     }
 
     void CommandEncoder::DrawIndexed(uint32_t indexCount, uint32_t firstIndex) {

@@ -11,6 +11,8 @@
 #include <Artus/Graphics/Resources/DescriptorAllocator.h>
 #include <Artus/Graphics/Resources/GraphicsPipeline.h>
 
+#include "Artus/Math/Color.h"
+
 using namespace Artus;
 
 static std::vector<Graphics::Vertex3D> vertices = {
@@ -165,39 +167,28 @@ int main() {
         auto image = surface->GetVulkanImage(imageIndex);
         auto depthImage = depthImages[imageIndex];
 
-        vk::Rect2D rect = {};
-        rect.setExtent(surface->GetVulkanExtent()).setOffset({0, 0});
+        auto surfaceRect = surface->GetRectangle();
 
-        vk::ClearColorValue clearColor = {};
-        clearColor.setFloat32({0.0f, 0.0f, 0.0f, 1.0f});
+        Graphics::RenderingAttachment surfaceColorAttachment = {
+            .view = surface->GetVulkanImageView(imageIndex),
+            .type = Graphics::RenderingAttachmentType::Color,
+            .lsOp = Graphics::RenderingAttachmentLoadStoreOp::ClearThenStore,
+            .clear = Math::Color{0.0f, 0.0f, 0.0f, 1.0f}
+        };
 
-        vk::RenderingAttachmentInfo colorAttachment = {};
-        colorAttachment.setClearValue(clearColor)
-            .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-            .setImageView(surface->GetVulkanImageView(imageIndex)->GetVulkanImageView())
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eStore);
+        Graphics::RenderingAttachment surfaceDepthAttachment = {
+            .view = depthImageViews[imageIndex],
+            .type = Graphics::RenderingAttachmentType::DepthStencil,
+            .lsOp = Graphics::RenderingAttachmentLoadStoreOp::ClearThenStore,
+            .clear = Graphics::RenderingDepthStencilClear{0.0f, 0}
+        };
 
-        vk::ClearDepthStencilValue clearDepthStencil = {};
-        clearDepthStencil.setDepth(0.0f).setStencil(0.0f);
-
-        vk::RenderingAttachmentInfo depthStencilAttachment = {};
-        depthStencilAttachment.setClearValue(clearDepthStencil)
-            .setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
-            .setImageView(depthImageViews[imageIndex]->GetVulkanImageView())
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eStore);
-
-        vk::RenderingInfo renderingInfo = {};
-        renderingInfo.setColorAttachments(colorAttachment)
-            .setPDepthAttachment(&depthStencilAttachment)
-            .setPStencilAttachment(&depthStencilAttachment)
-            .setLayerCount(1)
-            .setRenderArea(rect);
+        Graphics::RenderingPass mainPass = {
+            .attachments = {surfaceColorAttachment, surfaceDepthAttachment},
+            .renderArea = surfaceRect
+        };
 
         const auto frameIndex = surface->GetFrameIndex();
-
-        auto surfaceSize = surface->GetVulkanExtent();
 
         rotation *= Math::Quaternion::FromAxisAngle(Math::Vector3{1.0f, 1.0f, 1.0f}, 0.01f);
         rotation.Normalize();
@@ -206,7 +197,7 @@ int main() {
             .view =
                 Math::Matrix4::View(Math::Vector3{0, 0, 2}, Math::Vector3{0, 0, 0}, Math::Vector3{0, 1, 0}).Transpose(),
             .projection =
-                Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceSize.width / surfaceSize.height, 0.1f, 100.0f)
+                Math::Matrix4::Perspective(Math::AsRadians(90.0f), surfaceRect.width / surfaceRect.height, 0.1f, 100.0f)
                     .Transpose()};
 
         modelData = {.model =
@@ -217,24 +208,16 @@ int main() {
         cameraBuffer->Map(sizeof(Graphics::CameraData), 0, &cameraData);
         descriptorSets[frameIndex]->WriteDescriptorSet(0, 0, vk::DescriptorType::eUniformBuffer, cameraBuffer);
 
-        vk::Viewport viewport = {};
-        viewport.setX(0)
-            .setY(0)
-            .setWidth(rect.extent.width)
-            .setHeight(rect.extent.height)
-            .setMinDepth(0)
-            .setMaxDepth(1.0f);
-
         auto cmd = cmdEncoders[frameIndex];
         cmd->Start();
 
         cmd->MakeImageRenderable(image);
         cmd->MakeImageDepthStencil(depthImage);
 
-        cmd->StartRendering(renderingInfo);
+        cmd->StartRenderingPass(mainPass);
 
-        cmd->SetViewport(viewport);
-        cmd->SetScissor(rect);
+        cmd->SetViewport({0, 0, static_cast<float>(surfaceRect.width), static_cast<float>(surfaceRect.height), 0.0f, 1.0f});
+        cmd->SetScissor(surfaceRect);
 
         cmd->SetDepthTesting(false);
         cmd->SetDepthWriting(false);
@@ -249,13 +232,13 @@ int main() {
         cmd->SetDepthTesting(true);
         cmd->SetDepthWriting(true);
         cmd->SetStencilTesting(false);
-        cmd->BindDescriptorSet(descriptorSets[frameIndex], pipelineLayout, 0);
+        cmd->BindDescriptorSet(descriptorSets[frameIndex], pipelineLayout);
         cmd->BindVertexBuffer(vertexBuffer);
         cmd->BindIndexBuffer(indexBuffer);
         cmd->BindGraphicsPipeline(graphicsPipeline);
         cmd->DrawIndexed(indices.size(), 0);
 
-        cmd->EndRendering();
+        cmd->EndRenderingPass();
 
         cmd->MakeImagePresentable(image);
 
