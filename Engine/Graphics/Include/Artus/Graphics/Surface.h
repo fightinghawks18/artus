@@ -13,6 +13,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "Types/Common.h"
+
 namespace Artus::Graphics {
     class Surface {
     public:
@@ -21,6 +23,10 @@ namespace Artus::Graphics {
 
         uint32_t AcquireNextImage(vk::Semaphore* outSemaphore);
         bool PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore);
+
+        [[nodiscard]] Rectangle GetRectangle() const {
+            return {0, 0, mSurfaceExtent.width, mSurfaceExtent.height};
+        }
 
         [[nodiscard]] vk::SurfaceFormatKHR GetVulkanSurfaceFormat() const { return mSurfaceFormat; }
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
