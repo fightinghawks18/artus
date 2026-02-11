@@ -228,8 +228,8 @@ int main() {
         auto cmd = cmdEncoders[frameIndex];
         cmd->Start();
 
-        image->MakeRenderable(cmd->GetVulkanCommandBuffer());
-        depthImage->MakeDepthStencil(cmd->GetVulkanCommandBuffer());
+        cmd->MakeImageRenderable(image);
+        cmd->MakeImageDepthStencil(depthImage);
 
         cmd->StartRendering(renderingInfo);
 
@@ -257,7 +257,7 @@ int main() {
 
         cmd->EndRendering();
 
-        image->MakePresentable(cmd->GetVulkanCommandBuffer());
+        cmd->MakeImagePresentable(image);
 
         cmd->End();
 

@@ -52,6 +52,141 @@ namespace Artus::Graphics {
     }
     void CommandEncoder::EndRendering() { mCommandBuffer->endRendering(); }
 
+    void CommandEncoder::MakeImageRenderable(Image* image) {
+        auto& accessMasks = image->GetVulkanAccessMasks();
+        auto& stageMasks = image->GetVulkanStageMasks();
+        auto img = image->GetVulkanImage();
+        auto& layout = image->GetVulkanLayout();
+
+        vk::ImageSubresourceRange subresourceRange = {};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+            .setBaseArrayLayer(0)
+            .setLayerCount(1)
+            .setBaseMipLevel(0)
+            .setLevelCount(1);
+
+        vk::ImageMemoryBarrier2 imageMemBarrier = {};
+        imageMemBarrier.setImage(img)
+            .setOldLayout(layout)
+            .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
+            .setSrcAccessMask(accessMasks)
+            .setSrcStageMask(stageMasks)
+            .setDstAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
+            .setDstStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
+            .setSubresourceRange(subresourceRange);
+
+        vk::DependencyInfo dependencyInfo = {};
+        dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
+
+        mCommandBuffer->pipelineBarrier2(dependencyInfo);
+
+        layout = vk::ImageLayout::eColorAttachmentOptimal;
+        accessMasks = vk::AccessFlagBits2::eColorAttachmentWrite;
+        stageMasks = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
+    }
+
+    void CommandEncoder::MakeImageDepthStencil(Image* image) {
+        auto& accessMasks = image->GetVulkanAccessMasks();
+        auto& stageMasks = image->GetVulkanStageMasks();
+        auto img = image->GetVulkanImage();
+        auto& layout = image->GetVulkanLayout();
+        
+        vk::ImageSubresourceRange subresourceRange = {};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
+            .setBaseArrayLayer(0)
+            .setLayerCount(1)
+            .setBaseMipLevel(0)
+            .setLevelCount(1);
+
+        vk::ImageMemoryBarrier2 imageMemBarrier = {};
+        imageMemBarrier.setImage(img)
+            .setOldLayout(layout)
+            .setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+            .setSrcAccessMask(accessMasks)
+            .setSrcStageMask(stageMasks)
+            .setDstAccessMask(vk::AccessFlagBits2::eDepthStencilAttachmentRead |
+                              vk::AccessFlagBits2::eDepthStencilAttachmentWrite)
+            .setDstStageMask(vk::PipelineStageFlagBits2::eLateFragmentTests |
+                             vk::PipelineStageFlagBits2::eEarlyFragmentTests)
+            .setSubresourceRange(subresourceRange);
+
+        vk::DependencyInfo dependencyInfo = {};
+        dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
+
+        mCommandBuffer->pipelineBarrier2(dependencyInfo);
+
+        layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+        accessMasks =
+            vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite;
+        stageMasks = vk::PipelineStageFlagBits2::eLateFragmentTests | vk::PipelineStageFlagBits2::eEarlyFragmentTests;
+    }
+
+    void CommandEncoder::MakeImageShaderAccessible(Image* image) {
+        auto& accessMasks = image->GetVulkanAccessMasks();
+        auto& stageMasks = image->GetVulkanStageMasks();
+        auto img = image->GetVulkanImage();
+        auto& layout = image->GetVulkanLayout();
+        
+        vk::ImageSubresourceRange subresourceRange = {};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+            .setBaseArrayLayer(0)
+            .setLayerCount(1)
+            .setBaseMipLevel(0)
+            .setLevelCount(1);
+
+        vk::ImageMemoryBarrier2 imageMemBarrier = {};
+        imageMemBarrier.setImage(img)
+            .setOldLayout(layout)
+            .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+            .setSrcAccessMask(accessMasks)
+            .setSrcStageMask(stageMasks)
+            .setDstAccessMask(vk::AccessFlagBits2::eShaderRead)
+            .setDstStageMask(vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader)
+            .setSubresourceRange(subresourceRange);
+
+        vk::DependencyInfo dependencyInfo = {};
+        dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
+
+        mCommandBuffer->pipelineBarrier2(dependencyInfo);
+
+        layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        accessMasks = vk::AccessFlagBits2::eShaderRead;
+        stageMasks = vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader;
+    }
+
+    void CommandEncoder::MakeImagePresentable(Image* image) {
+        auto& accessMasks = image->GetVulkanAccessMasks();
+        auto& stageMasks = image->GetVulkanStageMasks();
+        auto img = image->GetVulkanImage();
+        auto& layout = image->GetVulkanLayout();
+
+        vk::ImageSubresourceRange subresourceRange = {};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+            .setBaseArrayLayer(0)
+            .setLayerCount(1)
+            .setBaseMipLevel(0)
+            .setLevelCount(1);
+
+        vk::ImageMemoryBarrier2 imageMemBarrier = {};
+        imageMemBarrier.setImage(img)
+            .setOldLayout(layout)
+            .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+            .setSrcAccessMask(accessMasks)
+            .setSrcStageMask(stageMasks)
+            .setDstAccessMask(vk::AccessFlagBits2::eNone)
+            .setDstStageMask(vk::PipelineStageFlagBits2::eNone)
+            .setSubresourceRange(subresourceRange);
+
+        vk::DependencyInfo dependencyInfo = {};
+        dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
+
+        mCommandBuffer->pipelineBarrier2(dependencyInfo);
+
+        layout = vk::ImageLayout::ePresentSrcKHR;
+        accessMasks = vk::AccessFlagBits2::eNone;
+        stageMasks = vk::PipelineStageFlagBits2::eNone;
+    }
+
     void CommandEncoder::BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline) {
         auto pipelineHandle = graphicsPipeline->GetVulkanPipeline();
         mCommandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipelineHandle);

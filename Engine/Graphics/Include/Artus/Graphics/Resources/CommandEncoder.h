@@ -23,6 +23,12 @@ namespace Artus::Graphics {
         void Reset();
         void StartRendering(vk::RenderingInfo renderingInfo);
         void EndRendering();
+
+        void MakeImageRenderable(Image* image);
+        void MakeImageDepthStencil(Image* image);
+        void MakeImageShaderAccessible(Image* image);
+        void MakeImagePresentable(Image* image);
+
         void BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline);
         void BindVertexBuffer(Buffer* vertexBuffer);
         void BindIndexBuffer(Buffer* indexBuffer);
@@ -34,6 +40,7 @@ namespace Artus::Graphics {
         void SetScissor(vk::Rect2D scissor);
         void BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout, uint32_t binding);
         void UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size, uint32_t offset, void* data);
+
         void DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
         void Draw(uint32_t vertexCount, uint32_t firstIndex);
 
