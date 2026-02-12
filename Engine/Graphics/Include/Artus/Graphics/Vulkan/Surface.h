@@ -13,9 +13,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "Types/Common.h"
+#include "../RHI/Types/Common.h"
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class Surface {
     public:
         explicit Surface(Device& device, Core::Window* window);

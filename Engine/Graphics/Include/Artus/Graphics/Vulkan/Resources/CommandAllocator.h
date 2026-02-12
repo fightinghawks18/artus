@@ -8,7 +8,7 @@
 #include "Artus/Graphics/Resources/CommandEncoder.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class CommandAllocator {
     public:
         explicit CommandAllocator(Device& device);

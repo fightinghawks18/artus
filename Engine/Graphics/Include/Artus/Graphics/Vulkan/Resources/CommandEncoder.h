@@ -13,7 +13,7 @@
 
 #include "Artus/Graphics/Types/Rendering.h"
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class CommandEncoder {
     public:
         explicit CommandEncoder(Device& device, vk::CommandPool commandPool);

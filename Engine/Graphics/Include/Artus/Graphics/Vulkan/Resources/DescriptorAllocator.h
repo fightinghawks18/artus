@@ -11,7 +11,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     struct DescriptorAllocatorPoolDesc {
         vk::DescriptorType type;
         uint32_t descriptorCount;

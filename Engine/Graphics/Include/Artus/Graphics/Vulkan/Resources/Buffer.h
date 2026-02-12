@@ -10,14 +10,7 @@
 #include "Artus/Graphics/Utils/Vulkan/Allocator.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
-    /// @brief Describes how a buffer is used
-    enum class BufferUsage {
-        Vertex,        ///< Buffer is used to store vertices for an object
-        Index,         ///< Buffer is used to store indices for an object
-        Shader,        ///< Buffer is read-only in shaders and stores small amounts of data
-        ShaderStorage, ///< Buffer is read/write in shaders and stores large amounts of data
-    };
+namespace Artus::Graphics::Vulkan {
 
     /// @brief Holds data that can be made accessible to the GPU
     class Buffer {

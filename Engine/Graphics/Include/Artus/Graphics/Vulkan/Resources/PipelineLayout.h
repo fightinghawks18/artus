@@ -9,17 +9,7 @@
 #include "../Device.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
-    struct PipelinePushConstant {
-        uint32_t size;
-        uint32_t offset;
-        vk::ShaderStageFlags stageFlags;
-    };
-
-    struct PipelineLayoutDesc {
-        std::vector<DescriptorSetLayout*> layouts;
-        std::vector<PipelinePushConstant> pushConstants;
-    };
+namespace Artus::Graphics::Vulkan {
 
     class PipelineLayout {
     public:

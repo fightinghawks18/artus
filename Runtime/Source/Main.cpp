@@ -1,12 +1,12 @@
 #include "Artus/Graphics/Types/Geometry.h"
 
-#include <Artus/Graphics/Surface.h>
+#include <../../Engine/Graphics/Include/Artus/Graphics/Vulkan/Surface.h>
 #include <Artus/Math/Matrix4.h>
 #include <Artus/Math/Utilities.h>
 #include <Artus/Math/Vector3.h>
 
 #include <Artus/Core/Window.h>
-#include <Artus/Graphics/Device.h>
+#include <../../Engine/Graphics/Include/Artus/Graphics/Vulkan/Device.h>
 #include <Artus/Graphics/Resources/CommandAllocator.h>
 #include <Artus/Graphics/Resources/DescriptorAllocator.h>
 #include <Artus/Graphics/Resources/GraphicsPipeline.h>

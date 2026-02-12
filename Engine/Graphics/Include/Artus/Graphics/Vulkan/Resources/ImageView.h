@@ -10,23 +10,7 @@
 #include "Image.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
-    struct ImageViewDesc {
-        Image* image;
-        vk::Format format;
-        vk::ImageViewType type;
-        vk::ImageAspectFlags aspectMask;
-        uint32_t baseLayer;
-        uint32_t layerCount;
-        uint32_t baseLevel;
-        uint32_t levelCount;
-
-        vk::ComponentSwizzle redComponent;
-        vk::ComponentSwizzle greenComponent;
-        vk::ComponentSwizzle blueComponent;
-        vk::ComponentSwizzle alphaComponent;
-    };
-
+namespace Artus::Graphics::Vulkan {
     class ImageView {
     public:
         explicit ImageView(Device& device, const ImageViewDesc& desc);

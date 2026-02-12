@@ -8,7 +8,7 @@
 #include "Artus/Graphics/Device.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class Shader {
     public:
         explicit Shader(Device& device, const std::string& shaderPath);

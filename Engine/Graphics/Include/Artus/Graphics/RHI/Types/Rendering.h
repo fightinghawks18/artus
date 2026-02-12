@@ -7,10 +7,11 @@
 #define ARTUS_RENDERING_H
 
 #include "Common.h"
-#include "../Resources/ImageView.h"
+#include "../Resources/IImageView.h"
 #include <Artus/Math/Color.h>
 
 #include <variant>
+#include <vector>
 
 namespace Artus::Graphics {
     struct RenderingDepthStencilClear {
@@ -30,7 +31,7 @@ namespace Artus::Graphics {
     };
 
     struct RenderingAttachment {
-        ImageView* view = nullptr;
+        RHI::IImageView* view = nullptr;
         RenderingAttachmentType type = RenderingAttachmentType::Color;
         RenderingAttachmentLoadStoreOp lsOp = RenderingAttachmentLoadStoreOp::ClearThenStore;
         std::variant<Math::Color, RenderingDepthStencilClear> clear;

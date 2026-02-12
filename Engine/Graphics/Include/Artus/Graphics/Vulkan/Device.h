@@ -5,10 +5,10 @@
 #ifndef ARTUS_DEVICE_H
 #define ARTUS_DEVICE_H
 
-#include "Artus/Graphics/Utils/Vulkan/Allocator.h"
+#include "Artus/Graphics/Vulkan/Utils/Vulkan/Allocator.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class Device {
     public:
         explicit Device();

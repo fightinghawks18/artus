@@ -8,7 +8,7 @@
 #include "../Device.h"
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     struct DescriptorSetLayoutBinding {
         uint32_t binding;
         vk::DescriptorType type;

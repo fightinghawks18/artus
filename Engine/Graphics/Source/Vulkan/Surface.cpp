@@ -10,7 +10,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "Artus/Graphics/Surface.h"
+#include "../../Include/Artus/Graphics/Vulkan/Surface.h"
 
 #include "Artus/Core/Logger.h"
 

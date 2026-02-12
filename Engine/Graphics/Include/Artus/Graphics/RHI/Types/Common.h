@@ -6,6 +6,8 @@
 #ifndef ARTUS_COMMON_H
 #define ARTUS_COMMON_H
 
+#include <cstdint>
+
 namespace Artus::Graphics {
     struct Rectangle {
         int32_t x, y;
@@ -15,6 +17,12 @@ namespace Artus::Graphics {
     struct Viewport {
         float x, y, width, height;
         float minDepth, maxDepth;
+    };
+
+    enum class ShaderStage {
+        Vertex,
+        Pixel,
+        Compute
     };
 }
 

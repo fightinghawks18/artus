@@ -9,16 +9,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
-    struct ImageDesc {
-        vk::Format format;
-        vk::ImageType type;
-        vk::Extent3D extent;
-        vk::ImageUsageFlags usage;
-        uint32_t layerCount;
-        uint32_t levelCount;
-    };
-
+namespace Artus::Graphics::Vulkan {
     /// @brief Holds image data used for textures, rendering, or storage
     class Image {
     public:

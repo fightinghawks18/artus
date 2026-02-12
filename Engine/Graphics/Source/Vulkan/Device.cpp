@@ -6,7 +6,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "Artus/Graphics/Device.h"
+#include "../../Include/Artus/Graphics/Vulkan/Device.h"
 
 #include "Artus/Core/Logger.h"
 

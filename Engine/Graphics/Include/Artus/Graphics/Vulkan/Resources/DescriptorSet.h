@@ -13,7 +13,7 @@
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     class DescriptorSet {
     public:
         explicit DescriptorSet(Device& device, vk::DescriptorPool pool, DescriptorSetLayout* layout);
