@@ -2,11 +2,19 @@
 // Created by fightinghawks18 on 1/22/2026.
 //
 
+#include "Artus/Graphics/Vulkan/Surface.h"
+#include "Artus/Graphics/Vulkan/Resources/BindGroup.h"
+#include "Artus/Graphics/Vulkan/Resources/BindGroupLayout.h"
+#include "Artus/Graphics/Vulkan/Resources/Buffer.h"
+#include "Artus/Graphics/Vulkan/Resources/GraphicsPipeline.h"
+#include "Artus/Graphics/Vulkan/Resources/Image.h"
+#include "Artus/Graphics/Vulkan/Resources/ImageView.h"
+#include "Artus/Graphics/Vulkan/Resources/Shader.h"
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "../../Include/Artus/Graphics/Vulkan/Device.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
 #include "Artus/Core/Logger.h"
 
@@ -16,12 +24,27 @@ struct DeviceQueue {
     float queuePriority[1] = {1};
 };
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     Device::Device() {
         MakeInstance();
         GetPhysicalDevice();
         MakeDevice();
         MakeAllocator();
+
+        mCommandAllocator = std::make_unique<CommandAllocator>(*this);
+
+        std::vector<DescriptorAllocatorPoolDesc> poolDesc;
+        poolDesc.push_back({
+            .type = vk::DescriptorType::eUniformBuffer,
+            .descriptorCount = 100
+        });
+
+        DescriptorAllocatorDesc allocDesc = {
+            .maxDescriptorSets = 50,
+            .pools = poolDesc
+        };
+
+        mDescriptorAllocator = std::make_unique<DescriptorAllocator>(*this, allocDesc);
     }
 
     Device::~Device() {
@@ -35,13 +58,50 @@ namespace Artus::Graphics {
         mInstance.reset();
     }
 
+    RHI::ISurface* Device::CreateSurface(const RHI::SurfaceDesc& surfaceDesc) {
+        return new Surface(*this, surfaceDesc);
+    }
+
+    RHI::IBuffer* Device::CreateBuffer(const RHI::BufferDesc& bufferDesc) { return new Buffer(*this, bufferDesc); }
+
+    RHI::IImage* Device::CreateImage(const RHI::ImageDesc& imageDesc) { return new Image(*this, imageDesc); }
+
+    RHI::IImageView* Device::CreateImageView(const RHI::ImageViewDesc& imageViewDesc) {
+        return new ImageView(*this, imageViewDesc);
+    }
+
+    RHI::IGraphicsPipeline* Device::CreateGraphicsPipeline(const RHI::GraphicsPipelineDesc& pipelineDesc) {
+        return new GraphicsPipeline(*this, pipelineDesc);
+    }
+
+    RHI::IShader* Device::CreateShader(const RHI::ShaderDesc& shaderDesc) { return new Shader(*this, shaderDesc); }
+
+    RHI::IPipelineLayout* Device::CreatePipelineLayout(const RHI::PipelineLayoutDesc& pipelineLayout) {
+        return new PipelineLayout(*this, pipelineLayout);
+    }
+
+    RHI::ICommandEncoder* Device::CreateCommandEncoder() { return mCommandAllocator->NewEncoder(); }
+
+    std::vector<RHI::ICommandEncoder*> Device::CreateCommandEncoders(uint32_t commandEncoderCount) {
+        auto cmds = mCommandAllocator->NewEncoders(commandEncoderCount);
+        return std::vector<RHI::ICommandEncoder*>(cmds.begin(), cmds.end());
+    }
+
+    RHI::IBindGroupLayout* Device::CreateBindGroupLayout(const RHI::BindGroupLayoutDesc& bindGroupLayoutDesc) {
+        return new BindGroupLayout(*this, mDescriptorAllocator.get(), bindGroupLayoutDesc);
+    }
+
+    RHI::IBindGroup* Device::CreateBindGroup(const RHI::BindGroupDesc& bindGroupDesc) {
+        return new BindGroup(*this, mDescriptorAllocator.get(), bindGroupDesc);
+    }
+
     void Device::MakeInstance() {
         vk::ApplicationInfo appInfo = {};
         appInfo.setPApplicationName("Artus")
-            .setApplicationVersion(VK_MAKE_API_VERSION(0, 1, 0, 0))
-            .setPEngineName("ArtusEngine")
-            .setEngineVersion(VK_MAKE_API_VERSION(0, 0, 0, 1))
-            .setApiVersion(VK_MAKE_API_VERSION(0, 1, 3, 0));
+               .setApplicationVersion(VK_MAKE_API_VERSION(0, 1, 0, 0))
+               .setPEngineName("ArtusEngine")
+               .setEngineVersion(VK_MAKE_API_VERSION(0, 0, 0, 1))
+               .setApiVersion(VK_MAKE_API_VERSION(0, 1, 3, 0));
 
         std::vector extensions = {"VK_KHR_surface"};
         std::vector<const char*> layers;
@@ -62,9 +122,9 @@ namespace Artus::Graphics {
 
         vk::InstanceCreateInfo instInfo = {};
         instInfo.setFlags(flags)
-            .setPEnabledExtensionNames(extensions)
-            .setPEnabledLayerNames(layers)
-            .setPApplicationInfo(&appInfo);
+                .setPEnabledExtensionNames(extensions)
+                .setPEnabledLayerNames(layers)
+                .setPApplicationInfo(&appInfo);
 
         mInstance = vk::createInstanceUnique(instInfo);
     }
@@ -165,7 +225,8 @@ namespace Artus::Graphics {
         deviceFeatures.setPNext(v11Feats);
 
         vk::DeviceCreateInfo deviceInfo = {};
-        deviceInfo.setPNext(deviceFeatures).setQueueCreateInfos(queueCreateInfos).setPEnabledExtensionNames(deviceExtensions);
+        deviceInfo.setPNext(deviceFeatures).setQueueCreateInfos(queueCreateInfos).setPEnabledExtensionNames(
+            deviceExtensions);
         mDevice = mPhysicalDevice.createDeviceUnique(deviceInfo);
 
         for (auto& deviceQueue : deviceQueues) {

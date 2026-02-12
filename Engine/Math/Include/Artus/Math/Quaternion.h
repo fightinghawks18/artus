@@ -11,8 +11,12 @@ namespace Artus::Math {
     struct Quaternion {
         float x, y, z, w;
 
-        explicit Quaternion(const float x, const float y, const float z, const float w = 1.0f) : x(x), y(y), z(z), w(w) {}
-        Quaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {}
+        explicit Quaternion(const float x, const float y, const float z,
+                            const float w = 1.0f) : x(x), y(y), z(z), w(w) {
+        }
+
+        Quaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {
+        }
 
         static Quaternion FromAxisAngle(const Vector3& axis, const float angle) {
             const Vector3 normalizedAxis = axis.Normalized();
@@ -43,9 +47,7 @@ namespace Artus::Math {
             return quaternion;
         }
 
-        [[nodiscard]] float Length() const {
-            return std::sqrt(x * x + y * y + z * z + w * w);
-        }
+        [[nodiscard]] float Length() const { return std::sqrt(x * x + y * y + z * z + w * w); }
 
         Quaternion& Normalize() {
             Quaternion quaternion = Normalized();

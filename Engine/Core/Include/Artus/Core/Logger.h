@@ -13,9 +13,9 @@
 namespace Artus::Core {
     /// @brief Differentiates the importance of a message
     enum class MessageSeverity {
-        Low,      ///< Message isn't important, probably to inform
-        Medium,   ///< Message is semi-important, probably to warn
-        High,     ///< Message is important, probably an error
+        Low, ///< Message isn't important, probably to inform
+        Medium, ///< Message is semi-important, probably to warn
+        High, ///< Message is important, probably an error
         Critical, ///< Message is very important, probably a fatal error
     };
 

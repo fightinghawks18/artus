@@ -4,22 +4,23 @@
 
 #ifdef __APPLE__
 #define VK_USE_PLATFORM_METAL_EXT
-#include "Artus/Graphics/Utils/Metal/Layer.h"
+#include "Artus/Graphics/Vulkan/Utils/Metal/Layer.h"
 #endif
+#include "Artus/Graphics/Vulkan/Utils/Common/Format.h"
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "../../Include/Artus/Graphics/Vulkan/Surface.h"
-
+#include "Artus/Graphics/Vulkan/Surface.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 #include "Artus/Core/Logger.h"
 
 #include <iostream>
 
-namespace Artus::Graphics {
-    Surface::Surface(Device& device, Core::Window* window) : mDevice(device), mWindow(window) {
-        CreateSurface(window);
-        CreateSwapchain(window);
+namespace Artus::Graphics::Vulkan {
+    Surface::Surface(Device& device, const RHI::SurfaceDesc& desc) : mDevice(device), mWindow(desc.window) {
+        CreateSurface(desc.window);
+        CreateSwapchain(desc.window);
         CreateSemaphores();
         CreateFences();
         CreateImageViews();
@@ -35,17 +36,17 @@ namespace Artus::Graphics {
         DestroySurface();
     }
 
-    uint32_t Surface::AcquireNextImage(vk::Semaphore* outSemaphore) {
+    void Surface::PrepareFrame() {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
             AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return 0;
+            return;
         }
 
         auto resetResult = mDevice.GetVulkanDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
         if (resetResult != vk::Result::eSuccess) {
             AR_ERR("Failed to reset fence before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return 0;
+            return;
         }
 
         uint32_t imageIndex = UINT32_MAX;
@@ -54,46 +55,49 @@ namespace Artus::Graphics {
         if (getImageResult == vk::Result::eErrorOutOfDateKHR || getImageResult == vk::Result::eSuboptimalKHR) {
             AR_LOG("Swapchain is out of date or is suboptimal, resizing. (Occurred on frame {})", mFrameIdx);
             Rebuild();
-            return AcquireNextImage(outSemaphore);
+            PrepareFrame();
+            return;
         }
 
         if (getImageResult != vk::Result::eSuccess) {
             AR_ERR("Failed to acquire new image from swapchain! (Occurred on frame {})", mFrameIdx);
-            return 0;
+            return;
         }
 
-        *outSemaphore = mImageAvailableSems[mFrameIdx].get();
-        return imageIndex;
+        mImageIndex = imageIndex;
     }
 
-    bool Surface::PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore) {
+    void Surface::PresentFrame(RHI::ICommandEncoder* encoder) {
+        const auto vkCommandEncoder = static_cast<CommandEncoder*>(encoder);
+        auto vkCmdBuffer = vkCommandEncoder->GetVulkanCommandBuffer();
+
         std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
         vk::SubmitInfo submitInfo = {};
-        submitInfo.setCommandBuffers(commandBuffer)
-            .setWaitDstStageMask(waitDstStageMask)
-            .setWaitSemaphores(waitSemaphore)
-            .setSignalSemaphores(mRenderFinishedSems[mFrameIdx].get());
+        submitInfo.setCommandBuffers(vkCmdBuffer)
+                  .setWaitDstStageMask(waitDstStageMask)
+                  .setWaitSemaphores(mImageAvailableSems[mFrameIdx].get())
+                  .setSignalSemaphores(mRenderFinishedSems[mFrameIdx].get());
 
         auto submitResult = mDevice.GetVulkanGraphicsQueue().submit(1, &submitInfo, mInFlightFens[mFrameIdx].get());
         if (submitResult != vk::Result::eSuccess) {
             AR_ERR("Failed to submit graphics to swapchain! (Occurred on frame {})", mFrameIdx);
-            return false;
+            return;
         }
 
         vk::PresentInfoKHR presentInfo = {};
-        presentInfo.setImageIndices(imageIndex)
-            .setSwapchains(mSwapchain.get())
-            .setWaitSemaphores(mRenderFinishedSems[mFrameIdx].get());
+        presentInfo.setImageIndices(mImageIndex)
+                   .setSwapchains(mSwapchain.get())
+                   .setWaitSemaphores(mRenderFinishedSems[mFrameIdx].get());
 
         auto presentResult = mDevice.GetVulkanGraphicsQueue().presentKHR(&presentInfo);
         if (presentResult != vk::Result::eSuccess) {
             AR_ERR("Failed to present graphics to swapchain! (Occurred on frame {})", mFrameIdx);
-            return false;
+            return;
         }
 
         mFrameIdx = (mFrameIdx + 1) % 2;
-        return true;
+        return;
     }
 
     void Surface::CreateSurface(Core::Window* window) {
@@ -129,7 +133,7 @@ namespace Artus::Graphics {
         for (const auto& format : surfaceFormats) {
             if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
                 surfaceFormat = format; // BGRA8_SRGB is common, so we use SRGB_nonlinear so that we don't reconvert
-                                        // SRGB swapchain data
+                // SRGB swapchain data
                 break;
             }
         }
@@ -157,17 +161,17 @@ namespace Artus::Graphics {
 
         vk::SwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.setImageFormat(surfaceFormat.format)
-            .setImageColorSpace(surfaceFormat.colorSpace)
-            .setImageArrayLayers(1)
-            .setImageSharingMode(vk::SharingMode::eExclusive)
-            .setImageExtent(surfaceExtent)
-            .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
-            .setMinImageCount(2)
-            .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-            .setClipped(true)
-            .setPresentMode(presentMode)
-            .setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
-            .setSurface(mSurface.get());
+                     .setImageColorSpace(surfaceFormat.colorSpace)
+                     .setImageArrayLayers(1)
+                     .setImageSharingMode(vk::SharingMode::eExclusive)
+                     .setImageExtent(surfaceExtent)
+                     .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
+                     .setMinImageCount(2)
+                     .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+                     .setClipped(true)
+                     .setPresentMode(presentMode)
+                     .setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
+                     .setSurface(mSurface.get());
 
         if (mSwapchain)
             swapchainInfo.setOldSwapchain(mSwapchain.get());
@@ -203,19 +207,15 @@ namespace Artus::Graphics {
         for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
             auto img = std::make_unique<Image>(mDevice, image);
 
-            ImageViewDesc imageViewDesc = {
+            RHI::ImageViewDesc imageViewDesc = {
                 .image = img.get(),
-                .format = mSurfaceFormat.format,
-                .type = vk::ImageViewType::e2D,
-                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .format = FromVkFormat(mSurfaceFormat.format),
+                .type = RHI::ImageViewType::ImageView2D,
+                .aspectMask = RHI::ImageAspect::Color,
                 .baseLayer = 0,
                 .layerCount = 1,
                 .baseLevel = 0,
-                .levelCount = 1,
-                .redComponent = vk::ComponentSwizzle::eIdentity,
-                .greenComponent = vk::ComponentSwizzle::eIdentity,
-                .blueComponent = vk::ComponentSwizzle::eIdentity,
-                .alphaComponent = vk::ComponentSwizzle::eIdentity
+                .levelCount = 1
             };
 
             mImageViews.push_back(std::make_unique<ImageView>(mDevice, imageViewDesc));
@@ -225,6 +225,7 @@ namespace Artus::Graphics {
 
     void Surface::DestroyImageViews() { mImageViews.clear(); }
     void Surface::DestroyFences() { mInFlightFens.clear(); }
+
     void Surface::DestroySemaphores() {
         mImageAvailableSems.clear();
         mRenderFinishedSems.clear();

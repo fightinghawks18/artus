@@ -2,28 +2,23 @@
 // Created by fightinghawks18 on 2/4/2026.
 //
 
-#include "Artus/Graphics/Resources/PipelineLayout.h"
+#include "Artus/Graphics/Vulkan/Resources/PipelineLayout.h"
+#include "Artus/Graphics/Vulkan/Resources/BindGroupLayout.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
-namespace Artus::Graphics {
-    PipelineLayout::PipelineLayout(Device& device, const PipelineLayoutDesc& desc) : mDevice(device) {
+namespace Artus::Graphics::Vulkan {
+    PipelineLayout::PipelineLayout(Device& device, const RHI::PipelineLayoutDesc& desc) : mDevice(device) {
         std::vector<vk::DescriptorSetLayout> layouts;
-        layouts.reserve(desc.layouts.size());
+        layouts.reserve(desc.groupLayouts.size());
 
-        std::vector<vk::PushConstantRange> pushConstants;
-        pushConstants.reserve(desc.pushConstants.size());
-
-        for (const auto& layout : desc.layouts) {
-            layouts.push_back(layout->GetVulkanDescriptorSetLayout());
-        }
-
-        for (const auto& pushConstant : desc.pushConstants) {
-            vk::PushConstantRange pushConstantRange = {};
-            pushConstantRange.setSize(pushConstant.size).setOffset(pushConstant.offset).setStageFlags(pushConstant.stageFlags);
-            pushConstants.push_back(pushConstantRange);
+        for (const auto& groupLayout : desc.groupLayouts) {
+            const auto vkBindGroupLayout = reinterpret_cast<BindGroupLayout*>(groupLayout);
+            layouts.push_back(vkBindGroupLayout->GetDescriptorSetLayout()->GetVulkanDescriptorSetLayout());
         }
 
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo = {};
-        pipelineLayoutInfo.setSetLayouts(layouts).setPushConstantRanges(pushConstants);
+        pipelineLayoutInfo.setSetLayouts(layouts)
+                          .setPushConstantRanges(nullptr); // WebGPU approach doesn't support push constants
         mPipelineLayout = device.GetVulkanDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
     }
 

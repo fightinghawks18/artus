@@ -10,8 +10,11 @@ namespace Artus::Math {
     struct Color {
         float r, g, b, a;
 
-        explicit Color(const float r, const float g, const float b, const float a = 1.0f) : r(r), g(g), b(b), a(a) {}
-        Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {}
+        explicit Color(const float r, const float g, const float b, const float a = 1.0f) : r(r), g(g), b(b), a(a) {
+        }
+
+        Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {
+        }
 
         void Mix(const Color& c1) {
             r = (r + c1.r) / 2;
@@ -20,7 +23,7 @@ namespace Artus::Math {
             a = (a + c1.a) / 2;
         }
     };
-    
+
     inline Color operator+(const Color& c0, const Color& c1) {
         return Color{c0.r + c1.r, c0.g + c1.g, c0.b + c1.b, c0.a + c1.a};
     }
@@ -75,17 +78,13 @@ namespace Artus::Math {
         return c0;
     }
 
-    inline Color operator-(const Color& c0) {
-        return Color{-c0.r, -c0.g, -c0.b, -c0.a};
-    }
+    inline Color operator-(const Color& c0) { return Color{-c0.r, -c0.g, -c0.b, -c0.a}; }
 
     inline bool operator==(const Color& c0, const Color& c1) {
         return c0.r == c1.r && c0.g == c1.g && c0.b == c1.b && c0.a == c1.a;
     }
 
-    inline bool operator!=(const Color& c0, const Color& c1) {
-        return !(c0 == c1);
-    }
+    inline bool operator!=(const Color& c0, const Color& c1) { return !(c0 == c1); }
 }
 
 #endif // ARTUS_COLOR_H

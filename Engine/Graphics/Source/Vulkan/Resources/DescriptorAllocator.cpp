@@ -2,9 +2,10 @@
 // Created by fightinghawks18 on 2/7/2026.
 //
 
-#include "Artus/Graphics/Resources/DescriptorAllocator.h"
+#include "Artus/Graphics/Vulkan/Resources/DescriptorAllocator.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     DescriptorAllocator::DescriptorAllocator(Device& device, const DescriptorAllocatorDesc& desc) : mDevice(device) {
         std::vector<vk::DescriptorPoolSize> poolSizes;
         poolSizes.reserve(desc.pools.size());
@@ -16,8 +17,8 @@ namespace Artus::Graphics {
 
         vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
         descriptorPoolInfo.setMaxSets(desc.maxDescriptorSets)
-            .setPoolSizes(poolSizes)
-            .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+                          .setPoolSizes(poolSizes)
+                          .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
         mDescriptorPool = device.GetVulkanDevice().createDescriptorPoolUnique(descriptorPoolInfo);
     }
@@ -28,7 +29,8 @@ namespace Artus::Graphics {
         mDescriptorPool.reset();
     }
 
-    DescriptorSetLayout* DescriptorAllocator::CreateDescriptorSetLayout(const std::vector<DescriptorSetLayoutBinding>& bindings) {
+    DescriptorSetLayout* DescriptorAllocator::CreateDescriptorSetLayout(
+        const std::vector<DescriptorSetLayoutBinding>& bindings) {
         auto setLayout = std::make_unique<DescriptorSetLayout>(mDevice, bindings);
         auto setLayoutPtr = setLayout.get();
         mDescriptorSetLayouts.push_back(std::move(setLayout));

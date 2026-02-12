@@ -10,7 +10,7 @@
 
 #include <array>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::RHI {
     struct Vertex2D {
         std::array<float, 2> position;
         std::array<float, 2> uvCoords;

@@ -150,7 +150,6 @@ namespace Artus::Math {
         }
 
         static Matrix4 Perspective(const float fov, const float aspect, const float near, const float far) {
-
             const float tanHalfFov = std::tan(fov / 2.0f);
 
             const float xZoom = 1.0f / (aspect * tanHalfFov);
@@ -170,11 +169,7 @@ namespace Artus::Math {
 
         Matrix4 Transpose() const {
             Matrix4 result;
-            for (uint32_t i = 0; i < 4; i++) {
-                for (uint32_t j = 0; j < 4; j++) {
-                    result.m[i][j] = m[j][i];
-                }
-            }
+            for (uint32_t i = 0; i < 4; i++) { for (uint32_t j = 0; j < 4; j++) { result.m[i][j] = m[j][i]; } }
             return result;
         }
     };
@@ -184,9 +179,9 @@ namespace Artus::Math {
         for (uint32_t i = 0; i < 4; i++) {
             for (uint32_t j = 0; j < 4; j++) {
                 matrix.m[i][j] = m0.m[i][0] * m1.m[0][j] +
-                                     m0.m[i][1] * m1.m[1][j] +
-                                     m0.m[i][2] * m1.m[2][j] +
-                                     m0.m[i][3] * m1.m[3][j];
+                    m0.m[i][1] * m1.m[1][j] +
+                    m0.m[i][2] * m1.m[2][j] +
+                    m0.m[i][3] * m1.m[3][j];
             }
         }
         return matrix;

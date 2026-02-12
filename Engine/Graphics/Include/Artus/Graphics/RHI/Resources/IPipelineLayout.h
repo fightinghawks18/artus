@@ -13,15 +13,8 @@
 #include <vector>
 
 namespace Artus::Graphics::RHI {
-    struct PipelinePushConstant {
-        uint32_t size;
-        uint32_t offset;
-        ShaderStage shaderStages;
-    };
-
     struct PipelineLayoutDesc {
-        std::vector<IBindGroup*> groups;
-        std::vector<PipelinePushConstant> pushConstants;
+        std::vector<IBindGroupLayout*> groupLayouts;
     };
 
     class IPipelineLayout {

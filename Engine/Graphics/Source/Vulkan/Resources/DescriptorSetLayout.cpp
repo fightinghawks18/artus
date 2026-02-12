@@ -2,18 +2,21 @@
 // Created by fightinghawks18 on 2/7/2026.
 //
 
-#include "Artus/Graphics/Resources/DescriptorSetLayout.h"
+#include "Artus/Graphics/Vulkan/Resources/DescriptorSetLayout.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
-namespace Artus::Graphics {
-    DescriptorSetLayout::DescriptorSetLayout(Device& device, const std::vector<DescriptorSetLayoutBinding>& bindings) : mDevice(device) {
+namespace Artus::Graphics::Vulkan {
+    DescriptorSetLayout::DescriptorSetLayout(Device& device,
+                                             const std::vector<DescriptorSetLayoutBinding>& bindings) : mDevice(
+        device) {
         std::vector<vk::DescriptorSetLayoutBinding> vbindings;
         vbindings.reserve(bindings.size());
         for (const auto& binding : bindings) {
             vk::DescriptorSetLayoutBinding vbinding = {};
             vbinding.setBinding(binding.binding)
-                .setDescriptorType(binding.type)
-                .setImmutableSamplers(nullptr)
-                .setStageFlags(binding.stageFlags);
+                    .setDescriptorType(binding.type)
+                    .setImmutableSamplers(nullptr)
+                    .setStageFlags(binding.stageFlags);
 
             vbinding.descriptorCount = binding.count;
 

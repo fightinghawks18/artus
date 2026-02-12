@@ -8,10 +8,18 @@
 
 #include <cstdint>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::RHI {
     struct Rectangle {
         int32_t x, y;
         uint32_t width, height;
+    };
+
+    struct Extent {
+        uint32_t width, height;
+    };
+
+    struct Extent3D {
+        uint32_t width, height, depth;
     };
 
     struct Viewport {

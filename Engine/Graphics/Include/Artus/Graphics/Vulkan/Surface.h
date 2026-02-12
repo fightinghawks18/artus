@@ -5,8 +5,6 @@
 #ifndef ARTUS_SURFACE_H
 #define ARTUS_SURFACE_H
 
-#include "Device.h"
-
 #include "Artus/Core/Window.h"
 #include "Resources/Image.h"
 #include "Resources/ImageView.h"
@@ -14,24 +12,27 @@
 #include <vulkan/vulkan.hpp>
 
 #include "../RHI/Types/Common.h"
+#include "Artus/Graphics/RHI/ISurface.h"
 
 namespace Artus::Graphics::Vulkan {
-    class Surface {
+    class Device;
+
+    class Surface : public RHI::ISurface {
     public:
-        explicit Surface(Device& device, Core::Window* window);
-        ~Surface();
+        explicit Surface(Device& device, const RHI::SurfaceDesc& desc);
+        ~Surface() override;
 
-        uint32_t AcquireNextImage(vk::Semaphore* outSemaphore);
-        bool PresentDrawn(uint32_t imageIndex, vk::CommandBuffer commandBuffer, vk::Semaphore waitSemaphore);
+        void PrepareFrame() override;
+        void PresentFrame(RHI::ICommandEncoder* encoder) override;
 
-        [[nodiscard]] Rectangle GetRectangle() const {
+        [[nodiscard]] RHI::Rectangle GetRectangle() const override {
             return {0, 0, mSurfaceExtent.width, mSurfaceExtent.height};
         }
 
         [[nodiscard]] vk::SurfaceFormatKHR GetVulkanSurfaceFormat() const { return mSurfaceFormat; }
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
         [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
-        [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) { return mImageViews[index].get(); }
+        [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) const { return mImageViews[index].get(); }
         [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
 
     private:
@@ -51,6 +52,7 @@ namespace Artus::Graphics::Vulkan {
         std::vector<std::unique_ptr<ImageView>> mImageViews;
 
         uint32_t mFrameIdx = 0;
+        uint32_t mImageIndex = 0;
 
         void CreateSurface(Core::Window* window);
         void CreateSwapchain(Core::Window* window);

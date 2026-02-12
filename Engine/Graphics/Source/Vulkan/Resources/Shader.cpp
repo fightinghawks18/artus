@@ -2,7 +2,8 @@
 // Created by fightinghawks18 on 1/28/2026.
 //
 
-#include "Artus/Graphics/Resources/Shader.h"
+#include "Artus/Graphics/Vulkan/Resources/Shader.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
 #include <fstream>
 
@@ -19,9 +20,9 @@ static std::vector<uint32_t> ReadSpirv(const std::string& shader) {
     return buffer;
 }
 
-namespace Artus::Graphics {
-    Shader::Shader(Device& device, const std::string& shaderPath) : mDevice(device) {
-        auto shaderBuffer = ReadSpirv(shaderPath);
+namespace Artus::Graphics::Vulkan {
+    Shader::Shader(Device& device, const RHI::ShaderDesc& desc) : mDevice(device) {
+        auto shaderBuffer = ReadSpirv(desc.path);
 
         vk::ShaderModuleCreateInfo shaderModuleInfo = {};
         shaderModuleInfo.setCode(shaderBuffer);

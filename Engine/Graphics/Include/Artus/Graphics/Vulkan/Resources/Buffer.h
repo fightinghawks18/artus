@@ -5,25 +5,20 @@
 #ifndef ARTUS_BUFFER_H
 #define ARTUS_BUFFER_H
 
-#include "Artus/Graphics/Device.h"
-
-#include "Artus/Graphics/Utils/Vulkan/Allocator.h"
+#include "../Utils/Vulkan/Allocator.h"
+#include "Artus/Graphics/RHI/Resources/IBuffer.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
+    class Device;
 
     /// @brief Holds data that can be made accessible to the GPU
-    class Buffer {
+    class Buffer : public RHI::IBuffer {
     public:
-        explicit Buffer(Device& device, size_t size, BufferUsage usage);
-        ~Buffer();
+        explicit Buffer(Device& device, const RHI::BufferDesc& desc);
+        ~Buffer() override;
 
-        /// @brief Maps data provided to the buffer's data
-        /// @warning If you try to provide data that can't fully fit into the buffer it'll cause buffer overflow
-        /// @param dataSize The size of the data being mapped
-        /// @param bufferOffset The offset in the buffer's data to map the data provided to
-        /// @param data The data to map
-        void Map(size_t dataSize, size_t bufferOffset, void* data) const;
+        void Map(size_t dataSize, size_t bufferOffset, const void* data) const override;
 
         /// @brief Retrieves the underlying vulkan handle to this buffer
         /// @return vk::Buffer
@@ -33,7 +28,7 @@ namespace Artus::Graphics::Vulkan {
         [[nodiscard]] VmaAllocation GetVulkanAllocation() const { return mAllocation; }
 
     private:
-        Device& mDevice;
+        Vulkan::Device& mDevice;
 
         vk::Buffer mBuffer;
         VmaAllocation mAllocation;

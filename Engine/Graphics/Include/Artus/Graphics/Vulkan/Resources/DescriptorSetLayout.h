@@ -5,10 +5,11 @@
 #ifndef ARTUS_DESCRIPTOR_SET_LAYOUT_H
 #define ARTUS_DESCRIPTOR_SET_LAYOUT_H
 
-#include "../Device.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
+    class Device;
+
     struct DescriptorSetLayoutBinding {
         uint32_t binding;
         vk::DescriptorType type;

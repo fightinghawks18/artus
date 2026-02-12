@@ -3,4 +3,4 @@
 //
 
 #define VMA_IMPLEMENTATION
-#include "Artus/Graphics/Utils/Vulkan/Allocator.h"
+#include "Artus/Graphics/Vulkan/Utils/Vulkan/Allocator.h"

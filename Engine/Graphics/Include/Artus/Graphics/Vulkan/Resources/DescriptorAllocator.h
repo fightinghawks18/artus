@@ -5,13 +5,14 @@
 #ifndef ARTUS_DESCRIPTOR_ALLOCATOR_H
 #define ARTUS_DESCRIPTOR_ALLOCATOR_H
 
-#include "../Device.h"
 #include "DescriptorSet.h"
 #include "DescriptorSetLayout.h"
 
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
+    class Device;
+
     struct DescriptorAllocatorPoolDesc {
         vk::DescriptorType type;
         uint32_t descriptorCount;
@@ -31,7 +32,11 @@ namespace Artus::Graphics::Vulkan {
         DescriptorSet* CreateDescriptorSet(DescriptorSetLayout* layout);
 
         [[nodiscard]] vk::DescriptorPool GetVulkanDescriptorPool() const { return mDescriptorPool.get(); }
-        [[nodiscard]] DescriptorSetLayout* GetDescriptorSetLayout(uint32_t index) const { return mDescriptorSetLayouts[index].get(); }
+
+        [[nodiscard]] DescriptorSetLayout* GetDescriptorSetLayout(uint32_t index) const {
+            return mDescriptorSetLayouts[index].get();
+        }
+
         [[nodiscard]] DescriptorSet* GetDescriptorSet(uint32_t index) const { return mDescriptorSets[index].get(); }
 
     private:

@@ -2,13 +2,14 @@
 // Created by fightinghawks18 on 2/1/2026.
 //
 
-#include "Artus/Graphics/Resources/CommandAllocator.h"
+#include "Artus/Graphics/Vulkan/Resources/CommandAllocator.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     CommandAllocator::CommandAllocator(Device& device) : mDevice(device) {
         vk::CommandPoolCreateInfo cmdPoolInfo = {};
         cmdPoolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
-            .setQueueFamilyIndex(device.GetVulkanGraphicsFamily());
+                   .setQueueFamilyIndex(device.GetVulkanGraphicsFamily());
 
         mCmdPool = device.GetVulkanDevice().createCommandPoolUnique(cmdPoolInfo);
     }
@@ -30,17 +31,13 @@ namespace Artus::Graphics {
     std::vector<CommandEncoder*> CommandAllocator::NewEncoders(size_t encoderCount) {
         std::vector<CommandEncoder*> encoders(encoderCount);
 
-        for (uint32_t i = 0; i < encoderCount; i++) {
-            encoders[i] = NewEncoder();
-        }
+        for (uint32_t i = 0; i < encoderCount; i++) { encoders[i] = NewEncoder(); }
 
         return encoders;
     }
 
     void CommandAllocator::DestroyEncoders(std::vector<CommandEncoder*>& encoders) {
-        for (const auto& encoder : encoders) {
-            DestroyEncoder(encoder);
-        }
+        for (const auto& encoder : encoders) { DestroyEncoder(encoder); }
 
         encoders.clear();
     }

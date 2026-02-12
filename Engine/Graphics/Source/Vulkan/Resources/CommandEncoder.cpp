@@ -2,10 +2,11 @@
 // Created by fightinghawks18 on 2/1/2026.
 //
 
-#include "Artus/Graphics/Resources/CommandEncoder.h"
+#include "Artus/Graphics/Vulkan/Resources/CommandEncoder.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 #include <Artus/Core/Logger.h>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::Vulkan {
     CommandEncoder::CommandEncoder(Device& device, vk::CommandPool commandPool) : mDevice(device) {
         vk::CommandBufferAllocateInfo cmdBufferInfo = {};
         cmdBufferInfo.setCommandBufferCount(1).setCommandPool(commandPool);
@@ -18,9 +19,7 @@ namespace Artus::Graphics {
     CommandEncoder::~CommandEncoder() {
         mDevice.GetVulkanDevice().waitIdle();
 
-        if (mInUse) {
-            End();
-        }
+        if (mInUse) { End(); }
 
         mCommandBuffer.reset();
     }
@@ -47,49 +46,53 @@ namespace Artus::Graphics {
     }
 
     void CommandEncoder::Reset() { mCommandBuffer->reset(); }
-    void CommandEncoder::StartRenderingPass(const RenderingPass& renderingPass) {
+
+    void CommandEncoder::StartRenderingPass(const RHI::RenderingPass& renderingPass) {
         vk::RenderingInfo renderingInfo = {};
 
         std::vector<vk::RenderingAttachmentInfo> colorAttachments;
         vk::RenderingAttachmentInfo depthStencilAttachmentInfo = {};
         for (const auto& attachment : renderingPass.attachments) {
+            const auto vkImageView = reinterpret_cast<ImageView*>(attachment.view);
+
             vk::RenderingAttachmentInfo attachmentInfo = {};
-            attachmentInfo.setImageView(attachment.view->GetVulkanImageView());
+            attachmentInfo.setImageView(vkImageView->GetVulkanImageView());
 
             switch (attachment.type) {
-            case RenderingAttachmentType::Color: {
+            case RHI::RenderingAttachmentType::Color: {
                 attachmentInfo.setImageLayout(vk::ImageLayout::eColorAttachmentOptimal);
                 break;
             }
-            case RenderingAttachmentType::DepthStencil: {
+            case RHI::RenderingAttachmentType::DepthStencil: {
                 attachmentInfo.setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
                 break;
             }
-            case RenderingAttachmentType::Shader: {
+            case RHI::RenderingAttachmentType::Shader: {
                 attachmentInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
                 break;
             }
             }
 
             switch (attachment.lsOp) {
-            case RenderingAttachmentLoadStoreOp::LoadThenStore: {
+            case RHI::RenderingAttachmentLoadStoreOp::LoadThenStore: {
                 attachmentInfo.setLoadOp(vk::AttachmentLoadOp::eLoad).setStoreOp(vk::AttachmentStoreOp::eStore);
                 break;
             }
-            case RenderingAttachmentLoadStoreOp::ClearThenStore: {
+            case RHI::RenderingAttachmentLoadStoreOp::ClearThenStore: {
                 attachmentInfo.setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
                 break;
             }
             }
 
-            if (attachment.type == RenderingAttachmentType::DepthStencil) {
-                const auto clearDepthValue = std::get<RenderingDepthStencilClear>(attachment.clear);
+            if (attachment.type == RHI::RenderingAttachmentType::DepthStencil) {
+                const auto clearDepthValue = std::get<RHI::RenderingDepthStencilClear>(attachment.clear);
 
                 vk::ClearDepthStencilValue depthStencil = {};
                 depthStencil.setDepth(clearDepthValue.depth).setStencil(clearDepthValue.stencil);
                 attachmentInfo.setClearValue(depthStencil);
                 depthStencilAttachmentInfo = attachmentInfo;
-            } else {
+            }
+            else {
                 const auto clearColorValue = std::get<Math::Color>(attachment.clear);
 
                 vk::ClearColorValue clearColor = {};
@@ -101,16 +104,17 @@ namespace Artus::Graphics {
 
         vk::Rect2D renderArea = {};
         renderArea.setOffset({renderingPass.renderArea.x, renderingPass.renderArea.y})
-            .setExtent({renderingPass.renderArea.width, renderingPass.renderArea.height});
+                  .setExtent({renderingPass.renderArea.width, renderingPass.renderArea.height});
 
         renderingInfo.setColorAttachments(colorAttachments)
-            .setLayerCount(1).setRenderArea(renderArea);
+                     .setLayerCount(1).setRenderArea(renderArea);
         if (depthStencilAttachmentInfo.imageView)
             renderingInfo.setPDepthAttachment(&depthStencilAttachmentInfo).setPStencilAttachment(
                 &depthStencilAttachmentInfo);
 
         mCommandBuffer->beginRendering(renderingInfo);
     }
+
     void CommandEncoder::EndRenderingPass() { mCommandBuffer->endRendering(); }
 
     void CommandEncoder::MakeImageRenderable(Image* image) {
@@ -121,20 +125,20 @@ namespace Artus::Graphics {
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-            .setBaseArrayLayer(0)
-            .setLayerCount(1)
-            .setBaseMipLevel(0)
-            .setLevelCount(1);
+                        .setBaseArrayLayer(0)
+                        .setLayerCount(1)
+                        .setBaseMipLevel(0)
+                        .setLevelCount(1);
 
         vk::ImageMemoryBarrier2 imageMemBarrier = {};
         imageMemBarrier.setImage(img)
-            .setOldLayout(layout)
-            .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
-            .setSrcAccessMask(accessMasks)
-            .setSrcStageMask(stageMasks)
-            .setDstAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
-            .setSubresourceRange(subresourceRange);
+                       .setOldLayout(layout)
+                       .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
+                       .setSrcAccessMask(accessMasks)
+                       .setSrcStageMask(stageMasks)
+                       .setDstAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
+                       .setDstStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
+                       .setSubresourceRange(subresourceRange);
 
         vk::DependencyInfo dependencyInfo = {};
         dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
@@ -151,25 +155,25 @@ namespace Artus::Graphics {
         auto& stageMasks = image->GetVulkanStageMasks();
         auto img = image->GetVulkanImage();
         auto& layout = image->GetVulkanLayout();
-        
+
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
-            .setBaseArrayLayer(0)
-            .setLayerCount(1)
-            .setBaseMipLevel(0)
-            .setLevelCount(1);
+                        .setBaseArrayLayer(0)
+                        .setLayerCount(1)
+                        .setBaseMipLevel(0)
+                        .setLevelCount(1);
 
         vk::ImageMemoryBarrier2 imageMemBarrier = {};
         imageMemBarrier.setImage(img)
-            .setOldLayout(layout)
-            .setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
-            .setSrcAccessMask(accessMasks)
-            .setSrcStageMask(stageMasks)
-            .setDstAccessMask(vk::AccessFlagBits2::eDepthStencilAttachmentRead |
-                              vk::AccessFlagBits2::eDepthStencilAttachmentWrite)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eLateFragmentTests |
-                             vk::PipelineStageFlagBits2::eEarlyFragmentTests)
-            .setSubresourceRange(subresourceRange);
+                       .setOldLayout(layout)
+                       .setNewLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+                       .setSrcAccessMask(accessMasks)
+                       .setSrcStageMask(stageMasks)
+                       .setDstAccessMask(vk::AccessFlagBits2::eDepthStencilAttachmentRead |
+                           vk::AccessFlagBits2::eDepthStencilAttachmentWrite)
+                       .setDstStageMask(vk::PipelineStageFlagBits2::eLateFragmentTests |
+                           vk::PipelineStageFlagBits2::eEarlyFragmentTests)
+                       .setSubresourceRange(subresourceRange);
 
         vk::DependencyInfo dependencyInfo = {};
         dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
@@ -187,23 +191,24 @@ namespace Artus::Graphics {
         auto& stageMasks = image->GetVulkanStageMasks();
         auto img = image->GetVulkanImage();
         auto& layout = image->GetVulkanLayout();
-        
+
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-            .setBaseArrayLayer(0)
-            .setLayerCount(1)
-            .setBaseMipLevel(0)
-            .setLevelCount(1);
+                        .setBaseArrayLayer(0)
+                        .setLayerCount(1)
+                        .setBaseMipLevel(0)
+                        .setLevelCount(1);
 
         vk::ImageMemoryBarrier2 imageMemBarrier = {};
         imageMemBarrier.setImage(img)
-            .setOldLayout(layout)
-            .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
-            .setSrcAccessMask(accessMasks)
-            .setSrcStageMask(stageMasks)
-            .setDstAccessMask(vk::AccessFlagBits2::eShaderRead)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader)
-            .setSubresourceRange(subresourceRange);
+                       .setOldLayout(layout)
+                       .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+                       .setSrcAccessMask(accessMasks)
+                       .setSrcStageMask(stageMasks)
+                       .setDstAccessMask(vk::AccessFlagBits2::eShaderRead)
+                       .setDstStageMask(
+                           vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader)
+                       .setSubresourceRange(subresourceRange);
 
         vk::DependencyInfo dependencyInfo = {};
         dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
@@ -223,20 +228,20 @@ namespace Artus::Graphics {
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-            .setBaseArrayLayer(0)
-            .setLayerCount(1)
-            .setBaseMipLevel(0)
-            .setLevelCount(1);
+                        .setBaseArrayLayer(0)
+                        .setLayerCount(1)
+                        .setBaseMipLevel(0)
+                        .setLevelCount(1);
 
         vk::ImageMemoryBarrier2 imageMemBarrier = {};
         imageMemBarrier.setImage(img)
-            .setOldLayout(layout)
-            .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
-            .setSrcAccessMask(accessMasks)
-            .setSrcStageMask(stageMasks)
-            .setDstAccessMask(vk::AccessFlagBits2::eNone)
-            .setDstStageMask(vk::PipelineStageFlagBits2::eNone)
-            .setSubresourceRange(subresourceRange);
+                       .setOldLayout(layout)
+                       .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+                       .setSrcAccessMask(accessMasks)
+                       .setSrcStageMask(stageMasks)
+                       .setDstAccessMask(vk::AccessFlagBits2::eNone)
+                       .setDstStageMask(vk::PipelineStageFlagBits2::eNone)
+                       .setSubresourceRange(subresourceRange);
 
         vk::DependencyInfo dependencyInfo = {};
         dependencyInfo.setImageMemoryBarriers(imageMemBarrier);
@@ -263,40 +268,38 @@ namespace Artus::Graphics {
         mCommandBuffer->bindIndexBuffer(indexHandle, 0, vk::IndexType::eUint32);
     }
 
-    void CommandEncoder::SetCullMode(vk::CullModeFlags cullMode) {
-        mCommandBuffer->setCullMode(cullMode);
-    }
+    void CommandEncoder::SetCullMode(vk::CullModeFlags cullMode) { mCommandBuffer->setCullMode(cullMode); }
 
-    void CommandEncoder::SetDepthTesting(bool depthTesting) {
-        mCommandBuffer->setDepthTestEnable(depthTesting);
-    }
+    void CommandEncoder::SetDepthTesting(bool depthTesting) { mCommandBuffer->setDepthTestEnable(depthTesting); }
 
     void CommandEncoder::SetStencilTesting(bool stencilTesting) {
         mCommandBuffer->setStencilTestEnable(stencilTesting);
     }
 
-    void CommandEncoder::SetDepthWriting(bool depthWriting) {
-        mCommandBuffer->setDepthWriteEnable(depthWriting);
-    }
+    void CommandEncoder::SetDepthWriting(bool depthWriting) { mCommandBuffer->setDepthWriteEnable(depthWriting); }
 
-    void CommandEncoder::SetViewport(const Viewport& viewport) {
-        vk::Viewport vp = {viewport.x, viewport.y, viewport.width, viewport.height, viewport.minDepth, viewport.maxDepth};
+    void CommandEncoder::SetViewport(const RHI::Viewport& viewport) {
+        vk::Viewport vp = {
+            viewport.x, viewport.y, viewport.width, viewport.height, viewport.minDepth, viewport.maxDepth
+        };
         mCommandBuffer->setViewportWithCount(1, &vp);
     }
 
-    void CommandEncoder::SetScissor(const Rectangle& scissor) {
+    void CommandEncoder::SetScissor(const RHI::Rectangle& scissor) {
         vk::Rect2D s = {};
         s.setOffset({scissor.x, scissor.y})
-            .setExtent({scissor.width, scissor.height});
+         .setExtent({scissor.width, scissor.height});
         mCommandBuffer->setScissorWithCount(1, &s);
     }
 
     void CommandEncoder::BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout) {
         auto setHandle = set->GetVulkanDescriptorSet();
-        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout->GetVulkanPipelineLayout(), 0, 1, &setHandle, 0, nullptr);
+        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout->GetVulkanPipelineLayout(), 0, 1,
+                                           &setHandle, 0, nullptr);
     }
 
-    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, const vk::ShaderStageFlagBits stageFlags, const uint32_t size, const uint32_t offset, void* data) {
+    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, const vk::ShaderStageFlagBits stageFlags,
+                                            const uint32_t size, const uint32_t offset, void* data) {
         mCommandBuffer->pushConstants(layout->GetVulkanPipelineLayout(), stageFlags, offset, size, data);
     }
 
@@ -307,5 +310,4 @@ namespace Artus::Graphics {
     void CommandEncoder::Draw(uint32_t vertexCount, uint32_t firstIndex) {
         mCommandBuffer->draw(vertexCount, 1, firstIndex, 0);
     }
-
 } // namespace Artus::Graphics

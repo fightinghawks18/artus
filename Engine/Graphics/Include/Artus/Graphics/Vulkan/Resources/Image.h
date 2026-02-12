@@ -5,17 +5,42 @@
 #ifndef ARTUS_IMAGE_H
 #define ARTUS_IMAGE_H
 
-#include "Artus/Graphics/Device.h"
-
+#include "Artus/Graphics/Vulkan/Utils/Vulkan/Allocator.h"
+#include "Artus/Graphics/RHI/Resources/IImage.h"
 #include <vulkan/vulkan.hpp>
 
+
 namespace Artus::Graphics::Vulkan {
+    class Device;
+
+    inline vk::ImageUsageFlags ToVkImageUsageFlags(const RHI::ImageUsage imageUsage) {
+        vk::ImageUsageFlags flags;
+        if ((imageUsage & RHI::ImageUsage::Color) != RHI::ImageUsage::None)
+            flags |= vk::ImageUsageFlagBits::eColorAttachment;
+        if ((imageUsage & RHI::ImageUsage::DepthStencil) != RHI::ImageUsage::None)
+            flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+        if ((imageUsage & RHI::ImageUsage::Shader) != RHI::ImageUsage::None)
+            flags |= vk::ImageUsageFlagBits::eSampled;
+        return flags;
+    }
+
+    inline vk::ImageType ToVkImageType(const RHI::ImageType imageType) {
+        switch (imageType) {
+        case RHI::ImageType::Image2D:
+            return vk::ImageType::e2D;
+        case RHI::ImageType::Image3D:
+            return vk::ImageType::e3D;
+        default:
+            return vk::ImageType::e2D;
+        }
+    }
+
     /// @brief Holds image data used for textures, rendering, or storage
-    class Image {
+    class Image : public RHI::IImage {
     public:
-        explicit Image(Device& device, const ImageDesc& desc);
+        explicit Image(Device& device, const RHI::ImageDesc& desc);
         explicit Image(Device& device, vk::Image image);
-        ~Image();
+        ~Image() override;
 
         /// @brief Retrieves the vulkan handle to this image
         /// @return vk::Image

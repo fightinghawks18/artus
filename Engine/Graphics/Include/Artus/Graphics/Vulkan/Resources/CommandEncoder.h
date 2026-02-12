@@ -5,25 +5,27 @@
 #ifndef ARTUS_COMMAND_ENCODER_H
 #define ARTUS_COMMAND_ENCODER_H
 
-#include "../Device.h"
 #include "Buffer.h"
 #include "DescriptorSet.h"
 #include "GraphicsPipeline.h"
 #include <vulkan/vulkan.hpp>
 
-#include "Artus/Graphics/Types/Rendering.h"
+#include "Artus/Graphics/RHI/Types/Rendering.h"
+#include "Artus/Graphics/RHI/Resources/ICommandEncoder.h"
 
 namespace Artus::Graphics::Vulkan {
-    class CommandEncoder {
+    class Device;
+
+    class CommandEncoder : public RHI::ICommandEncoder {
     public:
         explicit CommandEncoder(Device& device, vk::CommandPool commandPool);
-        ~CommandEncoder();
+        ~CommandEncoder() override;
 
         void Start();
         void End();
 
         void Reset();
-        void StartRenderingPass(const RenderingPass& renderingPass);
+        void StartRenderingPass(const RHI::RenderingPass& renderingPass);
         void EndRenderingPass();
 
         void MakeImageRenderable(Image* image);
@@ -38,10 +40,11 @@ namespace Artus::Graphics::Vulkan {
         void SetDepthTesting(bool depthTesting);
         void SetStencilTesting(bool stencilTesting);
         void SetDepthWriting(bool depthWriting);
-        void SetViewport(const Viewport& viewport);
-        void SetScissor(const Rectangle& scissor);
+        void SetViewport(const RHI::Viewport& viewport);
+        void SetScissor(const RHI::Rectangle& scissor);
         void BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout);
-        void UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size, uint32_t offset, void* data);
+        void UpdatePushConstant(PipelineLayout* layout, vk::ShaderStageFlagBits stageFlags, uint32_t size,
+                                uint32_t offset, void* data);
 
         void DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
         void Draw(uint32_t vertexCount, uint32_t firstIndex);

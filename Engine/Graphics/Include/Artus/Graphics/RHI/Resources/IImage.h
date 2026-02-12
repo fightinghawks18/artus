@@ -16,16 +16,24 @@ namespace Artus::Graphics::RHI {
     };
 
     enum class ImageUsage {
+        None = 0,
         Color,
-        Depth,
-        Stencil,
+        DepthStencil,
         Shader
     };
+
+    inline ImageUsage operator|(const ImageUsage i0, const ImageUsage i1) {
+        return static_cast<ImageUsage>(static_cast<uint32_t>(i0) | static_cast<uint32_t>(i1));
+    }
+
+    inline ImageUsage operator&(const ImageUsage i0, const ImageUsage i1) {
+        return static_cast<ImageUsage>(static_cast<uint32_t>(i0) & static_cast<uint32_t>(i1));
+    }
 
     struct ImageDesc {
         Format format;
         ImageType type;
-        Rectangle rect;
+        Extent3D extent;
         ImageUsage usage;
         uint32_t layerCount;
         uint32_t levelCount;

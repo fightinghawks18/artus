@@ -2,22 +2,26 @@
 // Created by fightinghawks18 on 1/25/2026.
 //
 
-#include "Artus/Graphics/Resources/Image.h"
+#include "Artus/Graphics/Vulkan/Resources/Image.h"
 
-namespace Artus::Graphics {
-    Image::Image(Device& device, const ImageDesc& desc) : mDevice(device) {
+#include "Artus/Graphics/Vulkan/Utils/Common/Format.h"
+#include "Artus/Graphics/Vulkan/Utils/Common/Common.h"
+#include "Artus/Graphics/Vulkan/Device.h"
+
+namespace Artus::Graphics::Vulkan {
+    Image::Image(Device& device, const RHI::ImageDesc& desc) : mDevice(device) {
         vk::ImageCreateInfo imageInfo = {};
-        imageInfo.setFormat(desc.format)
-            .setImageType(desc.type)
-            .setMipLevels(desc.levelCount)
-            .setArrayLayers(desc.layerCount)
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setExtent(desc.extent)
-            .setUsage(desc.usage)
-            .setTiling(vk::ImageTiling::eOptimal)
-            .setSharingMode(vk::SharingMode::eExclusive)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setQueueFamilyIndices(nullptr);
+        imageInfo.setFormat(ToVkFormat(desc.format))
+                 .setImageType(ToVkImageType(desc.type))
+                 .setMipLevels(desc.levelCount)
+                 .setArrayLayers(desc.layerCount)
+                 .setSamples(vk::SampleCountFlagBits::e1)
+                 .setExtent(ToVkExtent3D(desc.extent))
+                 .setUsage(ToVkImageUsageFlags(desc.usage))
+                 .setTiling(vk::ImageTiling::eOptimal)
+                 .setSharingMode(vk::SharingMode::eExclusive)
+                 .setInitialLayout(vk::ImageLayout::eUndefined)
+                 .setQueueFamilyIndices(nullptr);
 
         VmaAllocationCreateInfo allocationInfo = {0};
 
@@ -45,5 +49,4 @@ namespace Artus::Graphics {
             return;
         vmaDestroyImage(mDevice.GetVulkanAllocator(), mImage, mAllocation);
     }
-
 } // namespace Artus::Graphics

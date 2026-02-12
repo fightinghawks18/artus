@@ -17,6 +17,8 @@ add_library(ArtusGraphics
         Source/Vulkan/Resources/ImageView.cpp
         Source/Vulkan/Resources/DescriptorSetLayout.cpp
         Source/Vulkan/Resources/DescriptorSet.cpp
+        Source/Vulkan/Resources/BindGroupLayout.cpp
+        Source/Vulkan/Resources/BindGroup.cpp
 )
 
 target_include_directories(ArtusGraphics
@@ -31,7 +33,7 @@ target_link_libraries(ArtusGraphics
 
 if (APPLE)
     target_sources(ArtusGraphics PRIVATE
-            Source/Utils/Metal/Layer.mm
+            Source/Vulkan/Utils/Metal/Layer.mm
     )
 
     target_link_libraries(ArtusGraphics

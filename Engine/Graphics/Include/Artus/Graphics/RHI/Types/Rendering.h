@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-namespace Artus::Graphics {
+namespace Artus::Graphics::RHI {
     struct RenderingDepthStencilClear {
         float depth;
         uint32_t stencil;
@@ -31,7 +31,7 @@ namespace Artus::Graphics {
     };
 
     struct RenderingAttachment {
-        RHI::IImageView* view = nullptr;
+        IImageView* view = nullptr;
         RenderingAttachmentType type = RenderingAttachmentType::Color;
         RenderingAttachmentLoadStoreOp lsOp = RenderingAttachmentLoadStoreOp::ClearThenStore;
         std::variant<Math::Color, RenderingDepthStencilClear> clear;

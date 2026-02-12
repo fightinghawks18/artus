@@ -14,9 +14,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         auto createStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
         window = static_cast<Artus::Core::Window*>(createStruct->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
-    } else {
-        window = reinterpret_cast<Artus::Core::Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
+    else { window = reinterpret_cast<Artus::Core::Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA)); }
 
     switch (msg) {
     case WM_CLOSE: {
@@ -85,13 +84,13 @@ namespace Artus::Core {
     WindowSize Window::GetSize() {
         RECT rect;
         GetWindowRect(mImpl->hWnd, &rect);
-        return {rect.right-rect.left, rect.bottom-rect.top};
+        return {rect.right - rect.left, rect.bottom - rect.top};
     }
 
     WindowSize Window::GetPhysicalSize() {
         RECT rect;
         GetClientRect(mImpl->hWnd, &rect);
-        return {rect.right-rect.left, rect.bottom-rect.top};
+        return {rect.right - rect.left, rect.bottom - rect.top};
     }
 
     WindowHandle Window::GetHandle() { return {mImpl->hWnd}; }

@@ -15,11 +15,19 @@ namespace Artus::Graphics::RHI {
     };
 
     enum class ImageAspect {
+        None = 0,
         Color,
         Depth,
-        Stencil,
-        Shader
+        Stencil
     };
+
+    inline ImageAspect operator|(const ImageAspect i0, const ImageAspect i1) {
+        return static_cast<ImageAspect>(static_cast<uint32_t>(i0) | static_cast<uint32_t>(i1));
+    }
+
+    inline ImageAspect operator&(const ImageAspect i0, const ImageAspect i1) {
+        return static_cast<ImageAspect>(static_cast<uint32_t>(i0) & static_cast<uint32_t>(i1));
+    }
 
     struct ImageViewDesc {
         IImage* image;

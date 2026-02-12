@@ -10,13 +10,9 @@
 #include <math.h>
 
 namespace Artus::Math {
-    inline float AsRadians(const float degrees) {
-        return degrees * (M_PI / 180);
-    }
+    inline float AsRadians(const float degrees) { return degrees * (M_PI / 180); }
 
-    inline float AsDegrees(const float radians) {
-        return radians * (180 / M_PI);
-    }
+    inline float AsDegrees(const float radians) { return radians * (180 / M_PI); }
 }
 
 #endif // ARTUS_MATH_UTILITIES_H

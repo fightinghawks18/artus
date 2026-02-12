@@ -2,36 +2,39 @@
 // Created by fightinghawks18 on 1/26/2026.
 //
 
-#include "Artus/Graphics/Resources/Buffer.h"
+#include "Artus/Graphics/Vulkan/Resources/Buffer.h"
+#include "Artus/Graphics/Vulkan/Device.h"
 
-namespace Artus::Graphics {
-    Buffer::Buffer(Device& device, size_t size, BufferUsage usage) : mDevice(device) {
+namespace Artus::Graphics::Vulkan {
+    Buffer::Buffer(Device& device, const RHI::BufferDesc& desc) : mDevice(device) {
         vk::BufferUsageFlagBits usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
-        switch (usage) {
-        case BufferUsage::Vertex:
+        switch (desc.usage) {
+        case RHI::BufferUsage::Vertex:
             usageFlags = vk::BufferUsageFlagBits::eVertexBuffer;
             break;
-        case BufferUsage::Index:
+        case RHI::BufferUsage::Index:
             usageFlags = vk::BufferUsageFlagBits::eIndexBuffer;
             break;
-        case BufferUsage::Shader:
+        case RHI::BufferUsage::Shader:
             usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
             break;
-        case BufferUsage::ShaderStorage:
+        case RHI::BufferUsage::ShaderStorage:
             usageFlags = vk::BufferUsageFlagBits::eStorageBuffer;
             break;
         }
 
         vk::BufferCreateInfo bufferInfo = {};
-        bufferInfo.setSize(size).setUsage(usageFlags).setSharingMode(vk::SharingMode::eExclusive);
+        bufferInfo.setSize(desc.size).setUsage(usageFlags).setSharingMode(vk::SharingMode::eExclusive);
 
         VmaAllocationCreateInfo allocInfo = {0};
-        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT ;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+            VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
         VkBuffer buffer;
         VmaAllocationInfo allocInfoOut;
-        vmaCreateBuffer(device.GetVulkanAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo), &allocInfo, &buffer, &mAllocation, &allocInfoOut);
+        vmaCreateBuffer(device.GetVulkanAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
+                        &allocInfo, &buffer, &mAllocation, &allocInfoOut);
         mBuffer = buffer;
         mMappedData = allocInfoOut.pMappedData;
     }
@@ -44,7 +47,7 @@ namespace Artus::Graphics {
         mAllocation = nullptr;
     }
 
-    void Buffer::Map(size_t dataSize, size_t bufferOffset, void* data) const {
+    void Buffer::Map(const size_t dataSize, const size_t bufferOffset, const void* data) const {
         memcpy(static_cast<char*>(mMappedData) + bufferOffset, data, dataSize);
     }
 } // namespace Artus::Graphics
