@@ -10,6 +10,8 @@
 #include "../Resources/ImageView.h"
 #include <Artus/Math/Color.h>
 
+#include <variant>
+
 namespace Artus::Graphics {
     struct RenderingDepthStencilClear {
         float depth;
@@ -28,9 +30,9 @@ namespace Artus::Graphics {
     };
 
     struct RenderingAttachment {
-        ImageView* view;
-        RenderingAttachmentType type;
-        RenderingAttachmentLoadStoreOp lsOp;
+        ImageView* view = nullptr;
+        RenderingAttachmentType type = RenderingAttachmentType::Color;
+        RenderingAttachmentLoadStoreOp lsOp = RenderingAttachmentLoadStoreOp::ClearThenStore;
         std::variant<Math::Color, RenderingDepthStencilClear> clear;
     };
 
