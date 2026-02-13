@@ -13,7 +13,7 @@ namespace Artus::Graphics::Vulkan {
 
     class Shader : public RHI::IShader {
     public:
-        explicit Shader(Device& device, const RHI::ShaderDesc& desc);
+        explicit Shader(Device& device, const RHI::ShaderCreateDesc& desc);
         ~Shader() override;
 
         [[nodiscard]] vk::ShaderModule GetVulkanShaderModule() const { return mShaderModule.get(); }

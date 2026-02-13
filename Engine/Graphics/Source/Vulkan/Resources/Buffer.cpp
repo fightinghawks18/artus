@@ -6,7 +6,7 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    Buffer::Buffer(Device& device, const RHI::BufferDesc& desc) : mDevice(device) {
+    Buffer::Buffer(Device& device, const RHI::BufferCreateDesc& desc) : mDevice(device) {
         vk::BufferUsageFlagBits usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
         switch (desc.usage) {
         case RHI::BufferUsage::Vertex:

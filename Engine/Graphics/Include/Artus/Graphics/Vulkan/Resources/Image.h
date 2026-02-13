@@ -35,10 +35,44 @@ namespace Artus::Graphics::Vulkan {
         }
     }
 
+    inline RHI::ImageState FromVkImageLayout(const vk::ImageLayout imageLayout) {
+        switch (imageLayout) {
+        case vk::ImageLayout::eUndefined:
+            return RHI::ImageState::Unknown;
+        case vk::ImageLayout::eColorAttachmentOptimal:
+            return RHI::ImageState::Color;
+        case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+            return RHI::ImageState::DepthStencil;
+        case vk::ImageLayout::eShaderReadOnlyOptimal:
+            return RHI::ImageState::ShaderAccess;
+        case vk::ImageLayout::ePresentSrcKHR:
+            return RHI::ImageState::Presentable;
+        default:
+            return RHI::ImageState::Unknown;
+        }
+    }
+
+    inline vk::ImageLayout ToVkImageLayout(const RHI::ImageState imageState) {
+        switch (imageState) {
+        case RHI::ImageState::Unknown:
+            return vk::ImageLayout::eUndefined;
+        case RHI::ImageState::Color:
+            return vk::ImageLayout::eColorAttachmentOptimal;
+        case RHI::ImageState::DepthStencil:
+            return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+        case RHI::ImageState::ShaderAccess:
+            return vk::ImageLayout::eShaderReadOnlyOptimal;
+        case RHI::ImageState::Presentable:
+            return vk::ImageLayout::ePresentSrcKHR;
+        default:
+            return vk::ImageLayout::eUndefined;
+        }
+    }
+
     /// @brief Holds image data used for textures, rendering, or storage
     class Image : public RHI::IImage {
     public:
-        explicit Image(Device& device, const RHI::ImageDesc& desc);
+        explicit Image(Device& device, const RHI::ImageCreateDesc& desc);
         explicit Image(Device& device, vk::Image image);
         ~Image() override;
 

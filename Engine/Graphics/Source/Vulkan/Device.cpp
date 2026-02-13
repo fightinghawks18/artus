@@ -33,13 +33,13 @@ namespace Artus::Graphics::Vulkan {
 
         mCommandAllocator = std::make_unique<CommandAllocator>(*this);
 
-        std::vector<DescriptorAllocatorPoolDesc> poolDesc;
+        std::vector<DescriptorAllocatorPoolCreateDesc> poolDesc;
         poolDesc.push_back({
             .type = vk::DescriptorType::eUniformBuffer,
             .descriptorCount = 100
         });
 
-        DescriptorAllocatorDesc allocDesc = {
+        DescriptorAllocatorCreateDesc allocDesc = {
             .maxDescriptorSets = 50,
             .pools = poolDesc
         };
@@ -58,25 +58,25 @@ namespace Artus::Graphics::Vulkan {
         mInstance.reset();
     }
 
-    RHI::ISurface* Device::CreateSurface(const RHI::SurfaceDesc& surfaceDesc) {
+    RHI::ISurface* Device::CreateSurface(const RHI::SurfaceCreateDesc& surfaceDesc) {
         return new Surface(*this, surfaceDesc);
     }
 
-    RHI::IBuffer* Device::CreateBuffer(const RHI::BufferDesc& bufferDesc) { return new Buffer(*this, bufferDesc); }
+    RHI::IBuffer* Device::CreateBuffer(const RHI::BufferCreateDesc& bufferDesc) { return new Buffer(*this, bufferDesc); }
 
-    RHI::IImage* Device::CreateImage(const RHI::ImageDesc& imageDesc) { return new Image(*this, imageDesc); }
+    RHI::IImage* Device::CreateImage(const RHI::ImageCreateDesc& imageDesc) { return new Image(*this, imageDesc); }
 
-    RHI::IImageView* Device::CreateImageView(const RHI::ImageViewDesc& imageViewDesc) {
+    RHI::IImageView* Device::CreateImageView(const RHI::ImageViewCreateDesc& imageViewDesc) {
         return new ImageView(*this, imageViewDesc);
     }
 
-    RHI::IGraphicsPipeline* Device::CreateGraphicsPipeline(const RHI::GraphicsPipelineDesc& pipelineDesc) {
+    RHI::IGraphicsPipeline* Device::CreateGraphicsPipeline(const RHI::GraphicsPipelineCreateDesc& pipelineDesc) {
         return new GraphicsPipeline(*this, pipelineDesc);
     }
 
-    RHI::IShader* Device::CreateShader(const RHI::ShaderDesc& shaderDesc) { return new Shader(*this, shaderDesc); }
+    RHI::IShader* Device::CreateShader(const RHI::ShaderCreateDesc& shaderDesc) { return new Shader(*this, shaderDesc); }
 
-    RHI::IPipelineLayout* Device::CreatePipelineLayout(const RHI::PipelineLayoutDesc& pipelineLayout) {
+    RHI::IPipelineLayout* Device::CreatePipelineLayout(const RHI::PipelineLayoutCreateDesc& pipelineLayout) {
         return new PipelineLayout(*this, pipelineLayout);
     }
 
@@ -87,11 +87,11 @@ namespace Artus::Graphics::Vulkan {
         return std::vector<RHI::ICommandEncoder*>(cmds.begin(), cmds.end());
     }
 
-    RHI::IBindGroupLayout* Device::CreateBindGroupLayout(const RHI::BindGroupLayoutDesc& bindGroupLayoutDesc) {
+    RHI::IBindGroupLayout* Device::CreateBindGroupLayout(const RHI::BindGroupLayoutCreateDesc& bindGroupLayoutDesc) {
         return new BindGroupLayout(*this, mDescriptorAllocator.get(), bindGroupLayoutDesc);
     }
 
-    RHI::IBindGroup* Device::CreateBindGroup(const RHI::BindGroupDesc& bindGroupDesc) {
+    RHI::IBindGroup* Device::CreateBindGroup(const RHI::BindGroupCreateDesc& bindGroupDesc) {
         return new BindGroup(*this, mDescriptorAllocator.get(), bindGroupDesc);
     }
 

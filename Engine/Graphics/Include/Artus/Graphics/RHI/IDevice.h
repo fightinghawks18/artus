@@ -20,17 +20,17 @@ namespace Artus::Graphics::RHI {
     public:
         virtual ~IDevice() = default;
 
-        virtual ISurface* CreateSurface(const SurfaceDesc& surfaceDesc) = 0;
-        virtual IBuffer* CreateBuffer(const BufferDesc& bufferDesc) = 0;
-        virtual IImage* CreateImage(const ImageDesc& imageDesc) = 0;
-        virtual IImageView* CreateImageView(const ImageViewDesc& imageViewDesc) = 0;
-        virtual IGraphicsPipeline* CreateGraphicsPipeline(const GraphicsPipelineDesc& pipelineDesc) = 0;
-        virtual IShader* CreateShader(const ShaderDesc& shaderDesc) = 0;
-        virtual IPipelineLayout* CreatePipelineLayout(const PipelineLayoutDesc& pipelineLayout) = 0;
+        virtual ISurface* CreateSurface(const SurfaceCreateDesc& surfaceCreateDesc) = 0;
+        virtual IBuffer* CreateBuffer(const BufferCreateDesc& bufferCreateDesc) = 0;
+        virtual IImage* CreateImage(const ImageCreateDesc& imageCreateDesc) = 0;
+        virtual IImageView* CreateImageView(const ImageViewCreateDesc& imageViewCreateDesc) = 0;
+        virtual IGraphicsPipeline* CreateGraphicsPipeline(const GraphicsPipelineCreateDesc& pipelineCreateDesc) = 0;
+        virtual IShader* CreateShader(const ShaderCreateDesc& shaderCreateDesc) = 0;
+        virtual IPipelineLayout* CreatePipelineLayout(const PipelineLayoutCreateDesc& pipelineLayout) = 0;
         virtual ICommandEncoder* CreateCommandEncoder() = 0;
         virtual std::vector<ICommandEncoder*> CreateCommandEncoders(uint32_t commandEncoderCount) = 0;
-        virtual IBindGroupLayout* CreateBindGroupLayout(const BindGroupLayoutDesc& bindGroupLayoutDesc) = 0;
-        virtual IBindGroup* CreateBindGroup(const BindGroupDesc& bindGroupDesc) = 0;
+        virtual IBindGroupLayout* CreateBindGroupLayout(const BindGroupLayoutCreateDesc& bindGroupLayoutCreateDesc) = 0;
+        virtual IBindGroup* CreateBindGroup(const BindGroupCreateDesc& bindGroupDesc) = 0;
     };
 }
 

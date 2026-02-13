@@ -45,7 +45,7 @@ namespace Artus::Graphics::RHI {
         std::vector<GraphicsPipelineInputAttribute> attributes;
     };
 
-    struct GraphicsPipelineDesc {
+    struct GraphicsPipelineCreateDesc {
         IShader* vertexStage;
         IShader* pixelStage;
 

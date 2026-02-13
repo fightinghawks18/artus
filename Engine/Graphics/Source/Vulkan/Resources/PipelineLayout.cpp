@@ -7,7 +7,7 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    PipelineLayout::PipelineLayout(Device& device, const RHI::PipelineLayoutDesc& desc) : mDevice(device) {
+    PipelineLayout::PipelineLayout(Device& device, const RHI::PipelineLayoutCreateDesc& desc) : mDevice(device) {
         std::vector<vk::DescriptorSetLayout> layouts;
         layouts.reserve(desc.groupLayouts.size());
 

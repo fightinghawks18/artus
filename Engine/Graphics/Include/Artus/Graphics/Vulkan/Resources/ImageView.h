@@ -37,14 +37,16 @@ namespace Artus::Graphics::Vulkan {
 
     class ImageView : public RHI::IImageView {
     public:
-        explicit ImageView(Device& device, const RHI::ImageViewDesc& desc);
+        explicit ImageView(Device& device, const RHI::ImageViewCreateDesc& desc);
         ~ImageView() override;
 
+        [[nodiscard]] RHI::IImage* GetImage() const override { return mImage; }
         [[nodiscard]] vk::ImageView GetVulkanImageView() const { return mImageView.get(); }
 
     private:
         Device& mDevice;
 
+        RHI::IImage* mImage;
         vk::UniqueImageView mImageView;
     };
 }

@@ -6,7 +6,7 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    DescriptorAllocator::DescriptorAllocator(Device& device, const DescriptorAllocatorDesc& desc) : mDevice(device) {
+    DescriptorAllocator::DescriptorAllocator(Device& device, const DescriptorAllocatorCreateDesc& desc) : mDevice(device) {
         std::vector<vk::DescriptorPoolSize> poolSizes;
         poolSizes.reserve(desc.pools.size());
         for (const auto& pool : desc.pools) {

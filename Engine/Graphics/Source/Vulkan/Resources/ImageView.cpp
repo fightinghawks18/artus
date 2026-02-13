@@ -7,7 +7,7 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    ImageView::ImageView(Device& device, const RHI::ImageViewDesc& desc) : mDevice(device) {
+    ImageView::ImageView(Device& device, const RHI::ImageViewCreateDesc& desc) : mDevice(device), mImage(desc.image) {
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(ToVkImageAspectFlags(desc.aspectMask))
                         .setBaseArrayLayer(desc.baseLayer)

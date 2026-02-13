@@ -24,16 +24,19 @@ namespace Artus::Graphics::RHI {
         ShaderStage visibility;
         uint32_t binding;
         BindGroupLayoutBindingType type;
-        std::variant<IBuffer*, IImageView*> resource;
     };
 
-    struct BindGroupLayoutDesc {
+    struct BindGroupLayoutCreateDesc {
         std::vector<BindGroupLayoutBinding> bindings;
     };
+
+    struct BindGroupLayoutDesc : BindGroupLayoutCreateDesc {};
 
     class IBindGroupLayout {
     public:
         virtual ~IBindGroupLayout() = default;
+
+        [[nodiscard]] virtual const BindGroupLayoutDesc& GetDesc() const = 0;
     };
 }
 

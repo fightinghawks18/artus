@@ -8,7 +8,7 @@
 
 namespace Artus::Graphics::Vulkan {
     BindGroupLayout::BindGroupLayout(Device& device, DescriptorAllocator* allocator,
-                                     const RHI::BindGroupLayoutDesc& desc) : mDevice(device) {
+                                     const RHI::BindGroupLayoutCreateDesc& desc) : mDevice(device), mDesc(desc) {
         std::vector<DescriptorSetLayoutBinding> bindings;
         for (const auto& binding : desc.bindings) {
             DescriptorSetLayoutBinding layoutBinding = {

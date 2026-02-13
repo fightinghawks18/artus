@@ -8,8 +8,10 @@
 #include "Artus/Core/Window.h"
 #include "Resources/Image.h"
 #include "Resources/ImageView.h"
+#include "Utils/Common/Format.h"
 
 #include <vulkan/vulkan.hpp>
+#include <functional>
 
 #include "../RHI/Types/Common.h"
 #include "Artus/Graphics/RHI/ISurface.h"
@@ -19,8 +21,10 @@ namespace Artus::Graphics::Vulkan {
 
     class Surface : public RHI::ISurface {
     public:
-        explicit Surface(Device& device, const RHI::SurfaceDesc& desc);
+        explicit Surface(Device& device, const RHI::SurfaceCreateDesc& desc);
         ~Surface() override;
+
+        void OnResize(const std::function<void()>& onResizeFun) override;
 
         RHI::SurfaceFrameInfo PrepareFrame() override;
         void PresentFrame(RHI::ICommandEncoder* encoder) override;
@@ -31,14 +35,17 @@ namespace Artus::Graphics::Vulkan {
 
         [[nodiscard]] vk::SurfaceFormatKHR GetVulkanSurfaceFormat() const { return mSurfaceFormat; }
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
-        [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
-        [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) const { return mImageViews[index].get(); }
+        [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mColorImages[index].get(); }
+        [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) const { return mColorImageViews[index].get(); }
         [[nodiscard]] uint32_t GetImageIndex() const override { return mImageIndex; }
         [[nodiscard]] uint32_t GetFrameIndex() const override { return mFrameIdx; }
+        [[nodiscard]] RHI::Format GetFormat() const override { return FromVkFormat(mSurfaceFormat.format); }
 
     private:
         Device& mDevice;
         Core::Window* mWindow;
+
+        std::function<void()> mOnResizeFun;
 
         vk::UniqueSwapchainKHR mSwapchain;
         vk::UniqueSurfaceKHR mSurface;
@@ -49,8 +56,10 @@ namespace Artus::Graphics::Vulkan {
         std::vector<vk::UniqueSemaphore> mRenderFinishedSems;
         std::vector<vk::UniqueFence> mInFlightFens;
 
-        std::vector<std::unique_ptr<Image>> mImages;
-        std::vector<std::unique_ptr<ImageView>> mImageViews;
+        std::vector<std::unique_ptr<Image>> mColorImages;
+        std::vector<std::unique_ptr<ImageView>> mColorImageViews;
+        std::vector<std::unique_ptr<Image>> mDepthImages;
+        std::vector<std::unique_ptr<ImageView>> mDepthImageViews;
 
         uint32_t mFrameIdx = 0;
         uint32_t mImageIndex = 0;
@@ -59,8 +68,10 @@ namespace Artus::Graphics::Vulkan {
         void CreateSwapchain(Core::Window* window);
         void CreateSemaphores();
         void CreateFences();
+        void CreateImages();
         void CreateImageViews();
 
+        void DestroyImages();
         void DestroyImageViews();
         void DestroyFences();
         void DestroySemaphores();

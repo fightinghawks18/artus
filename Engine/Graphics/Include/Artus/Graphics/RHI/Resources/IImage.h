@@ -15,6 +15,14 @@ namespace Artus::Graphics::RHI {
         Image3D
     };
 
+    enum class ImageState {
+        Unknown,
+        Color,
+        DepthStencil,
+        ShaderAccess,
+        Presentable
+    };
+
     enum class ImageUsage {
         None = 0,
         Color = 1 << 0,
@@ -30,7 +38,7 @@ namespace Artus::Graphics::RHI {
         return static_cast<ImageUsage>(static_cast<uint32_t>(i0) & static_cast<uint32_t>(i1));
     }
 
-    struct ImageDesc {
+    struct ImageCreateDesc {
         Format format;
         ImageType type;
         Extent3D extent;

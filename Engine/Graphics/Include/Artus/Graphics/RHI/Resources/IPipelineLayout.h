@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace Artus::Graphics::RHI {
-    struct PipelineLayoutDesc {
+    struct PipelineLayoutCreateDesc {
         std::vector<IBindGroupLayout*> groupLayouts;
     };
 

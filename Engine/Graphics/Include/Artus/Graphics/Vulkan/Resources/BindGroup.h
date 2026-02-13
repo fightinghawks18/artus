@@ -14,7 +14,7 @@ namespace Artus::Graphics::Vulkan {
 
     class BindGroup : public RHI::IBindGroup {
     public:
-        explicit BindGroup(Device& device, DescriptorAllocator* allocator, const RHI::BindGroupDesc& desc);
+        explicit BindGroup(Device& device, DescriptorAllocator* allocator, const RHI::BindGroupCreateDesc& desc);
         ~BindGroup() override;
 
         [[nodiscard]] DescriptorSet* GetDescriptorSet() const { return mSet; }

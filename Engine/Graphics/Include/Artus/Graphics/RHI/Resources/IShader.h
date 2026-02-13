@@ -9,7 +9,7 @@
 #include <string>
 
 namespace Artus::Graphics::RHI {
-    struct ShaderDesc {
+    struct ShaderCreateDesc {
         std::string path;
     };
 

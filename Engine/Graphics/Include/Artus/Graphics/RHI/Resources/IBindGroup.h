@@ -9,8 +9,14 @@
 #include "IBindGroupLayout.h"
 
 namespace Artus::Graphics::RHI {
-    struct BindGroupDesc {
+    struct BindGroupBinding {
+        uint32_t binding;
+        std::variant<IBuffer*, IImageView*> resource;
+    };
+
+    struct BindGroupCreateDesc {
         IBindGroupLayout* layout;
+        std::vector<BindGroupBinding> bindings;
     };
 
     class IBindGroup {

@@ -20,6 +20,10 @@ namespace Artus::Graphics::RHI {
         BGRA8_UNorm,
         BGRA8_SNorm,
 
+        RG32_Float,
+        RGB32_Float,
+        RGBA32_Float,
+
         D16_UNorm_S8_UInt,
         D32_SFloat_S8_UInt,
     };

@@ -15,7 +15,7 @@ namespace Artus::Graphics::Vulkan {
     /// @brief Holds data that can be made accessible to the GPU
     class Buffer : public RHI::IBuffer {
     public:
-        explicit Buffer(Device& device, const RHI::BufferDesc& desc);
+        explicit Buffer(Device& device, const RHI::BufferCreateDesc& desc);
         ~Buffer() override;
 
         void Map(size_t dataSize, size_t bufferOffset, const void* data) const override;

@@ -13,19 +13,19 @@
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    struct DescriptorAllocatorPoolDesc {
+    struct DescriptorAllocatorPoolCreateDesc {
         vk::DescriptorType type;
         uint32_t descriptorCount;
     };
 
-    struct DescriptorAllocatorDesc {
+    struct DescriptorAllocatorCreateDesc {
         uint32_t maxDescriptorSets;
-        const std::vector<DescriptorAllocatorPoolDesc>& pools;
+        const std::vector<DescriptorAllocatorPoolCreateDesc>& pools;
     };
 
     class DescriptorAllocator {
     public:
-        explicit DescriptorAllocator(Device& device, const DescriptorAllocatorDesc& desc);
+        explicit DescriptorAllocator(Device& device, const DescriptorAllocatorCreateDesc& desc);
         ~DescriptorAllocator();
 
         DescriptorSetLayout* CreateDescriptorSetLayout(const std::vector<DescriptorSetLayoutBinding>& bindings);

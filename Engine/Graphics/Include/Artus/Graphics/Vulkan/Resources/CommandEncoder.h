@@ -39,7 +39,7 @@ namespace Artus::Graphics::Vulkan {
         void SetDepthWriting(bool depthWriting) override;
         void SetViewport(const RHI::Viewport& viewport) override;
         void SetScissor(const RHI::Rectangle& scissor) override;
-        void BindGroup(RHI::IBindGroup* group, RHI::IPipelineLayout* layout) override;
+        void BindGroup(uint32_t groupIndex, RHI::IBindGroup* group, RHI::IPipelineLayout* layout) override;
 
         void DrawIndexed(uint32_t indexCount, uint32_t firstIndex) override;
         void Draw(uint32_t vertexCount, uint32_t firstIndex) override;

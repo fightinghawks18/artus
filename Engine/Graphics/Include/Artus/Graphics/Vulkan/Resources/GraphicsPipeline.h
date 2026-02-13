@@ -48,7 +48,7 @@ namespace Artus::Graphics::Vulkan {
 
     class GraphicsPipeline : public RHI::IGraphicsPipeline {
     public:
-        explicit GraphicsPipeline(Device& device, const RHI::GraphicsPipelineDesc& pipelineDescriptor);
+        explicit GraphicsPipeline(Device& device, const RHI::GraphicsPipelineCreateDesc& pipelineDescriptor);
         ~GraphicsPipeline() override;
 
         [[nodiscard]] vk::Pipeline GetVulkanPipeline() { return mPipeline.get(); }

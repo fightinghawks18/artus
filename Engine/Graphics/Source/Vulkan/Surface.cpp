@@ -20,11 +20,12 @@
 #include <iostream>
 
 namespace Artus::Graphics::Vulkan {
-    Surface::Surface(Device& device, const RHI::SurfaceDesc& desc) : mDevice(device), mWindow(desc.window) {
+    Surface::Surface(Device& device, const RHI::SurfaceCreateDesc& desc) : mDevice(device), mWindow(desc.window) {
         CreateSurface(desc.window);
         CreateSwapchain(desc.window);
         CreateSemaphores();
         CreateFences();
+        CreateImages();
         CreateImageViews();
     }
 
@@ -32,11 +33,14 @@ namespace Artus::Graphics::Vulkan {
         mDevice.GetVulkanDevice().waitIdle();
 
         DestroyImageViews();
+        DestroyImages();
         DestroyFences();
         DestroySemaphores();
         DestroySwapchain();
         DestroySurface();
     }
+
+    void Surface::OnResize(const std::function<void()>& onResizeFun) { mOnResizeFun = onResizeFun; }
 
     RHI::SurfaceFrameInfo Surface::PrepareFrame() {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
@@ -67,8 +71,10 @@ namespace Artus::Graphics::Vulkan {
 
         mImageIndex = imageIndex;
         return {
-            .image = mImages[mImageIndex].get(),
-            .view = mImageViews[mImageIndex].get()
+            .colorImage = mColorImages[mImageIndex].get(),
+            .colorView = mColorImageViews[mImageIndex].get(),
+            .depthImage = mDepthImages[mImageIndex].get(),
+            .depthView = mDepthImageViews[mImageIndex].get()
         };
     }
 
@@ -206,13 +212,36 @@ namespace Artus::Graphics::Vulkan {
         }
     }
 
-    void Surface::CreateImageViews() {
-        mImages.clear();
+    void Surface::CreateImages() {
+        mColorImages.clear();
+        mDepthImages.clear();
+
+        const auto rect = GetRectangle();
         for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
             auto img = std::make_unique<Image>(mDevice, image);
 
-            RHI::ImageViewDesc imageViewDesc = {
-                .image = img.get(),
+            RHI::ImageCreateDesc imageDepthDesc = {
+                .format = RHI::Format::D32_SFloat_S8_UInt,
+                .type = RHI::ImageType::Image2D,
+                .extent = RHI::Extent3D{rect.width, rect.height, 1},
+                .usage = RHI::ImageUsage::DepthStencil,
+                .layerCount = 1,
+                .levelCount = 1
+            };
+
+            auto imgDepth = std::make_unique<Image>(mDevice, imageDepthDesc);
+            mDepthImages.push_back(std::move(imgDepth));
+            mColorImages.push_back(std::move(img));
+        }
+    }
+
+    void Surface::CreateImageViews() {
+        mColorImageViews.clear();
+        mDepthImageViews.clear();
+
+        for (const auto& image : mColorImages) {
+            RHI::ImageViewCreateDesc imageViewDesc = {
+                .image = image.get(),
                 .format = FromVkFormat(mSurfaceFormat.format),
                 .type = RHI::ImageViewType::ImageView2D,
                 .aspectMask = RHI::ImageAspect::Color,
@@ -222,12 +251,35 @@ namespace Artus::Graphics::Vulkan {
                 .levelCount = 1
             };
 
-            mImageViews.push_back(std::make_unique<ImageView>(mDevice, imageViewDesc));
-            mImages.push_back(std::move(img));
+            mColorImageViews.push_back(std::make_unique<ImageView>(mDevice, imageViewDesc));
+        }
+
+        for (const auto& depthImage : mDepthImages) {
+            RHI::ImageViewCreateDesc imageDepthViewDesc = {
+                .image = depthImage.get(),
+                .format = RHI::Format::D32_SFloat_S8_UInt,
+                .type = RHI::ImageViewType::ImageView2D,
+                .aspectMask = RHI::ImageAspect::Depth | RHI::ImageAspect::Stencil,
+                .baseLayer = 0,
+                .layerCount = 1,
+                .baseLevel = 0,
+                .levelCount = 1
+            };
+
+            mDepthImageViews.push_back(std::make_unique<ImageView>(mDevice, imageDepthViewDesc));
         }
     }
 
-    void Surface::DestroyImageViews() { mImageViews.clear(); }
+    void Surface::DestroyImages() {
+        mDepthImages.clear();
+        mColorImages.clear();
+    }
+
+    void Surface::DestroyImageViews() {
+        mColorImageViews.clear();
+        mDepthImageViews.clear();
+    }
+
     void Surface::DestroyFences() { mInFlightFens.clear(); }
 
     void Surface::DestroySemaphores() {
@@ -242,11 +294,16 @@ namespace Artus::Graphics::Vulkan {
         mDevice.GetVulkanDevice().waitIdle();
 
         DestroyImageViews();
+        DestroyImages();
         DestroySemaphores();
         DestroyFences();
         CreateSwapchain(mWindow);
         CreateSemaphores();
         CreateFences();
+        CreateImages();
         CreateImageViews();
+
+        if (mOnResizeFun)
+            mOnResizeFun();
     }
 } // namespace Artus::Graphics

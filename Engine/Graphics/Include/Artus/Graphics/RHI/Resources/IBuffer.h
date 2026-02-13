@@ -18,7 +18,7 @@ namespace Artus::Graphics::RHI {
         ShaderStorage, ///< Buffer is read/write in shaders and stores large amounts of data
     };
 
-    struct BufferDesc {
+    struct BufferCreateDesc {
         size_t size;
         BufferUsage usage;
     };

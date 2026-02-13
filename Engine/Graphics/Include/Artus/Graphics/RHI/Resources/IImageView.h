@@ -29,7 +29,7 @@ namespace Artus::Graphics::RHI {
         return static_cast<ImageAspect>(static_cast<uint32_t>(i0) & static_cast<uint32_t>(i1));
     }
 
-    struct ImageViewDesc {
+    struct ImageViewCreateDesc {
         IImage* image;
         Format format;
         ImageViewType type;
@@ -43,6 +43,8 @@ namespace Artus::Graphics::RHI {
     class IImageView {
     public:
         virtual ~IImageView() = default;
+
+        [[nodiscard]] virtual IImage* GetImage() const = 0;
     };
 }
 

@@ -18,17 +18,17 @@ namespace Artus::Graphics::Vulkan {
         explicit Device();
         ~Device() override;
 
-        RHI::ISurface* CreateSurface(const RHI::SurfaceDesc& surfaceDesc) override;
-        RHI::IBuffer* CreateBuffer(const RHI::BufferDesc& bufferDesc) override;
-        RHI::IImage* CreateImage(const RHI::ImageDesc& imageDesc) override;
-        RHI::IImageView* CreateImageView(const RHI::ImageViewDesc& imageViewDesc) override;
-        RHI::IGraphicsPipeline* CreateGraphicsPipeline(const RHI::GraphicsPipelineDesc& pipelineDesc) override;
-        RHI::IShader* CreateShader(const RHI::ShaderDesc& shaderDesc) override;
-        RHI::IPipelineLayout* CreatePipelineLayout(const RHI::PipelineLayoutDesc& pipelineLayout) override;
+        RHI::ISurface* CreateSurface(const RHI::SurfaceCreateDesc& surfaceCreateDesc) override;
+        RHI::IBuffer* CreateBuffer(const RHI::BufferCreateDesc& bufferCreateDesc) override;
+        RHI::IImage* CreateImage(const RHI::ImageCreateDesc& imageCreateDesc) override;
+        RHI::IImageView* CreateImageView(const RHI::ImageViewCreateDesc& imageViewDesc) override;
+        RHI::IGraphicsPipeline* CreateGraphicsPipeline(const RHI::GraphicsPipelineCreateDesc& pipelineDesc) override;
+        RHI::IShader* CreateShader(const RHI::ShaderCreateDesc& shaderDesc) override;
+        RHI::IPipelineLayout* CreatePipelineLayout(const RHI::PipelineLayoutCreateDesc& pipelineLayout) override;
         RHI::ICommandEncoder* CreateCommandEncoder() override;
         std::vector<RHI::ICommandEncoder*> CreateCommandEncoders(uint32_t commandEncoderCount) override;
-        RHI::IBindGroupLayout* CreateBindGroupLayout(const RHI::BindGroupLayoutDesc& bindGroupLayoutDesc) override;
-        RHI::IBindGroup* CreateBindGroup(const RHI::BindGroupDesc& bindGroupDesc) override;
+        RHI::IBindGroupLayout* CreateBindGroupLayout(const RHI::BindGroupLayoutCreateDesc& bindGroupLayoutDesc) override;
+        RHI::IBindGroup* CreateBindGroup(const RHI::BindGroupCreateDesc& bindGroupDesc) override;
 
         [[nodiscard]] vk::Instance GetVulkanInstance() { return mInstance.get(); }
         [[nodiscard]] vk::PhysicalDevice GetVulkanPhysicalDevice() const { return mPhysicalDevice; }

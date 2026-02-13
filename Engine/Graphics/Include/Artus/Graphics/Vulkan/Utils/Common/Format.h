@@ -30,6 +30,12 @@ namespace Artus::Graphics::Vulkan {
             return vk::Format::eB8G8R8A8Unorm;
         case RHI::Format::BGRA8_SNorm:
             return vk::Format::eB8G8R8A8Snorm;
+        case RHI::Format::RG32_Float:
+            return vk::Format::eR32G32Sfloat;
+        case RHI::Format::RGB32_Float:
+            return vk::Format::eR32G32B32Sfloat;
+        case RHI::Format::RGBA32_Float:
+            return vk::Format::eR32G32B32A32Sfloat;
         case RHI::Format::D16_UNorm_S8_UInt:
             return vk::Format::eD16UnormS8Uint;
         case RHI::Format::D32_SFloat_S8_UInt:
@@ -59,6 +65,12 @@ namespace Artus::Graphics::Vulkan {
             return RHI::Format::BGRA8_UNorm;
         case vk::Format::eB8G8R8A8Snorm:
             return RHI::Format::BGRA8_SNorm;
+        case vk::Format::eR32G32Sfloat:
+            return RHI::Format::RG32_Float;
+        case vk::Format::eR32G32B32Sfloat:
+            return RHI::Format::RGB32_Float;
+        case vk::Format::eR32G32B32A32Sfloat:
+            return RHI::Format::RGBA32_Float;
         case vk::Format::eD16UnormS8Uint:
             return RHI::Format::D16_UNorm_S8_UInt;
         case vk::Format::eD32SfloatS8Uint:

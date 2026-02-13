@@ -33,7 +33,7 @@ namespace Artus::Graphics::RHI {
         virtual void SetDepthWriting(bool depthWriting) = 0;
         virtual void SetViewport(const Viewport& viewport) = 0;
         virtual void SetScissor(const Rectangle& scissor) = 0;
-        virtual void BindGroup(IBindGroup* group, IPipelineLayout* layout) = 0;
+        virtual void BindGroup(uint32_t groupIndex, IBindGroup* group, IPipelineLayout* layout) = 0;
 
         virtual void DrawIndexed(uint32_t indexCount, uint32_t firstIndex) = 0;
         virtual void Draw(uint32_t vertexCount, uint32_t firstIndex) = 0;

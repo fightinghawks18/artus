@@ -9,7 +9,7 @@
 #include "Artus/Graphics/Vulkan/Resources/Shader.h"
 
 namespace Artus::Graphics::Vulkan {
-    GraphicsPipeline::GraphicsPipeline(Device& device, const RHI::GraphicsPipelineDesc& pipelineDescriptor)
+    GraphicsPipeline::GraphicsPipeline(Device& device, const RHI::GraphicsPipelineCreateDesc& pipelineDescriptor)
         : mDevice(device) {
         const auto vkVertexShader = reinterpret_cast<Shader*>(pipelineDescriptor.vertexStage);
         const auto vkPixelShader = reinterpret_cast<Shader*>(pipelineDescriptor.pixelStage);

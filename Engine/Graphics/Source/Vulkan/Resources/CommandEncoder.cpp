@@ -19,7 +19,7 @@ namespace Artus::Graphics::Vulkan {
     CommandEncoder::~CommandEncoder() {
         mDevice.GetVulkanDevice().waitIdle();
 
-        if (mInUse) { End(); }
+        if (mInUse) { CommandEncoder::End(); }
 
         mCommandBuffer.reset();
     }
@@ -306,12 +306,12 @@ namespace Artus::Graphics::Vulkan {
         mCommandBuffer->setScissorWithCount(1, &s);
     }
 
-    void CommandEncoder::BindGroup(RHI::IBindGroup* group, RHI::IPipelineLayout* layout) {
+    void CommandEncoder::BindGroup(const uint32_t groupIndex, RHI::IBindGroup* group, RHI::IPipelineLayout* layout) {
         const auto vkBindGroup = reinterpret_cast<Vulkan::BindGroup*>(group);
-        const auto vkPipelineLayout = reinterpret_cast<PipelineLayout*>(group);
+        const auto vkPipelineLayout = reinterpret_cast<PipelineLayout*>(layout);
 
         auto setHandle = vkBindGroup->GetDescriptorSet()->GetVulkanDescriptorSet();
-        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipelineLayout->GetVulkanPipelineLayout(), 0, 1,
+        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipelineLayout->GetVulkanPipelineLayout(), groupIndex, 1,
                                            &setHandle, 0, nullptr);
     }
 

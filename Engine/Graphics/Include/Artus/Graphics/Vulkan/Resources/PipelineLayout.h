@@ -14,7 +14,7 @@ namespace Artus::Graphics::Vulkan {
 
     class PipelineLayout : public RHI::IPipelineLayout {
     public:
-        explicit PipelineLayout(Device& device, const RHI::PipelineLayoutDesc& desc);
+        explicit PipelineLayout(Device& device, const RHI::PipelineLayoutCreateDesc& desc);
         ~PipelineLayout() override;
 
         [[nodiscard]] vk::PipelineLayout GetVulkanPipelineLayout() { return mPipelineLayout.get(); }
