@@ -31,6 +31,21 @@ namespace Artus::Graphics::Vulkan {
         }
     }
 
+    inline vk::CullModeFlags ToVkCullMode(const RHI::CullMode cullMode) {
+        switch (cullMode) {
+        case RHI::CullMode::Never:
+            return vk::CullModeFlagBits::eNone;
+        case RHI::CullMode::Back:
+            return vk::CullModeFlagBits::eBack;
+        case RHI::CullMode::Front:
+            return vk::CullModeFlagBits::eFront;
+        case RHI::CullMode::BackAndFront:
+            return vk::CullModeFlagBits::eFrontAndBack;
+        default:
+            return vk::CullModeFlagBits::eNone;
+        }
+    }
+
     class GraphicsPipeline : public RHI::IGraphicsPipeline {
     public:
         explicit GraphicsPipeline(Device& device, const RHI::GraphicsPipelineDesc& pipelineDescriptor);

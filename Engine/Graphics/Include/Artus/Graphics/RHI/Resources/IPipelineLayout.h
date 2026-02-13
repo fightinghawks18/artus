@@ -19,7 +19,7 @@ namespace Artus::Graphics::RHI {
 
     class IPipelineLayout {
     public:
-        virtual ~IPipelineLayout() = 0;
+        virtual ~IPipelineLayout() = default;
     };
 }
 

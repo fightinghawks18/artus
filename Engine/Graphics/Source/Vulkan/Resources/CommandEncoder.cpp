@@ -117,11 +117,13 @@ namespace Artus::Graphics::Vulkan {
 
     void CommandEncoder::EndRenderingPass() { mCommandBuffer->endRendering(); }
 
-    void CommandEncoder::MakeImageRenderable(Image* image) {
-        auto& accessMasks = image->GetVulkanAccessMasks();
-        auto& stageMasks = image->GetVulkanStageMasks();
-        auto img = image->GetVulkanImage();
-        auto& layout = image->GetVulkanLayout();
+    void CommandEncoder::MakeImageRenderable(RHI::IImage* image) {
+        const auto vkImage = reinterpret_cast<Image*>(image);
+
+        auto& accessMasks = vkImage->GetVulkanAccessMasks();
+        auto& stageMasks = vkImage->GetVulkanStageMasks();
+        auto img = vkImage->GetVulkanImage();
+        auto& layout = vkImage->GetVulkanLayout();
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
@@ -150,11 +152,13 @@ namespace Artus::Graphics::Vulkan {
         stageMasks = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
     }
 
-    void CommandEncoder::MakeImageDepthStencil(Image* image) {
-        auto& accessMasks = image->GetVulkanAccessMasks();
-        auto& stageMasks = image->GetVulkanStageMasks();
-        auto img = image->GetVulkanImage();
-        auto& layout = image->GetVulkanLayout();
+    void CommandEncoder::MakeImageDepthStencil(RHI::IImage* image) {
+        const auto vkImage = reinterpret_cast<Image*>(image);
+
+        auto& accessMasks = vkImage->GetVulkanAccessMasks();
+        auto& stageMasks = vkImage->GetVulkanStageMasks();
+        auto img = vkImage->GetVulkanImage();
+        auto& layout = vkImage->GetVulkanLayout();
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
@@ -186,11 +190,13 @@ namespace Artus::Graphics::Vulkan {
         stageMasks = vk::PipelineStageFlagBits2::eLateFragmentTests | vk::PipelineStageFlagBits2::eEarlyFragmentTests;
     }
 
-    void CommandEncoder::MakeImageShaderAccessible(Image* image) {
-        auto& accessMasks = image->GetVulkanAccessMasks();
-        auto& stageMasks = image->GetVulkanStageMasks();
-        auto img = image->GetVulkanImage();
-        auto& layout = image->GetVulkanLayout();
+    void CommandEncoder::MakeImageShaderAccessible(RHI::IImage* image) {
+        const auto vkImage = reinterpret_cast<Image*>(image);
+
+        auto& accessMasks = vkImage->GetVulkanAccessMasks();
+        auto& stageMasks = vkImage->GetVulkanStageMasks();
+        auto img = vkImage->GetVulkanImage();
+        auto& layout = vkImage->GetVulkanLayout();
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
@@ -220,11 +226,13 @@ namespace Artus::Graphics::Vulkan {
         stageMasks = vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader;
     }
 
-    void CommandEncoder::MakeImagePresentable(Image* image) {
-        auto& accessMasks = image->GetVulkanAccessMasks();
-        auto& stageMasks = image->GetVulkanStageMasks();
-        auto img = image->GetVulkanImage();
-        auto& layout = image->GetVulkanLayout();
+    void CommandEncoder::MakeImagePresentable(RHI::IImage* image) {
+        const auto vkImage = reinterpret_cast<Image*>(image);
+
+        auto& accessMasks = vkImage->GetVulkanAccessMasks();
+        auto& stageMasks = vkImage->GetVulkanStageMasks();
+        auto img = vkImage->GetVulkanImage();
+        auto& layout = vkImage->GetVulkanLayout();
 
         vk::ImageSubresourceRange subresourceRange = {};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
@@ -253,22 +261,28 @@ namespace Artus::Graphics::Vulkan {
         stageMasks = vk::PipelineStageFlagBits2::eNone;
     }
 
-    void CommandEncoder::BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline) {
-        auto pipelineHandle = graphicsPipeline->GetVulkanPipeline();
+    void CommandEncoder::BindGraphicsPipeline(RHI::IGraphicsPipeline* graphicsPipeline) {
+        const auto vkGraphicsPipeline = reinterpret_cast<GraphicsPipeline*>(graphicsPipeline);
+
+        auto pipelineHandle = vkGraphicsPipeline->GetVulkanPipeline();
         mCommandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipelineHandle);
     }
 
-    void CommandEncoder::BindVertexBuffer(Buffer* vertexBuffer) {
-        auto vertexHandle = vertexBuffer->GetVulkanBuffer();
+    void CommandEncoder::BindVertexBuffer(RHI::IBuffer* vertexBuffer) {
+        const auto vkBuffer = reinterpret_cast<Buffer*>(vertexBuffer);
+
+        auto vertexHandle = vkBuffer->GetVulkanBuffer();
         mCommandBuffer->bindVertexBuffers(0, vertexHandle, {0});
     }
 
-    void CommandEncoder::BindIndexBuffer(Buffer* indexBuffer) {
-        auto indexHandle = indexBuffer->GetVulkanBuffer();
+    void CommandEncoder::BindIndexBuffer(RHI::IBuffer* indexBuffer) {
+        const auto vkBuffer = reinterpret_cast<Buffer*>(indexBuffer);
+
+        auto indexHandle = vkBuffer->GetVulkanBuffer();
         mCommandBuffer->bindIndexBuffer(indexHandle, 0, vk::IndexType::eUint32);
     }
 
-    void CommandEncoder::SetCullMode(vk::CullModeFlags cullMode) { mCommandBuffer->setCullMode(cullMode); }
+    void CommandEncoder::SetCullMode(RHI::CullMode cullMode) { mCommandBuffer->setCullMode(ToVkCullMode(cullMode)); }
 
     void CommandEncoder::SetDepthTesting(bool depthTesting) { mCommandBuffer->setDepthTestEnable(depthTesting); }
 
@@ -292,15 +306,13 @@ namespace Artus::Graphics::Vulkan {
         mCommandBuffer->setScissorWithCount(1, &s);
     }
 
-    void CommandEncoder::BindDescriptorSet(DescriptorSet* set, PipelineLayout* layout) {
-        auto setHandle = set->GetVulkanDescriptorSet();
-        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout->GetVulkanPipelineLayout(), 0, 1,
-                                           &setHandle, 0, nullptr);
-    }
+    void CommandEncoder::BindGroup(RHI::IBindGroup* group, RHI::IPipelineLayout* layout) {
+        const auto vkBindGroup = reinterpret_cast<Vulkan::BindGroup*>(group);
+        const auto vkPipelineLayout = reinterpret_cast<PipelineLayout*>(group);
 
-    void CommandEncoder::UpdatePushConstant(PipelineLayout* layout, const vk::ShaderStageFlagBits stageFlags,
-                                            const uint32_t size, const uint32_t offset, void* data) {
-        mCommandBuffer->pushConstants(layout->GetVulkanPipelineLayout(), stageFlags, offset, size, data);
+        auto setHandle = vkBindGroup->GetDescriptorSet()->GetVulkanDescriptorSet();
+        mCommandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipelineLayout->GetVulkanPipelineLayout(), 0, 1,
+                                           &setHandle, 0, nullptr);
     }
 
     void CommandEncoder::DrawIndexed(uint32_t indexCount, uint32_t firstIndex) {

@@ -14,6 +14,13 @@
 #include <vector>
 
 namespace Artus::Graphics::RHI {
+    enum class CullMode {
+        Never, ///< Never cull faces
+        Back, ///< Cull back faces
+        Front, ///< Cull front faces
+        BackAndFront, ///< Cull front and back faces
+    };
+
     enum class DepthComparison {
         Never, ///< Never compare depth
 
@@ -52,7 +59,7 @@ namespace Artus::Graphics::RHI {
 
     class IGraphicsPipeline {
     public:
-        virtual ~IGraphicsPipeline() = 0;
+        virtual ~IGraphicsPipeline() = default;
     };
 }
 

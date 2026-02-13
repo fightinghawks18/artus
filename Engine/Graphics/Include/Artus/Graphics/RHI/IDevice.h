@@ -18,7 +18,7 @@
 namespace Artus::Graphics::RHI {
     class IDevice {
     public:
-        virtual ~IDevice() = 0;
+        virtual ~IDevice() = default;
 
         virtual ISurface* CreateSurface(const SurfaceDesc& surfaceDesc) = 0;
         virtual IBuffer* CreateBuffer(const BufferDesc& bufferDesc) = 0;

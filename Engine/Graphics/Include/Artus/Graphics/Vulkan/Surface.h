@@ -22,7 +22,7 @@ namespace Artus::Graphics::Vulkan {
         explicit Surface(Device& device, const RHI::SurfaceDesc& desc);
         ~Surface() override;
 
-        void PrepareFrame() override;
+        RHI::SurfaceFrameInfo PrepareFrame() override;
         void PresentFrame(RHI::ICommandEncoder* encoder) override;
 
         [[nodiscard]] RHI::Rectangle GetRectangle() const override {
@@ -33,7 +33,8 @@ namespace Artus::Graphics::Vulkan {
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
         [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mImages[index].get(); }
         [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) const { return mImageViews[index].get(); }
-        [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
+        [[nodiscard]] uint32_t GetImageIndex() const override { return mImageIndex; }
+        [[nodiscard]] uint32_t GetFrameIndex() const override { return mFrameIdx; }
 
     private:
         Device& mDevice;

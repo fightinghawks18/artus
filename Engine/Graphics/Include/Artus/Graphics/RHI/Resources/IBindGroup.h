@@ -15,7 +15,7 @@ namespace Artus::Graphics::RHI {
 
     class IBindGroup {
     public:
-        virtual ~IBindGroup() = 0;
+        virtual ~IBindGroup() = default;
     };
 }
 

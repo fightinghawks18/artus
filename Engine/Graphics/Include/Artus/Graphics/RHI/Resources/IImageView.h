@@ -16,9 +16,9 @@ namespace Artus::Graphics::RHI {
 
     enum class ImageAspect {
         None = 0,
-        Color,
-        Depth,
-        Stencil
+        Color = 1 << 0,
+        Depth = 1 << 1,
+        Stencil = 1 << 2
     };
 
     inline ImageAspect operator|(const ImageAspect i0, const ImageAspect i1) {
@@ -42,7 +42,7 @@ namespace Artus::Graphics::RHI {
 
     class IImageView {
     public:
-        virtual ~IImageView() = 0;
+        virtual ~IImageView() = default;
     };
 }
 

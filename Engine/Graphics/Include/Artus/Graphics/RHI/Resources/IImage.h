@@ -17,9 +17,9 @@ namespace Artus::Graphics::RHI {
 
     enum class ImageUsage {
         None = 0,
-        Color,
-        DepthStencil,
-        Shader
+        Color = 1 << 0,
+        DepthStencil = 1 << 1,
+        Shader = 1 << 2
     };
 
     inline ImageUsage operator|(const ImageUsage i0, const ImageUsage i1) {
@@ -41,7 +41,7 @@ namespace Artus::Graphics::RHI {
 
     class IImage {
     public:
-        virtual ~IImage() = 0;
+        virtual ~IImage() = default;
     };
 }
 

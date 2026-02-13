@@ -14,7 +14,7 @@ namespace Artus::Graphics::Vulkan {
     class Device;
 
     inline vk::ImageAspectFlags ToVkImageAspectFlags(const RHI::ImageAspect imageAspect) {
-        vk::ImageAspectFlags flags;
+        vk::ImageAspectFlags flags = vk::ImageAspectFlagBits::eNone;
         if ((imageAspect & RHI::ImageAspect::Color) != RHI::ImageAspect::None)
             flags |= vk::ImageAspectFlagBits::eColor;
         if ((imageAspect & RHI::ImageAspect::Depth) != RHI::ImageAspect::None)

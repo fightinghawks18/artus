@@ -2,14 +2,16 @@
 // Created by fightinghawks18 on 1/24/2026.
 //
 
+#ifdef _WIN32
+#include <windows.h>
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
+
 #ifdef __APPLE__
 #define VK_USE_PLATFORM_METAL_EXT
 #include "Artus/Graphics/Vulkan/Utils/Metal/Layer.h"
 #endif
 #include "Artus/Graphics/Vulkan/Utils/Common/Format.h"
-#ifdef _WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
 
 #include "Artus/Graphics/Vulkan/Surface.h"
 #include "Artus/Graphics/Vulkan/Device.h"
@@ -36,17 +38,17 @@ namespace Artus::Graphics::Vulkan {
         DestroySurface();
     }
 
-    void Surface::PrepareFrame() {
+    RHI::SurfaceFrameInfo Surface::PrepareFrame() {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
             AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return;
+            return {};
         }
 
         auto resetResult = mDevice.GetVulkanDevice().resetFences(1, &mInFlightFens[mFrameIdx].get());
         if (resetResult != vk::Result::eSuccess) {
             AR_ERR("Failed to reset fence before acquiring new image! (Occurred on frame {})", mFrameIdx);
-            return;
+            return {};
         }
 
         uint32_t imageIndex = UINT32_MAX;
@@ -55,20 +57,23 @@ namespace Artus::Graphics::Vulkan {
         if (getImageResult == vk::Result::eErrorOutOfDateKHR || getImageResult == vk::Result::eSuboptimalKHR) {
             AR_LOG("Swapchain is out of date or is suboptimal, resizing. (Occurred on frame {})", mFrameIdx);
             Rebuild();
-            PrepareFrame();
-            return;
+            return PrepareFrame();
         }
 
         if (getImageResult != vk::Result::eSuccess) {
             AR_ERR("Failed to acquire new image from swapchain! (Occurred on frame {})", mFrameIdx);
-            return;
+            return {};
         }
 
         mImageIndex = imageIndex;
+        return {
+            .image = mImages[mImageIndex].get(),
+            .view = mImageViews[mImageIndex].get()
+        };
     }
 
     void Surface::PresentFrame(RHI::ICommandEncoder* encoder) {
-        const auto vkCommandEncoder = static_cast<CommandEncoder*>(encoder);
+        const auto vkCommandEncoder = reinterpret_cast<CommandEncoder*>(encoder);
         auto vkCmdBuffer = vkCommandEncoder->GetVulkanCommandBuffer();
 
         std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -97,7 +102,6 @@ namespace Artus::Graphics::Vulkan {
         }
 
         mFrameIdx = (mFrameIdx + 1) % 2;
-        return;
     }
 
     void Surface::CreateSurface(Core::Window* window) {

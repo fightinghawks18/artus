@@ -113,7 +113,7 @@ namespace Artus::Graphics::Vulkan {
         extensions.push_back("VK_EXT_metal_surface");
 #endif
 #ifdef _WIN32
-        extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+        extensions.push_back("VK_KHR_win32_surface");
 #endif
 
 #ifndef NDEBUG

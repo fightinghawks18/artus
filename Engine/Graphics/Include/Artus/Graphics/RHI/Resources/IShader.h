@@ -15,7 +15,7 @@ namespace Artus::Graphics::RHI {
 
     class IShader {
     public:
-        virtual ~IShader() = 0;
+        virtual ~IShader() = default;
     };
 }
 

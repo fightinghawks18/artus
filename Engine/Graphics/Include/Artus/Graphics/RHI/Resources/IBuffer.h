@@ -25,7 +25,7 @@ namespace Artus::Graphics::RHI {
 
     class IBuffer {
     public:
-        virtual ~IBuffer() = 0;
+        virtual ~IBuffer() = default;
 
         /// @brief Maps data provided to the buffer's data
         /// @warning If you try to provide data that can't fully fit into the buffer it'll cause buffer overflow

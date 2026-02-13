@@ -9,7 +9,7 @@
 namespace Artus::Graphics::RHI {
     class ICommandAllocator {
     public:
-        virtual ~ICommandAllocator() = 0;
+        virtual ~ICommandAllocator() = default;
     };
 }
 

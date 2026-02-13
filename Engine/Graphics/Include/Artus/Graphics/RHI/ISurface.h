@@ -16,14 +16,22 @@ namespace Artus::Graphics::RHI {
         Core::Window* window;
     };
 
+    struct SurfaceFrameInfo {
+        IImage* image;
+        IImageView* view;
+    };
+
     class ISurface {
     public:
-        virtual ~ISurface() = 0;
+        virtual ~ISurface() = default;
 
-        virtual void PrepareFrame() = 0;
+        virtual SurfaceFrameInfo PrepareFrame() = 0;
         virtual void PresentFrame(ICommandEncoder* encoder) = 0;
 
-        [[nodiscard]] virtual Rectangle GetRectangle() const;
+        [[nodiscard]] virtual Rectangle GetRectangle() const = 0;
+        [[nodiscard]] virtual uint32_t GetImageIndex() const = 0;
+        [[nodiscard]] virtual uint32_t GetFrameIndex() const = 0;
+
     };
 }
 

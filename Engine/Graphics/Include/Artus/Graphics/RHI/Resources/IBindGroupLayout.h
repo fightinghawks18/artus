@@ -9,6 +9,7 @@
 #include "../Types/Common.h"
 
 #include <vector>
+#include <variant>
 
 #include "IBuffer.h"
 #include "IImageView.h"
@@ -32,7 +33,7 @@ namespace Artus::Graphics::RHI {
 
     class IBindGroupLayout {
     public:
-        virtual ~IBindGroupLayout() = 0;
+        virtual ~IBindGroupLayout() = default;
     };
 }
 
