@@ -8,7 +8,7 @@ include (CMake/slang.cmake)
 add_executable(Artus Runtime/Source/Main.cpp)
 target_link_libraries(Artus
         PRIVATE ArtusCore
-        PRIVATE ArtusGraphics
+        PRIVATE ArtusRendering
         PRIVATE ArtusMath
 )
 
