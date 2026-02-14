@@ -4,6 +4,8 @@
 
 #include "Artus/Rendering/RenderDevice.h"
 
+#include "Artus/Core/Logger.h"
+
 #include <Artus/Graphics/Vulkan/Device.h>
 
 namespace Artus::Rendering {
@@ -18,10 +20,18 @@ namespace Artus::Rendering {
         mRHI.reset();
     }
 
-    std::unique_ptr<RenderContext> RenderDevice::StartRendering() {
-        const auto surfaceInfo = mSurface->PrepareFrame();
-        if (!surfaceInfo.colorImage || !surfaceInfo.colorView)
-            return nullptr;
+    RenderContext RenderDevice::StartRendering() {
+        Graphics::Structs::SurfaceFrameInfo surfaceInfo = {};
+        uint32_t retries = 0;
+        while (retries < 3 && (!surfaceInfo.colorImage || !surfaceInfo.colorView)) {
+            surfaceInfo = mSurface->PrepareFrame();
+            ++retries;
+        }
+
+        if (retries >= 3) {
+            AR_PANIC("RenderDevice failed to reattempt rendering after 3 tries!");
+            throw std::runtime_error("Retry render failure");
+        }
 
         FrameContext ctx = {
             .device = mRHI.get(),
@@ -33,15 +43,14 @@ namespace Artus::Rendering {
 
         ctx.encoder->Start();
         ctx.encoder->MakeImageRenderable(ctx.surfaceFrameInfo.colorImage);
-        return std::make_unique<RenderContext>(ctx);
+        return RenderContext(ctx);
     }
 
-    void RenderDevice::EndRendering(std::unique_ptr<RenderContext> ctx) {
-        auto& frameCtx = ctx->GetFrameContext();
+    void RenderDevice::EndRendering(const RenderContext& ctx) {
+        auto& frameCtx = ctx.GetFrameContext();
         frameCtx.encoder->MakeImagePresentable(frameCtx.surfaceFrameInfo.colorImage);
         frameCtx.encoder->End();
-        mSurface->PresentFrame(ctx->GetRawCmd());
-        ctx.reset();
+        mSurface->PresentFrame(ctx.GetRawCmd());
         mFrameIndex = (mFrameIndex + 1) % 2;
     }
 

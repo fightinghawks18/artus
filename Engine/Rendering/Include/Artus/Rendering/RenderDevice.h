@@ -26,8 +26,8 @@ namespace Artus::Rendering {
         explicit RenderDevice(const RenderDeviceCreateDesc& desc);
         ~RenderDevice();
 
-        std::unique_ptr<RenderContext> StartRendering();
-        void EndRendering(std::unique_ptr<RenderContext> ctx);
+        RenderContext StartRendering();
+        void EndRendering(const RenderContext& ctx);
 
     private:
         RenderAPI mRenderingApi;

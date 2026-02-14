@@ -17,10 +17,8 @@ int main() {
         Core::Window::Update();
 
         auto ctx = renderDevice->StartRendering();
-        if (!ctx)
-            continue;
-        ctx->StartPass();
-        ctx->EndPass();
-        renderDevice->EndRendering(std::move(ctx));
+        ctx.StartPass();
+        ctx.EndPass();
+        renderDevice->EndRendering(ctx);
     }
 }
