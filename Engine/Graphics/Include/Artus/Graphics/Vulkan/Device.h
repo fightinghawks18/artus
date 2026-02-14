@@ -5,35 +5,42 @@
 #ifndef ARTUS_DEVICE_H
 #define ARTUS_DEVICE_H
 
-#include "../RHI/IDevice.h"
-#include "Artus/Graphics/Vulkan/Utils/Vulkan/Allocator.h"
-#include <vulkan/vulkan.hpp>
+#include "Utils/Vulkan/Allocator.h"
 
+#include "Surface.h"
+#include "Resources/Buffer.h"
+#include "Resources/Image.h"
+#include "Resources/ImageView.h"
+#include "Resources/GraphicsPipeline.h"
+#include "Resources/Shader.h"
+#include "Resources/PipelineLayout.h"
 #include "Resources/CommandAllocator.h"
 #include "Resources/DescriptorAllocator.h"
 
+#include <vulkan/vulkan.hpp>
+
 namespace Artus::Graphics::Vulkan {
-    class Device : public RHI::IDevice {
+    class Device {
     public:
         explicit Device();
-        ~Device() override;
+        ~Device();
 
-        RHI::ISurface* CreateSurface(const RHI::SurfaceCreateDesc& surfaceCreateDesc) override;
-        RHI::IBuffer* CreateBuffer(const RHI::BufferCreateDesc& bufferCreateDesc) override;
-        RHI::IImage* CreateImage(const RHI::ImageCreateDesc& imageCreateDesc) override;
-        RHI::IImageView* CreateImageView(const RHI::ImageViewCreateDesc& imageViewDesc) override;
-        RHI::IGraphicsPipeline* CreateGraphicsPipeline(const RHI::GraphicsPipelineCreateDesc& pipelineDesc) override;
-        RHI::IShader* CreateShader(const RHI::ShaderCreateDesc& shaderDesc) override;
-        RHI::IPipelineLayout* CreatePipelineLayout(const RHI::PipelineLayoutCreateDesc& pipelineLayout) override;
-        RHI::ICommandEncoder* CreateCommandEncoder() override;
-        std::vector<RHI::ICommandEncoder*> CreateCommandEncoders(uint32_t commandEncoderCount) override;
-        RHI::IBindGroupLayout* CreateBindGroupLayout(const RHI::BindGroupLayoutCreateDesc& bindGroupLayoutDesc) override;
-        RHI::IBindGroup* CreateBindGroup(const RHI::BindGroupCreateDesc& bindGroupDesc) override;
+        Surface* CreateSurface(const Structs::SurfaceCreateDesc& surfaceCreateDesc);
+        Buffer* CreateBuffer(const Structs::BufferCreateDesc& bufferCreateDesc);
+        Image* CreateImage(const Structs::ImageCreateDesc& imageCreateDesc);
+        ImageView* CreateImageView(const Structs::ImageViewCreateDesc& imageViewCreateDesc);
+        GraphicsPipeline* CreateGraphicsPipeline(const Structs::GraphicsPipelineCreateDesc& pipelineCreateDesc);
+        Shader* CreateShader(const Structs::ShaderCreateDesc& shaderCreateDesc);
+        PipelineLayout* CreatePipelineLayout(const Structs::PipelineLayoutCreateDesc& pipelineCreateLayout);
+        CommandEncoder* CreateCommandEncoder();
+        std::vector<CommandEncoder*> CreateCommandEncoders(uint32_t commandEncoderCount);
+        BindGroupLayout* CreateBindGroupLayout(const Structs::BindGroupLayoutCreateDesc& bindGroupLayoutCreateDesc);
+        BindGroup* CreateBindGroup(const Structs::BindGroupCreateDesc& bindGroupCreateDesc);
 
         [[nodiscard]] vk::Instance GetVulkanInstance() { return mInstance.get(); }
         [[nodiscard]] vk::PhysicalDevice GetVulkanPhysicalDevice() const { return mPhysicalDevice; }
         [[nodiscard]] vk::Device GetVulkanDevice() { return mDevice.get(); }
-        [[nodiscard]] VmaAllocator GetVulkanAllocator() { return mAllocator; }
+        [[nodiscard]] VmaAllocator GetVulkanAllocator() const { return mAllocator; }
 
         [[nodiscard]] vk::Queue GetVulkanGraphicsQueue() const { return mGraphicsQueue; }
         [[nodiscard]] vk::Queue GetVulkanComputeQueue() const { return mComputeQueue; }

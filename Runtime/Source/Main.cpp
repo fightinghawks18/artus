@@ -2,11 +2,7 @@
 // Created by fightinghawks18 on 2/12/2026
 //
 
-#include "../../engine/Rendering/Include/Artus/Rendering/RenderDevice.h"
-
-#include <Artus/Graphics/RHI/IDevice.h>
-#include <Artus/Graphics/RHI/Types/Geometry.h>
-#include <Artus/Graphics/Vulkan/Device.h>
+#include <Artus/Rendering/RenderDevice.h>
 #include <Artus/Core/Window.h>
 #include <Artus/Math/Utilities.h>
 

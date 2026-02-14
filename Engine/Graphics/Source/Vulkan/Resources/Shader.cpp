@@ -21,7 +21,7 @@ static std::vector<uint32_t> ReadSpirv(const std::string& shader) {
 }
 
 namespace Artus::Graphics::Vulkan {
-    Shader::Shader(Device& device, const RHI::ShaderCreateDesc& desc) : mDevice(device) {
+    Shader::Shader(Device& device, const Structs::ShaderCreateDesc& desc) : mDevice(device) {
         auto shaderBuffer = ReadSpirv(desc.path);
 
         vk::ShaderModuleCreateInfo shaderModuleInfo = {};

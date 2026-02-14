@@ -10,14 +10,14 @@ namespace Artus::Rendering {
     RenderContext::~RenderContext() = default;
 
     void RenderContext::StartPass() {
-        Graphics::RHI::RenderingAttachment mainSurfaceColorAttachment = {
+        Graphics::Structs::RenderingAttachment mainSurfaceColorAttachment = {
             .view = mContext.surfaceFrameInfo.colorView,
-            .type = Graphics::RHI::RenderingAttachmentType::Color,
-            .lsOp = Graphics::RHI::RenderingAttachmentLoadStoreOp::ClearThenStore,
+            .type = Graphics::Enums::RenderingAttachmentType::Color,
+            .lsOp = Graphics::Enums::RenderingAttachmentLoadStoreOp::ClearThenStore,
             .clear = Math::Color{0.1f, 0.15f, 0.05f, 1.0f}
         };
 
-        Graphics::RHI::RenderingPass mainPass = {
+        Graphics::Structs::RenderingPass mainPass = {
             .attachments = {mainSurfaceColorAttachment},
             .renderArea = mContext.surface->GetRectangle()
         };

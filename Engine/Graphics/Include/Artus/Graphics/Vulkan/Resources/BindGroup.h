@@ -7,15 +7,15 @@
 #define ARTUS_VULKAN_BIND_GROUP_H
 
 #include "DescriptorAllocator.h"
-#include "Artus/Graphics/RHI/Resources/IBindGroup.h"
+#include "Artus/Graphics/Structs.h"
 
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class BindGroup : public RHI::IBindGroup {
+    class BindGroup {
     public:
-        explicit BindGroup(Device& device, DescriptorAllocator* allocator, const RHI::BindGroupCreateDesc& desc);
-        ~BindGroup() override;
+        explicit BindGroup(Device& device, DescriptorAllocator* allocator, const Structs::BindGroupCreateDesc& desc);
+        ~BindGroup();
 
         [[nodiscard]] DescriptorSet* GetDescriptorSet() const { return mSet; }
 

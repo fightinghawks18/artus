@@ -6,6 +6,7 @@
 #define ARTUS_SURFACE_H
 
 #include "Artus/Core/Window.h"
+#include "Resources/CommandEncoder.h"
 #include "Resources/Image.h"
 #include "Resources/ImageView.h"
 #include "Utils/Common/Format.h"
@@ -13,23 +14,20 @@
 #include <vulkan/vulkan.hpp>
 #include <functional>
 
-#include "../RHI/Types/Common.h"
-#include "Artus/Graphics/RHI/ISurface.h"
-
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class Surface : public RHI::ISurface {
+    class Surface {
     public:
-        explicit Surface(Device& device, const RHI::SurfaceCreateDesc& desc);
-        ~Surface() override;
+        explicit Surface(Device& device, const Structs::SurfaceCreateDesc& desc);
+        ~Surface();
 
-        void OnResize(const std::function<void()>& onResizeFun) override;
+        void OnResize(const std::function<void()>& onResizeFun);
 
-        RHI::SurfaceFrameInfo PrepareFrame() override;
-        void PresentFrame(RHI::ICommandEncoder* encoder) override;
+        Structs::SurfaceFrameInfo PrepareFrame();
+        void PresentFrame(CommandEncoder* encoder);
 
-        [[nodiscard]] RHI::Rectangle GetRectangle() const override {
+        [[nodiscard]] Structs::Rectangle GetRectangle() const {
             return {0, 0, mSurfaceExtent.width, mSurfaceExtent.height};
         }
 
@@ -37,9 +35,9 @@ namespace Artus::Graphics::Vulkan {
         [[nodiscard]] vk::Extent2D GetVulkanExtent() const { return mSurfaceExtent; }
         [[nodiscard]] Image* GetVulkanImage(const uint32_t index) const { return mColorImages[index].get(); }
         [[nodiscard]] ImageView* GetVulkanImageView(const uint32_t index) const { return mColorImageViews[index].get(); }
-        [[nodiscard]] uint32_t GetImageIndex() const override { return mImageIndex; }
-        [[nodiscard]] uint32_t GetFrameIndex() const override { return mFrameIdx; }
-        [[nodiscard]] RHI::Format GetFormat() const override { return FromVkFormat(mSurfaceFormat.format); }
+        [[nodiscard]] uint32_t GetImageIndex() const { return mImageIndex; }
+        [[nodiscard]] uint32_t GetFrameIndex() const { return mFrameIdx; }
+        [[nodiscard]] Enums::Format GetFormat() const { return FromVkFormat(mSurfaceFormat.format); }
 
     private:
         Device& mDevice;

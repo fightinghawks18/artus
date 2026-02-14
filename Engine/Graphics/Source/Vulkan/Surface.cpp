@@ -20,7 +20,7 @@
 #include <iostream>
 
 namespace Artus::Graphics::Vulkan {
-    Surface::Surface(Device& device, const RHI::SurfaceCreateDesc& desc) : mDevice(device), mWindow(desc.window) {
+    Surface::Surface(Device& device, const Structs::SurfaceCreateDesc& desc) : mDevice(device), mWindow(desc.window) {
         CreateSurface(desc.window);
         CreateSwapchain(desc.window);
         CreateSemaphores();
@@ -42,7 +42,7 @@ namespace Artus::Graphics::Vulkan {
 
     void Surface::OnResize(const std::function<void()>& onResizeFun) { mOnResizeFun = onResizeFun; }
 
-    RHI::SurfaceFrameInfo Surface::PrepareFrame() {
+    Structs::SurfaceFrameInfo Surface::PrepareFrame() {
         auto waitResult = mDevice.GetVulkanDevice().waitForFences(1, &mInFlightFens[mFrameIdx].get(), true, UINT64_MAX);
         if (waitResult != vk::Result::eSuccess) {
             AR_ERR("Failed to wait for fences before acquiring new image! (Occurred on frame {})", mFrameIdx);
@@ -78,9 +78,8 @@ namespace Artus::Graphics::Vulkan {
         };
     }
 
-    void Surface::PresentFrame(RHI::ICommandEncoder* encoder) {
-        const auto vkCommandEncoder = reinterpret_cast<CommandEncoder*>(encoder);
-        auto vkCmdBuffer = vkCommandEncoder->GetVulkanCommandBuffer();
+    void Surface::PresentFrame(CommandEncoder* encoder) {
+        auto vkCmdBuffer = encoder->GetVulkanCommandBuffer();
 
         std::vector<vk::PipelineStageFlags> waitDstStageMask = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
@@ -220,11 +219,11 @@ namespace Artus::Graphics::Vulkan {
         for (const auto& image : mDevice.GetVulkanDevice().getSwapchainImagesKHR(mSwapchain.get())) {
             auto img = std::make_unique<Image>(mDevice, image);
 
-            RHI::ImageCreateDesc imageDepthDesc = {
-                .format = RHI::Format::D32_SFloat_S8_UInt,
-                .type = RHI::ImageType::Image2D,
-                .extent = RHI::Extent3D{rect.width, rect.height, 1},
-                .usage = RHI::ImageUsage::DepthStencil,
+            Structs::ImageCreateDesc imageDepthDesc = {
+                .format = Enums::Format::D32_SFloat_S8_UInt,
+                .type = Enums::ImageType::Image2D,
+                .extent = Structs::Extent3D{rect.width, rect.height, 1},
+                .usage = Flags::ImageUsage::DepthStencil,
                 .layerCount = 1,
                 .levelCount = 1
             };
@@ -240,11 +239,11 @@ namespace Artus::Graphics::Vulkan {
         mDepthImageViews.clear();
 
         for (const auto& image : mColorImages) {
-            RHI::ImageViewCreateDesc imageViewDesc = {
+            Structs::ImageViewCreateDesc imageViewDesc = {
                 .image = image.get(),
                 .format = FromVkFormat(mSurfaceFormat.format),
-                .type = RHI::ImageViewType::ImageView2D,
-                .aspectMask = RHI::ImageAspect::Color,
+                .type = Enums::ImageViewType::ImageView2D,
+                .aspectMask = Flags::ImageAspect::Color,
                 .baseLayer = 0,
                 .layerCount = 1,
                 .baseLevel = 0,
@@ -255,11 +254,11 @@ namespace Artus::Graphics::Vulkan {
         }
 
         for (const auto& depthImage : mDepthImages) {
-            RHI::ImageViewCreateDesc imageDepthViewDesc = {
+            Structs::ImageViewCreateDesc imageDepthViewDesc = {
                 .image = depthImage.get(),
-                .format = RHI::Format::D32_SFloat_S8_UInt,
-                .type = RHI::ImageViewType::ImageView2D,
-                .aspectMask = RHI::ImageAspect::Depth | RHI::ImageAspect::Stencil,
+                .format = Enums::Format::D32_SFloat_S8_UInt,
+                .type = Enums::ImageViewType::ImageView2D,
+                .aspectMask = Flags::ImageAspect::Depth | Flags::ImageAspect::Stencil,
                 .baseLayer = 0,
                 .layerCount = 1,
                 .baseLevel = 0,

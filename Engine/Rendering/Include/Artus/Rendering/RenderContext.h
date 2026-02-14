@@ -6,14 +6,15 @@
 #ifndef ARTUS_RENDER_CONTEXT_H
 #define ARTUS_RENDER_CONTEXT_H
 
-#include <Artus/Graphics/RHI/IDevice.h>
+#include <Artus/Graphics/Vulkan/Surface.h>
+#include <Artus/Graphics/Vulkan/Device.h>
 
 namespace Artus::Rendering {
     struct FrameContext {
-        Graphics::RHI::IDevice* device;
-        Graphics::RHI::ICommandEncoder* encoder;
-        Graphics::RHI::ISurface* surface;
-        Graphics::RHI::SurfaceFrameInfo surfaceFrameInfo;
+        Graphics::Vulkan::Device* device;
+        Graphics::Vulkan::CommandEncoder* encoder;
+        Graphics::Vulkan::Surface* surface;
+        Graphics::Structs::SurfaceFrameInfo surfaceFrameInfo;
         uint32_t frame;
     };
 
@@ -25,7 +26,7 @@ namespace Artus::Rendering {
         void StartPass();
         void EndPass();
 
-        [[nodiscard]] Graphics::RHI::ICommandEncoder* GetRawCmd() const { return mContext.encoder; }
+        [[nodiscard]] Graphics::Vulkan::CommandEncoder* GetRawCmd() const { return mContext.encoder; }
         [[nodiscard]] const FrameContext& GetFrameContext() const { return mContext; }
 
     private:

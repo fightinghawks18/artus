@@ -5,27 +5,28 @@
 
 #ifndef ARTUS_VULKAN_COMMON_PIPELINE_H
 #define ARTUS_VULKAN_COMMON_PIPELINE_H
-#include "Artus/Graphics/Vulkan/Resources/Shader.h"
+
+#include "Artus/Graphics/Enums.h"
 
 namespace Artus::Graphics::Vulkan {
-    inline vk::ShaderStageFlags ToVkShaderStageFlags(const RHI::ShaderStage shaderStage) {
+    inline vk::ShaderStageFlags ToVkShaderStageFlags(const Enums::ShaderStage shaderStage) {
         switch (shaderStage) {
-        case RHI::ShaderStage::Vertex:
+        case Enums::ShaderStage::Vertex:
             return vk::ShaderStageFlagBits::eVertex;
-        case RHI::ShaderStage::Pixel:
+        case Enums::ShaderStage::Pixel:
             return vk::ShaderStageFlagBits::eFragment;
-        case RHI::ShaderStage::Compute:
+        case Enums::ShaderStage::Compute:
             return vk::ShaderStageFlagBits::eCompute;
         default:
             return vk::ShaderStageFlagBits::eVertex;
         }
     }
 
-    inline vk::DescriptorType ToVkDescriptorType(const RHI::BindGroupLayoutBindingType type) {
+    inline vk::DescriptorType ToVkDescriptorType(const Enums::BindGroupLayoutBindingType type) {
         switch (type) {
-        case RHI::BindGroupLayoutBindingType::Buffer:
+        case Enums::BindGroupLayoutBindingType::Buffer:
             return vk::DescriptorType::eUniformBuffer;
-        case RHI::BindGroupLayoutBindingType::ImageView:
+        case Enums::BindGroupLayoutBindingType::ImageView:
             return vk::DescriptorType::eSampledImage;
         default:
             return vk::DescriptorType::eUniformBuffer;

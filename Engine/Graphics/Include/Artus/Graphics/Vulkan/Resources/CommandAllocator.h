@@ -5,17 +5,16 @@
 #ifndef ARTUS_COMMAND_ALLOCATOR_H
 #define ARTUS_COMMAND_ALLOCATOR_H
 
-#include "Artus/Graphics/RHI/Resources/ICommandAllocator.h"
 #include "CommandEncoder.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class CommandAllocator : public RHI::ICommandAllocator {
+    class CommandAllocator {
     public:
         explicit CommandAllocator(Device& device);
-        ~CommandAllocator() override;
+        ~CommandAllocator();
 
         CommandEncoder* NewEncoder();
         void DestroyEncoder(CommandEncoder* encoder);

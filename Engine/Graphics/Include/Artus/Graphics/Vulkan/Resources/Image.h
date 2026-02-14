@@ -5,64 +5,67 @@
 #ifndef ARTUS_IMAGE_H
 #define ARTUS_IMAGE_H
 
-#include "Artus/Graphics/Vulkan/Utils/Vulkan/Allocator.h"
-#include "Artus/Graphics/RHI/Resources/IImage.h"
+#include "../Utils/Vulkan/Allocator.h"
+#include "Artus/Graphics/Enums.h"
+#include "Artus/Graphics/Flags.h"
+#include "Artus/Graphics/Structs.h"
+
 #include <vulkan/vulkan.hpp>
 
 
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    inline vk::ImageUsageFlags ToVkImageUsageFlags(const RHI::ImageUsage imageUsage) {
+    inline vk::ImageUsageFlags ToVkImageUsageFlags(const Flags::ImageUsage imageUsage) {
         vk::ImageUsageFlags flags;
-        if ((imageUsage & RHI::ImageUsage::Color) != RHI::ImageUsage::None)
+        if ((imageUsage & Flags::ImageUsage::Color) != Flags::ImageUsage::None)
             flags |= vk::ImageUsageFlagBits::eColorAttachment;
-        if ((imageUsage & RHI::ImageUsage::DepthStencil) != RHI::ImageUsage::None)
+        if ((imageUsage & Flags::ImageUsage::DepthStencil) != Flags::ImageUsage::None)
             flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-        if ((imageUsage & RHI::ImageUsage::Shader) != RHI::ImageUsage::None)
+        if ((imageUsage & Flags::ImageUsage::Shader) != Flags::ImageUsage::None)
             flags |= vk::ImageUsageFlagBits::eSampled;
         return flags;
     }
 
-    inline vk::ImageType ToVkImageType(const RHI::ImageType imageType) {
+    inline vk::ImageType ToVkImageType(const Enums::ImageType imageType) {
         switch (imageType) {
-        case RHI::ImageType::Image2D:
+        case Enums::ImageType::Image2D:
             return vk::ImageType::e2D;
-        case RHI::ImageType::Image3D:
+        case Enums::ImageType::Image3D:
             return vk::ImageType::e3D;
         default:
             return vk::ImageType::e2D;
         }
     }
 
-    inline RHI::ImageState FromVkImageLayout(const vk::ImageLayout imageLayout) {
+    inline Enums::ImageState FromVkImageLayout(const vk::ImageLayout imageLayout) {
         switch (imageLayout) {
         case vk::ImageLayout::eUndefined:
-            return RHI::ImageState::Unknown;
+            return Enums::ImageState::Unknown;
         case vk::ImageLayout::eColorAttachmentOptimal:
-            return RHI::ImageState::Color;
+            return Enums::ImageState::Color;
         case vk::ImageLayout::eDepthStencilAttachmentOptimal:
-            return RHI::ImageState::DepthStencil;
+            return Enums::ImageState::DepthStencil;
         case vk::ImageLayout::eShaderReadOnlyOptimal:
-            return RHI::ImageState::ShaderAccess;
+            return Enums::ImageState::ShaderAccess;
         case vk::ImageLayout::ePresentSrcKHR:
-            return RHI::ImageState::Presentable;
+            return Enums::ImageState::Presentable;
         default:
-            return RHI::ImageState::Unknown;
+            return Enums::ImageState::Unknown;
         }
     }
 
-    inline vk::ImageLayout ToVkImageLayout(const RHI::ImageState imageState) {
+    inline vk::ImageLayout ToVkImageLayout(const Enums::ImageState imageState) {
         switch (imageState) {
-        case RHI::ImageState::Unknown:
+        case Enums::ImageState::Unknown:
             return vk::ImageLayout::eUndefined;
-        case RHI::ImageState::Color:
+        case Enums::ImageState::Color:
             return vk::ImageLayout::eColorAttachmentOptimal;
-        case RHI::ImageState::DepthStencil:
+        case Enums::ImageState::DepthStencil:
             return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-        case RHI::ImageState::ShaderAccess:
+        case Enums::ImageState::ShaderAccess:
             return vk::ImageLayout::eShaderReadOnlyOptimal;
-        case RHI::ImageState::Presentable:
+        case Enums::ImageState::Presentable:
             return vk::ImageLayout::ePresentSrcKHR;
         default:
             return vk::ImageLayout::eUndefined;
@@ -70,11 +73,11 @@ namespace Artus::Graphics::Vulkan {
     }
 
     /// @brief Holds image data used for textures, rendering, or storage
-    class Image : public RHI::IImage {
+    class Image {
     public:
-        explicit Image(Device& device, const RHI::ImageCreateDesc& desc);
+        explicit Image(Device& device, const Structs::ImageCreateDesc& desc);
         explicit Image(Device& device, vk::Image image);
-        ~Image() override;
+        ~Image();
 
         /// @brief Retrieves the vulkan handle to this image
         /// @return vk::Image

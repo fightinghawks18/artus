@@ -8,24 +8,24 @@
 
 #include "DescriptorAllocator.h"
 #include "DescriptorSetLayout.h"
-#include "Artus/Graphics/RHI/Resources/IBindGroupLayout.h"
-#include "Artus/Graphics/Vulkan/Device.h"
+#include "Artus/Graphics/Structs.h"
 
 namespace Artus::Graphics::Vulkan {
-    class BindGroupLayout : public RHI::IBindGroupLayout {
+    class Device;
+
+    class BindGroupLayout {
     public:
-        explicit BindGroupLayout(Device& device, DescriptorAllocator* allocator, const RHI::BindGroupLayoutCreateDesc& desc);
-        ~BindGroupLayout() override;
+        explicit BindGroupLayout(Device& device, DescriptorAllocator* allocator, const Structs::BindGroupLayoutCreateDesc& desc);
+        ~BindGroupLayout();
 
         [[nodiscard]] DescriptorSetLayout* GetDescriptorSetLayout() const { return mLayout; }
 
-        [[nodiscard]] const RHI::BindGroupLayoutDesc& GetDesc() const override { return mDesc; }
-
     private:
         Device& mDevice;
-
-        RHI::BindGroupLayoutDesc mDesc;
         DescriptorSetLayout* mLayout;
+        Structs::BindGroupLayoutCreateDesc mCreateDesc;
+
+        friend class BindGroup;
     };
 }
 

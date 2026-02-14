@@ -9,7 +9,7 @@
 #include "RenderContext.h"
 
 #include <Artus/Core/Window.h>
-#include <Artus/Graphics/RHI/IDevice.h>
+#include <Artus/Graphics/Vulkan/Device.h>
 
 namespace Artus::Rendering {
     enum class RenderAPI {
@@ -32,10 +32,10 @@ namespace Artus::Rendering {
     private:
         RenderAPI mRenderingApi;
         Core::Window* mMainWindow;
-        std::unique_ptr<Graphics::RHI::IDevice> mRHI;
-        std::unique_ptr<Graphics::RHI::ISurface> mSurface;
+        std::unique_ptr<Graphics::Vulkan::Device> mRHI;
+        std::unique_ptr<Graphics::Vulkan::Surface> mSurface;
 
-        std::vector<std::unique_ptr<Graphics::RHI::ICommandEncoder>> mCommandEncoders;
+        std::vector<std::unique_ptr<Graphics::Vulkan::CommandEncoder>> mCommandEncoders;
 
         uint32_t mFrameIndex = 0;
 

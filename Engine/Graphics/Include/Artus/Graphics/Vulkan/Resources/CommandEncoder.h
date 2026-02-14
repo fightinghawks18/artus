@@ -10,39 +10,36 @@
 #include "GraphicsPipeline.h"
 #include <vulkan/vulkan.hpp>
 
-#include "Artus/Graphics/RHI/Types/Rendering.h"
-#include "Artus/Graphics/RHI/Resources/ICommandEncoder.h"
-
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class CommandEncoder : public RHI::ICommandEncoder {
+    class CommandEncoder {
     public:
         explicit CommandEncoder(Device& device, vk::CommandPool commandPool);
-        ~CommandEncoder() override;
+        ~CommandEncoder();
 
-        void Start() override;
-        void End() override;
-        void Reset() override;
-        void StartRenderingPass(const RHI::RenderingPass& renderingPass) override;
-        void EndRenderingPass() override;
-        void MakeImageRenderable(RHI::IImage* image) override;
-        void MakeImageDepthStencil(RHI::IImage* image) override;
-        void MakeImageShaderAccessible(RHI::IImage* image) override;
-        void MakeImagePresentable(RHI::IImage* image) override;
-        void BindGraphicsPipeline(RHI::IGraphicsPipeline* graphicsPipeline) override;
-        void BindVertexBuffer(RHI::IBuffer* vertexBuffer) override;
-        void BindIndexBuffer(RHI::IBuffer* indexBuffer) override;
-        void SetCullMode(RHI::CullMode cullMode) override;
-        void SetDepthTesting(bool depthTesting) override;
-        void SetStencilTesting(bool stencilTesting) override;
-        void SetDepthWriting(bool depthWriting) override;
-        void SetViewport(const RHI::Viewport& viewport) override;
-        void SetScissor(const RHI::Rectangle& scissor) override;
-        void BindGroup(uint32_t groupIndex, RHI::IBindGroup* group, RHI::IPipelineLayout* layout) override;
+        void Start();
+        void End();
+        void Reset();
+        void StartRenderingPass(const Structs::RenderingPass& renderingPass);
+        void EndRenderingPass();
+        void MakeImageRenderable(Image* image);
+        void MakeImageDepthStencil(Image* image);
+        void MakeImageShaderAccessible(Image* image);
+        void MakeImagePresentable(Image* image);
+        void BindGraphicsPipeline(GraphicsPipeline* graphicsPipeline);
+        void BindVertexBuffer(Buffer* vertexBuffer);
+        void BindIndexBuffer(Buffer* indexBuffer);
+        void SetCullMode(Enums::CullMode cullMode);
+        void SetDepthTesting(bool depthTesting);
+        void SetStencilTesting(bool stencilTesting);
+        void SetDepthWriting(bool depthWriting);
+        void SetViewport(const Structs::Viewport& viewport);
+        void SetScissor(const Structs::Rectangle& scissor);
+        void BindGroup(uint32_t groupIndex, const BindGroup* group, PipelineLayout* layout);
 
-        void DrawIndexed(uint32_t indexCount, uint32_t firstIndex) override;
-        void Draw(uint32_t vertexCount, uint32_t firstIndex) override;
+        void DrawIndexed(uint32_t indexCount, uint32_t firstIndex);
+        void Draw(uint32_t vertexCount, uint32_t firstIndex);
 
         [[nodiscard]] vk::CommandBuffer GetVulkanCommandBuffer() { return mCommandBuffer.get(); }
         [[nodiscard]] bool InUse() const { return mInUse; }

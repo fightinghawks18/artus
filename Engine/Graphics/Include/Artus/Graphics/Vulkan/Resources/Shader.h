@@ -5,16 +5,16 @@
 #ifndef ARTUS_SHADER_H
 #define ARTUS_SHADER_H
 
-#include "Artus/Graphics/RHI/Resources/IShader.h"
+#include "Artus/Graphics/Structs.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class Shader : public RHI::IShader {
+    class Shader {
     public:
-        explicit Shader(Device& device, const RHI::ShaderCreateDesc& desc);
-        ~Shader() override;
+        explicit Shader(Device& device, const Structs::ShaderCreateDesc& desc);
+        ~Shader();
 
         [[nodiscard]] vk::ShaderModule GetVulkanShaderModule() const { return mShaderModule.get(); }
 

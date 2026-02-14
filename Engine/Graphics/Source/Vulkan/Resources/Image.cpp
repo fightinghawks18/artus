@@ -9,7 +9,7 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    Image::Image(Device& device, const RHI::ImageCreateDesc& desc) : mDevice(device) {
+    Image::Image(Device& device, const Structs::ImageCreateDesc& desc) : mDevice(device) {
         vk::ImageCreateInfo imageInfo = {};
         imageInfo.setFormat(ToVkFormat(desc.format))
                  .setImageType(ToVkImageType(desc.type))

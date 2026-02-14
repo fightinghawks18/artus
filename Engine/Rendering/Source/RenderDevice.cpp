@@ -52,12 +52,12 @@ namespace Artus::Rendering {
     }
 
     void RenderDevice::CreateMainSurface() {
-        mSurface = std::unique_ptr<Graphics::RHI::ISurface>(mRHI->CreateSurface({ .window = mMainWindow }));
+        mSurface = std::unique_ptr<Graphics::Vulkan::Surface>(mRHI->CreateSurface({ .window = mMainWindow }));
     }
 
     void RenderDevice::CreateResources() {
         for (auto& encoder : mRHI->CreateCommandEncoders(2)) {
-            mCommandEncoders.push_back(std::unique_ptr<Graphics::RHI::ICommandEncoder>(std::move(encoder)));
+            mCommandEncoders.push_back(std::unique_ptr<Graphics::Vulkan::CommandEncoder>(std::move(encoder)));
         }
     }
 }

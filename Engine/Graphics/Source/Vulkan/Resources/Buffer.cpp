@@ -6,19 +6,19 @@
 #include "Artus/Graphics/Vulkan/Device.h"
 
 namespace Artus::Graphics::Vulkan {
-    Buffer::Buffer(Device& device, const RHI::BufferCreateDesc& desc) : mDevice(device) {
-        vk::BufferUsageFlagBits usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
+    Buffer::Buffer(Device& device, const Structs::BufferCreateDesc& desc) : mDevice(device) {
+        auto usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
         switch (desc.usage) {
-        case RHI::BufferUsage::Vertex:
+        case Enums::BufferUsage::Vertex:
             usageFlags = vk::BufferUsageFlagBits::eVertexBuffer;
             break;
-        case RHI::BufferUsage::Index:
+        case Enums::BufferUsage::Index:
             usageFlags = vk::BufferUsageFlagBits::eIndexBuffer;
             break;
-        case RHI::BufferUsage::Shader:
+        case Enums::BufferUsage::Shader:
             usageFlags = vk::BufferUsageFlagBits::eUniformBuffer;
             break;
-        case RHI::BufferUsage::ShaderStorage:
+        case Enums::BufferUsage::ShaderStorage:
             usageFlags = vk::BufferUsageFlagBits::eStorageBuffer;
             break;
         }

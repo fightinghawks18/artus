@@ -6,16 +6,17 @@
 #define ARTUS_PIPELINE_LAYOUT_H
 
 #include "DescriptorSetLayout.h"
-#include "Artus/Graphics/RHI/Resources/IPipelineLayout.h"
+#include "Artus/Graphics/Structs.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace Artus::Graphics::Vulkan {
     class Device;
 
-    class PipelineLayout : public RHI::IPipelineLayout {
+    class PipelineLayout {
     public:
-        explicit PipelineLayout(Device& device, const RHI::PipelineLayoutCreateDesc& desc);
-        ~PipelineLayout() override;
+        explicit PipelineLayout(Device& device, const Structs::PipelineLayoutCreateDesc& desc);
+        ~PipelineLayout();
 
         [[nodiscard]] vk::PipelineLayout GetVulkanPipelineLayout() { return mPipelineLayout.get(); }
 

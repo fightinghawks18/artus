@@ -149,13 +149,13 @@ namespace Artus::Math {
             return matrix;
         }
 
-        static Matrix4 Perspective(const float fov, const float aspect, const float near, const float far) {
+        static Matrix4 Perspective(const float fov, const float aspect, const float zNear, const float zFar) {
             const float tanHalfFov = std::tan(fov / 2.0f);
 
             const float xZoom = 1.0f / (aspect * tanHalfFov);
             const float yZoom = 1.0f / tanHalfFov;
-            const float coefficient = -far / (far - near);
-            const float constantOffset = -(far * near) / (far - near);
+            const float coefficient = -zFar / (zFar - zNear);
+            const float constantOffset = -(zFar * zNear) / (zFar - zNear);
 
             Matrix4 matrix;
             matrix.m[0][0] = xZoom;

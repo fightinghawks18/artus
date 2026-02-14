@@ -58,41 +58,41 @@ namespace Artus::Graphics::Vulkan {
         mInstance.reset();
     }
 
-    RHI::ISurface* Device::CreateSurface(const RHI::SurfaceCreateDesc& surfaceDesc) {
-        return new Surface(*this, surfaceDesc);
+    Surface* Device::CreateSurface(const Structs::SurfaceCreateDesc& surfaceCreateDesc) {
+        return new Surface(*this, surfaceCreateDesc);
     }
 
-    RHI::IBuffer* Device::CreateBuffer(const RHI::BufferCreateDesc& bufferDesc) { return new Buffer(*this, bufferDesc); }
+    Buffer* Device::CreateBuffer(const Structs::BufferCreateDesc& bufferCreateDesc) { return new Buffer(*this, bufferCreateDesc); }
 
-    RHI::IImage* Device::CreateImage(const RHI::ImageCreateDesc& imageDesc) { return new Image(*this, imageDesc); }
+    Image* Device::CreateImage(const Structs::ImageCreateDesc& imageCreateDesc) { return new Image(*this, imageCreateDesc); }
 
-    RHI::IImageView* Device::CreateImageView(const RHI::ImageViewCreateDesc& imageViewDesc) {
-        return new ImageView(*this, imageViewDesc);
+    ImageView* Device::CreateImageView(const Structs::ImageViewCreateDesc& imageViewCreateDesc) {
+        return new ImageView(*this, imageViewCreateDesc);
     }
 
-    RHI::IGraphicsPipeline* Device::CreateGraphicsPipeline(const RHI::GraphicsPipelineCreateDesc& pipelineDesc) {
+    GraphicsPipeline* Device::CreateGraphicsPipeline(const Structs::GraphicsPipelineCreateDesc& pipelineDesc) {
         return new GraphicsPipeline(*this, pipelineDesc);
     }
 
-    RHI::IShader* Device::CreateShader(const RHI::ShaderCreateDesc& shaderDesc) { return new Shader(*this, shaderDesc); }
+    Shader* Device::CreateShader(const Structs::ShaderCreateDesc& shaderCreateDesc) { return new Shader(*this, shaderCreateDesc); }
 
-    RHI::IPipelineLayout* Device::CreatePipelineLayout(const RHI::PipelineLayoutCreateDesc& pipelineLayout) {
-        return new PipelineLayout(*this, pipelineLayout);
+    PipelineLayout* Device::CreatePipelineLayout(const Structs::PipelineLayoutCreateDesc& pipelineCreateLayout) {
+        return new PipelineLayout(*this, pipelineCreateLayout);
     }
 
-    RHI::ICommandEncoder* Device::CreateCommandEncoder() { return mCommandAllocator->NewEncoder(); }
+    CommandEncoder* Device::CreateCommandEncoder() { return mCommandAllocator->NewEncoder(); }
 
-    std::vector<RHI::ICommandEncoder*> Device::CreateCommandEncoders(uint32_t commandEncoderCount) {
+    std::vector<CommandEncoder*> Device::CreateCommandEncoders(uint32_t commandEncoderCount) {
         auto cmds = mCommandAllocator->NewEncoders(commandEncoderCount);
-        return std::vector<RHI::ICommandEncoder*>(cmds.begin(), cmds.end());
+        return {cmds.begin(), cmds.end()};
     }
 
-    RHI::IBindGroupLayout* Device::CreateBindGroupLayout(const RHI::BindGroupLayoutCreateDesc& bindGroupLayoutDesc) {
-        return new BindGroupLayout(*this, mDescriptorAllocator.get(), bindGroupLayoutDesc);
+    BindGroupLayout* Device::CreateBindGroupLayout(const Structs::BindGroupLayoutCreateDesc& bindGroupLayoutCreateDesc) {
+        return new BindGroupLayout(*this, mDescriptorAllocator.get(), bindGroupLayoutCreateDesc);
     }
 
-    RHI::IBindGroup* Device::CreateBindGroup(const RHI::BindGroupCreateDesc& bindGroupDesc) {
-        return new BindGroup(*this, mDescriptorAllocator.get(), bindGroupDesc);
+    BindGroup* Device::CreateBindGroup(const Structs::BindGroupCreateDesc& bindGroupCreateDesc) {
+        return new BindGroup(*this, mDescriptorAllocator.get(), bindGroupCreateDesc);
     }
 
     void Device::MakeInstance() {

@@ -9,18 +9,15 @@
 #include "Artus/Graphics/Vulkan/Resources/Shader.h"
 
 namespace Artus::Graphics::Vulkan {
-    GraphicsPipeline::GraphicsPipeline(Device& device, const RHI::GraphicsPipelineCreateDesc& pipelineDescriptor)
+    GraphicsPipeline::GraphicsPipeline(Device& device, const Structs::GraphicsPipelineCreateDesc& pipelineDescriptor)
         : mDevice(device) {
-        const auto vkVertexShader = reinterpret_cast<Shader*>(pipelineDescriptor.vertexStage);
-        const auto vkPixelShader = reinterpret_cast<Shader*>(pipelineDescriptor.pixelStage);
-
         vk::PipelineShaderStageCreateInfo vertexStageInfo = {};
         vertexStageInfo.setStage(vk::ShaderStageFlagBits::eVertex)
-                       .setModule(vkVertexShader->GetVulkanShaderModule())
+                       .setModule(pipelineDescriptor.vertexStage->GetVulkanShaderModule())
                        .setPName("main");
         vk::PipelineShaderStageCreateInfo pixelStageInfo = {};
         pixelStageInfo.setStage(vk::ShaderStageFlagBits::eFragment)
-                      .setModule(vkPixelShader->GetVulkanShaderModule())
+                      .setModule(pipelineDescriptor.pixelStage->GetVulkanShaderModule())
                       .setPName("main");
 
         auto stages = {vertexStageInfo, pixelStageInfo};
