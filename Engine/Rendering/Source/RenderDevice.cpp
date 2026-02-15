@@ -11,47 +11,66 @@
 namespace Artus::Rendering {
     RenderDevice::RenderDevice(const RenderDeviceCreateDesc& desc) : mRenderingApi(desc.renderingApi), mMainWindow(desc.mainWindow) {
         CreateRenderDevice();
+        CreateAllocators();
         CreateMainSurface();
         CreateResources();
+        CreateSurfaceResources();
+        mSurfaceReady = true;
     }
 
     RenderDevice::~RenderDevice() {
-        mSurface.reset();
-        mRHI.reset();
+        DestroyResources();
+        DestroySurfaceResources();
+        DestroyMainSurface();
+        DestroyAllocators();
+        DestroyRenderDevice();
     }
 
-    RenderContext RenderDevice::StartRendering() {
-        Graphics::Structs::SurfaceFrameInfo surfaceInfo = {};
-        uint32_t retries = 0;
-        while (retries < 3 && (!surfaceInfo.colorImage || !surfaceInfo.colorView)) {
-            surfaceInfo = mSurface->PrepareFrame();
-            ++retries;
-        }
+    RenderState RenderDevice::StartRendering() {
+        if (!mSurfaceReady)
+            return RenderState(RenderStartResult::Fail, RenderContext(*this));
 
-        if (retries >= 3) {
-            AR_PANIC("RenderDevice failed to reattempt rendering after 3 tries!");
-            throw std::runtime_error("Retry render failure");
-        }
+        mSurface->PrepareFrame();
+        mImageIndex = mSurface->GetImageIndex();
 
-        FrameContext ctx = {
-            .device = mRHI.get(),
-            .encoder = mCommandEncoders[mFrameIndex].get(),
-            .surface = mSurface.get(),
-            .surfaceFrameInfo = surfaceInfo,
-            .frame = mFrameIndex
-        };
+        const auto currentEncoder = GetCurrentCommandEncoder();
+        auto currentSurfaceColorImageHandle = GetCurrentSurfaceColorImage();
+        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle);
 
-        ctx.encoder->Start();
-        ctx.encoder->MakeImageRenderable(ctx.surfaceFrameInfo.colorImage);
-        return RenderContext(ctx);
+        auto currentSurfaceDepthImageHandle = GetCurrentSurfaceDepthImage();
+        const auto surfaceDepthImage = GetImage(currentSurfaceDepthImageHandle);
+
+        currentEncoder->Start();
+        currentEncoder->MakeImageRenderable(surfaceColorImage);
+        currentEncoder->MakeImageDepthStencil(surfaceDepthImage);
+        return RenderState(RenderStartResult::Ok, RenderContext(*this));
     }
 
-    void RenderDevice::EndRendering(const RenderContext& ctx) {
-        auto& frameCtx = ctx.GetFrameContext();
-        frameCtx.encoder->MakeImagePresentable(frameCtx.surfaceFrameInfo.colorImage);
-        frameCtx.encoder->End();
-        mSurface->PresentFrame(ctx.GetRawCmd());
+    void RenderDevice::EndRendering(RenderState& state) {
+        const auto currentEncoder = GetCurrentCommandEncoder();
+        auto currentSurfaceColorImageHandle = GetCurrentSurfaceColorImage();
+        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle);
+
+        currentEncoder->MakeImagePresentable(surfaceColorImage);
+        currentEncoder->End();
+        mSurface->PresentFrame(state->GetRawCmd());
         mFrameIndex = (mFrameIndex + 1) % 2;
+    }
+
+    Graphics::Vulkan::Image* RenderDevice::GetImage(Handle<Graphics::Vulkan::Image>& handle) const {
+        return mImageAllocator->Get(handle);
+    }
+
+    Graphics::Vulkan::ImageView* RenderDevice::GetImageView(Handle<Graphics::Vulkan::ImageView>& handle) const {
+        return mImageViewAllocator->Get(handle);
+    }
+
+    Graphics::Vulkan::CommandEncoder* RenderDevice::GetCurrentCommandEncoder() const {
+        return mCommandEncoders[mFrameIndex].get();
+    }
+
+    Graphics::Vulkan::Surface* RenderDevice::GetMainSurface() const {
+        return mSurface.get();
     }
 
     void RenderDevice::CreateRenderDevice() {
@@ -60,13 +79,82 @@ namespace Artus::Rendering {
         }
     }
 
+    void RenderDevice::CreateAllocators() {
+        mImageAllocator = std::make_unique<ResourceAllocator<Graphics::Vulkan::Image>>();
+        mImageViewAllocator = std::make_unique<ResourceAllocator<Graphics::Vulkan::ImageView>>();
+    }
+
     void RenderDevice::CreateMainSurface() {
         mSurface = std::unique_ptr<Graphics::Vulkan::Surface>(mRHI->CreateSurface({ .window = mMainWindow }));
+
+        mSurface->OnResize([&] {
+            mSurfaceReady = false;
+            DestroySurfaceResources();
+            CreateSurfaceResources();
+            mSurfaceReady = true;
+        });
     }
 
     void RenderDevice::CreateResources() {
         for (auto& encoder : mRHI->CreateCommandEncoders(2)) {
             mCommandEncoders.push_back(std::unique_ptr<Graphics::Vulkan::CommandEncoder>(std::move(encoder)));
         }
+    }
+
+    void RenderDevice::CreateSurfaceResources() {
+        for (const auto& image : mSurface->GetColorImages()) {
+            mSurfaceColorImages.push_back(mImageAllocator->AllocateNonOwning(image));
+        }
+
+        for (const auto& view : mSurface->GetColorImageViews()) {
+            mSurfaceColorImageViews.push_back(mImageViewAllocator->AllocateNonOwning(view));
+        }
+
+        for (const auto& image : mSurface->GetDepthImages()) {
+            mSurfaceDepthImages.push_back(mImageAllocator->AllocateNonOwning(image));
+        }
+
+        for (const auto& view : mSurface->GetDepthImageViews()) {
+            mSurfaceDepthImageViews.push_back(mImageViewAllocator->AllocateNonOwning(view));
+        }
+    }
+
+    void RenderDevice::DestroySurfaceResources() {
+        for (auto& image : mSurfaceColorImages) {
+            mImageAllocator->Free(image);
+        }
+        mSurfaceColorImages.clear();
+
+        for (auto& view : mSurfaceColorImageViews) {
+            mImageViewAllocator->Free(view);
+        }
+        mSurfaceColorImageViews.clear();
+
+        for (auto& image : mSurfaceDepthImages) {
+            mImageAllocator->Free(image);
+        }
+        mSurfaceDepthImages.clear();
+
+        for (auto& view : mSurfaceDepthImageViews) {
+            mImageViewAllocator->Free(view);
+        }
+        mSurfaceDepthImageViews.clear();
+    }
+
+    void RenderDevice::DestroyResources() {
+        mCommandEncoders.clear();
+    }
+
+    void RenderDevice::DestroyMainSurface() {
+        mSurface.reset();
+    }
+
+    void RenderDevice::DestroyAllocators() {
+        mImageViewAllocator.reset();
+        mImageAllocator.reset();
+    }
+
+    void RenderDevice::DestroyRenderDevice() {
+        mRHI.reset();
     }
 }

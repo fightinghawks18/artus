@@ -16,9 +16,15 @@ int main() {
     while (!window->IsClosing()) {
         Core::Window::Update();
 
-        auto ctx = renderDevice->StartRendering();
-        ctx.StartPass();
-        ctx.EndPass();
-        renderDevice->EndRendering(ctx);
+        auto render = renderDevice->StartRendering();
+        if (!render)
+            continue;
+        render->StartPass({
+            .colorImages = {renderDevice->GetCurrentSurfaceColorImageView()},
+            .depthImage = renderDevice->GetCurrentSurfaceDepthImageView(),
+            .loadStoreOperation = Rendering::RenderPassLoadStoreOperation::ClearAndStore
+        });
+        render->EndPass();
+        renderDevice->EndRendering(render);
     }
 }

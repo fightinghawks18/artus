@@ -21,11 +21,21 @@ namespace Artus::Rendering {
     template <typename T>
     class ResourceAllocator {
     public:
-        explicit ResourceAllocator(uint32_t reserveCount = 5);
-        ~ResourceAllocator();
+        explicit ResourceAllocator(uint32_t reserveCount = 5) { mSlots.reserve(reserveCount); }
+        ~ResourceAllocator() {
+            for (const auto& slot : mSlots) {
+                DestroySlot(slot.id);
+            }
+            mSlots.clear();
+        }
 
-        template <typename... Args>
-        Handle<T> Allocate(Args&&... constructorArgs) {
+        Handle<T> AllocateNonOwning(T* resource) {
+            auto handle = Allocate(resource);
+            mSlots[handle.id].isOwned = false;
+            return handle;
+        }
+
+        Handle<T> Allocate(T* resource) {
             uint32_t id = INVALID_HANDLE;
             if (mFreeSlotHead != INVALID_HANDLE) {
                 id = mFreeSlotHead;
@@ -35,11 +45,17 @@ namespace Artus::Rendering {
                 mSlots.push_back({});
             }
 
-            mSlots[id].resource = new T(std::forward<Args>(constructorArgs)...);
+            mSlots[id].resource = resource;
             mSlots[id].allocated = true;
+            mSlots[id].isOwned = true;
             ++mSlots[id].generation;
 
             return Handle<T>{ id, mSlots[id].generation, true };
+        }
+
+        template <typename... Args>
+        Handle<T> Allocate(Args&&... constructorArgs) {
+            return Allocate(new T(std::forward<Args>(constructorArgs)...));
         }
 
         T* Get(Handle<T>& handle) {
@@ -51,11 +67,9 @@ namespace Artus::Rendering {
         void Free(Handle<T>& handle) {
             if (!IsHandleValid(handle))
                 return;
-            delete mSlots[handle.id].resource;
-            mSlots[handle.id].resource = nullptr;
-            mSlots[handle.id].allocated = false;
-            mSlots[handle.id].nextFreeSlot = mFreeSlotHead;
-            mFreeSlotHead = handle.id;
+            if (mSlots[handle.id].isOwned)
+                delete mSlots[handle.id].resource;
+            DestroySlot(handle.id);
         }
     private:
         struct Slot {
@@ -66,10 +80,18 @@ namespace Artus::Rendering {
             uint32_t id;
             uint32_t generation;
             bool allocated;
+            bool isOwned;
         };
 
         std::vector<Slot> mSlots;
         uint32_t mFreeSlotHead = INVALID_HANDLE;
+
+        void DestroySlot(uint32_t id) {
+            mSlots[id].resource = nullptr;
+            mSlots[id].allocated = false;
+            mSlots[id].nextFreeSlot = mFreeSlotHead;
+            mFreeSlotHead = id;
+        }
 
         static void InvalidateHandle(Handle<T>& handle) {
             handle.generation = INVALID_HANDLE;
