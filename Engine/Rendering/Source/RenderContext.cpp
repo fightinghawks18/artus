@@ -32,7 +32,7 @@ namespace Artus::Rendering {
                 .view = mRenderDevice.GetImageView(colorView),
                 .type = Graphics::Enums::RenderingAttachmentType::Color,
                 .lsOp = lsOp,
-                .clear = Math::Color{0.1f, 0.15f, 0.05f, 1.0f}
+                .clear = Math::Color{0.0f, 0.0f, 0.0f, 1.0f}
             };
 
             mainPass.attachments.push_back(colorAttachment);

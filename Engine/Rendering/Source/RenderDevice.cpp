@@ -35,10 +35,10 @@ namespace Artus::Rendering {
 
         const auto currentEncoder = GetCurrentCommandEncoder();
         auto currentSurfaceColorImageHandle = GetCurrentSurfaceColorImage();
-        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle);
+        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle.img);
 
         auto currentSurfaceDepthImageHandle = GetCurrentSurfaceDepthImage();
-        const auto surfaceDepthImage = GetImage(currentSurfaceDepthImageHandle);
+        const auto surfaceDepthImage = GetImage(currentSurfaceDepthImageHandle.img);
 
         currentEncoder->Start();
         currentEncoder->MakeImageRenderable(surfaceColorImage);
@@ -49,7 +49,7 @@ namespace Artus::Rendering {
     void RenderDevice::EndRendering(RenderState& state) {
         const auto currentEncoder = GetCurrentCommandEncoder();
         auto currentSurfaceColorImageHandle = GetCurrentSurfaceColorImage();
-        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle);
+        const auto surfaceColorImage = GetImage(currentSurfaceColorImageHandle.img);
 
         currentEncoder->MakeImagePresentable(surfaceColorImage);
         currentEncoder->End();
@@ -58,11 +58,11 @@ namespace Artus::Rendering {
     }
 
     Graphics::Vulkan::Image* RenderDevice::GetImage(Handle<Graphics::Vulkan::Image>& handle) const {
-        return mImageAllocator->Get(handle);
+        return mGraphicsAllocator->GetImageAllocator()->Get(handle);
     }
 
     Graphics::Vulkan::ImageView* RenderDevice::GetImageView(Handle<Graphics::Vulkan::ImageView>& handle) const {
-        return mImageViewAllocator->Get(handle);
+        return mGraphicsAllocator->GetImageViewAllocator()->Get(handle);
     }
 
     Graphics::Vulkan::CommandEncoder* RenderDevice::GetCurrentCommandEncoder() const {
@@ -73,6 +73,14 @@ namespace Artus::Rendering {
         return mSurface.get();
     }
 
+    Graphics::Vulkan::Device* RenderDevice::GetRHI() const {
+        return mRHI.get();
+    }
+
+    GraphicsAllocator* RenderDevice::GetGraphicsAllocator() const {
+        return mGraphicsAllocator.get();
+    }
+
     void RenderDevice::CreateRenderDevice() {
         if (mRenderingApi == RenderAPI::Vulkan) {
             mRHI = std::make_unique<Graphics::Vulkan::Device>();
@@ -80,8 +88,7 @@ namespace Artus::Rendering {
     }
 
     void RenderDevice::CreateAllocators() {
-        mImageAllocator = std::make_unique<ResourceAllocator<Graphics::Vulkan::Image>>();
-        mImageViewAllocator = std::make_unique<ResourceAllocator<Graphics::Vulkan::ImageView>>();
+        mGraphicsAllocator = std::make_unique<GraphicsAllocator>(*this);
     }
 
     void RenderDevice::CreateMainSurface() {
@@ -102,43 +109,33 @@ namespace Artus::Rendering {
     }
 
     void RenderDevice::CreateSurfaceResources() {
-        for (const auto& image : mSurface->GetColorImages()) {
-            mSurfaceColorImages.push_back(mImageAllocator->AllocateNonOwning(image));
-        }
+        auto colorImages = mSurface->GetColorImages();
+        auto colorImageViews = mSurface->GetColorImageViews();
+        auto depthImages = mSurface->GetDepthImages();
+        auto depthImageViews = mSurface->GetDepthImageViews();
 
-        for (const auto& view : mSurface->GetColorImageViews()) {
-            mSurfaceColorImageViews.push_back(mImageViewAllocator->AllocateNonOwning(view));
-        }
+        for (uint32_t i = 0; i < colorImages.size(); i++) {
+            mSurfaceColorImages.push_back({
+                .img = mGraphicsAllocator->GetImageAllocator()->AllocateNonOwning(colorImages[i]),
+                .view = mGraphicsAllocator->GetImageViewAllocator()->AllocateNonOwning(colorImageViews[i])
+            });
 
-        for (const auto& image : mSurface->GetDepthImages()) {
-            mSurfaceDepthImages.push_back(mImageAllocator->AllocateNonOwning(image));
-        }
-
-        for (const auto& view : mSurface->GetDepthImageViews()) {
-            mSurfaceDepthImageViews.push_back(mImageViewAllocator->AllocateNonOwning(view));
+            mSurfaceDepthImages.push_back({
+                .img = mGraphicsAllocator->GetImageAllocator()->AllocateNonOwning(depthImages[i]),
+                .view = mGraphicsAllocator->GetImageViewAllocator()->AllocateNonOwning(depthImageViews[i])
+            });
         }
     }
 
     void RenderDevice::DestroySurfaceResources() {
-        for (auto& image : mSurfaceColorImages) {
-            mImageAllocator->Free(image);
+        for (uint32_t i = 0; i < mSurfaceColorImages.size(); i++) {
+            mGraphicsAllocator->DestroyImage(mSurfaceColorImages[i].img);
+            mGraphicsAllocator->DestroyImageView(mSurfaceColorImages[i].view);
+            mGraphicsAllocator->DestroyImage(mSurfaceDepthImages[i].img);
+            mGraphicsAllocator->DestroyImageView(mSurfaceDepthImages[i].view);
         }
         mSurfaceColorImages.clear();
-
-        for (auto& view : mSurfaceColorImageViews) {
-            mImageViewAllocator->Free(view);
-        }
-        mSurfaceColorImageViews.clear();
-
-        for (auto& image : mSurfaceDepthImages) {
-            mImageAllocator->Free(image);
-        }
         mSurfaceDepthImages.clear();
-
-        for (auto& view : mSurfaceDepthImageViews) {
-            mImageViewAllocator->Free(view);
-        }
-        mSurfaceDepthImageViews.clear();
     }
 
     void RenderDevice::DestroyResources() {
@@ -150,8 +147,7 @@ namespace Artus::Rendering {
     }
 
     void RenderDevice::DestroyAllocators() {
-        mImageViewAllocator.reset();
-        mImageAllocator.reset();
+        mGraphicsAllocator.reset();
     }
 
     void RenderDevice::DestroyRenderDevice() {

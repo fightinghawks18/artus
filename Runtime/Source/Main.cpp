@@ -20,8 +20,8 @@ int main() {
         if (!render)
             continue;
         render->StartPass({
-            .colorImages = {renderDevice->GetCurrentSurfaceColorImageView()},
-            .depthImage = renderDevice->GetCurrentSurfaceDepthImageView(),
+            .colorImages = {renderDevice->GetCurrentSurfaceColorImage()},
+            .depthImage = renderDevice->GetCurrentSurfaceDepthImage(),
             .loadStoreOperation = Rendering::RenderPassLoadStoreOperation::ClearAndStore
         });
         render->EndPass();

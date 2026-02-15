@@ -6,10 +6,10 @@
 #ifndef ARTUS_RENDER_CONTEXT_H
 #define ARTUS_RENDER_CONTEXT_H
 
+#include "Utils/GraphicsAllocator.h"
+
 #include <Artus/Graphics/Vulkan/Surface.h>
 #include <Artus/Graphics/Vulkan/Device.h>
-
-#include "Utils/ResourceAllocator.h"
 
 #include <optional>
 
@@ -22,8 +22,8 @@ namespace Artus::Rendering {
     };
 
     struct RenderPassDesc {
-        std::vector<Handle<Graphics::Vulkan::ImageView>> colorImages;
-        std::optional<Handle<Graphics::Vulkan::ImageView>> depthImage;
+        std::vector<ImageViewHandle> colorImages;
+        std::optional<ImageViewHandle> depthImage;
         RenderPassLoadStoreOperation loadStoreOperation;
     };
 

@@ -16,6 +16,10 @@ namespace Artus::Rendering {
     struct Handle {
         uint32_t id, generation;
         bool valid;
+
+        explicit operator bool() const {
+            return id != INVALID_HANDLE && generation != INVALID_HANDLE && valid;
+        }
     };
 
     template <typename T>
@@ -28,6 +32,8 @@ namespace Artus::Rendering {
             }
             mSlots.clear();
         }
+
+        static Handle<T> CreateInvalidHandle() { return {INVALID_HANDLE, INVALID_HANDLE, false}; }
 
         Handle<T> AllocateNonOwning(T* resource) {
             auto handle = Allocate(resource);
@@ -59,6 +65,14 @@ namespace Artus::Rendering {
         }
 
         T* Get(Handle<T>& handle) {
+            if (!IsHandleValid(handle)) {
+                InvalidateHandle(handle);
+                return nullptr;
+            }
+            return mSlots[handle.id].resource;
+        }
+
+        T* Get(const Handle<T>& handle) {
             if (!IsHandleValid(handle))
                 return nullptr;
             return mSlots[handle.id].resource;
@@ -99,19 +113,16 @@ namespace Artus::Rendering {
             handle.valid = false;
         }
 
-        bool IsHandleValid(Handle<T>& handle) {
+        bool IsHandleValid(const Handle<T>& handle) {
             if (handle.id >= mSlots.size()) {
-                InvalidateHandle(handle);
                 return false;
             }
 
             if (!mSlots[handle.id].allocated) {
-                InvalidateHandle(handle);
                 return false;
             }
 
             if (handle.generation != mSlots[handle.id].generation) {
-                InvalidateHandle(handle);
                 return false;
             }
 
