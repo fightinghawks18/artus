@@ -250,8 +250,14 @@ namespace Artus::Rendering {
         void DestroyGraphicsPipeline(GraphicsPipelineHandle& graphicsPipelineHandle) const;
         void DestroyShader(ShaderHandle& shaderHandle) const;
 
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::Buffer>* GetBufferAllocator() const { return mBufferAllocator.get(); }
         [[nodiscard]] ResourceAllocator<Graphics::Vulkan::Image>* GetImageAllocator() const { return mImageAllocator.get(); }
         [[nodiscard]] ResourceAllocator<Graphics::Vulkan::ImageView>* GetImageViewAllocator() const { return mImageViewAllocator.get(); }
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::BindGroupLayout>* GetBindGroupLayoutAllocator() const { return mBindGroupLayoutAllocator.get(); }
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::BindGroup>* GetBindGroupAllocator() const { return mBindGroupAllocator.get(); }
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::PipelineLayout>* GetPipelineLayoutAllocator() const { return mPipelineLayoutAllocator.get(); }
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::GraphicsPipeline>* GetGraphicsPipelineAllocator() const { return mGraphicsPipelineAllocator.get(); }
+        [[nodiscard]] ResourceAllocator<Graphics::Vulkan::Shader>* GetShaderAllocator() const { return mShaderAllocator.get(); }
 
     private:
         RenderDevice& mRenderDevice;

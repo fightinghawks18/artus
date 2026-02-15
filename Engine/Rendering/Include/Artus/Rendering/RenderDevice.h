@@ -6,6 +6,8 @@
 #ifndef ARTUS_RENDER_DEVICE_H
 #define ARTUS_RENDER_DEVICE_H
 
+#include "Material.h"
+#include "MaterialGroup.h"
 #include "RenderContext.h"
 #include "Artus/Core/Logger.h"
 #include "Utils/GraphicsAllocator.h"
@@ -50,6 +52,9 @@ namespace Artus::Rendering {
         explicit RenderDevice(const RenderDeviceCreateDesc& desc);
         ~RenderDevice();
 
+        MaterialGroupHandle CreateMaterialGroup(const MaterialGroupCreateDesc& materialGroupCreateDesc) const;
+        MaterialHandle CreateMaterial(const MaterialCreateDesc& materialCreateDesc);
+
         RenderState StartRendering();
         void EndRendering(RenderState& state);
 
@@ -78,6 +83,8 @@ namespace Artus::Rendering {
         std::vector<ImageAndViewHandle> mSurfaceDepthImages;
 
         std::unique_ptr<GraphicsAllocator> mGraphicsAllocator;
+        std::unique_ptr<ResourceAllocator<Material>> mMaterialAllocator;
+        std::unique_ptr<ResourceAllocator<MaterialGroup>> mMaterialGroupAllocator;
 
         uint32_t mFrameIndex = 0;
         uint32_t mImageIndex = 0;
